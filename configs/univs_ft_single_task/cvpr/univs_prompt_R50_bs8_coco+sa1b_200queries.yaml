@@ -1,0 +1,30 @@
+_BASE_: univs_R50_bs8_coco+sa1b_200queries.yaml
+MODEL:
+  WEIGHTS: 'pretrained/m2f_panseg/model_final_94dc52.pkl'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  MASK_FORMER:
+      NUM_OBJECT_QUERIES: 200
+      CLASS_WEIGHT: 5.0
+      MASK_WEIGHT: 3.0
+      DICE_WEIGHT: 3.0
+  UniVS:
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: True
+DATASETS:
+  DATASET_RATIO: 
+  - 1.0
+  - 1.0
+  TRAIN: 
+  - "coco_panoptic_train"
+  - "sa_1b_train_250k_1"
+  # - "vipseg_panoptic_train"
+INPUT:
+  SAMPLING_FRAME_NUM: 2
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 1024
+SOLVER:
+  IMS_PER_BATCH: 2
+  STEPS: (80000, )
+  MAX_ITER: 90000  # 0.5x for bs=8
+OUTPUT_DIR: output/univs_prompt_R50_bs8_sa1b+coco_200queries/

@@ -1,0 +1,3938 @@
+tench, Tinca tinca,
+goldfish, Carassius auratus,
+great white shark, white shark, man-eater, man-eating shark, Carcharodon carcharias,
+tiger shark, Galeocerdo cuvieri,
+hammerhead, hammerhead shark,
+electric ray, crampfish, numbfish, torpedo,
+stingray,
+cock,
+hen,
+ostrich, Struthio camelus,
+brambling, Fringilla montifringilla,
+goldfinch, Carduelis carduelis,
+house finch, linnet, Carpodacus mexicanus,
+junco, snowbird,
+indigo bunting, indigo finch, indigo bird, Passerina cyanea,
+robin, American robin, Turdus migratorius,
+bulbul,
+jay,
+magpie,
+chickadee,
+water ouzel, dipper,
+kite,
+bald eagle, American eagle, Haliaeetus leucocephalus,
+vulture,
+great grey owl, great gray owl, Strix nebulosa,
+European fire salamander, Salamandra salamandra,
+common newt, Triturus vulgaris,
+eft,
+spotted salamander, Ambystoma maculatum,
+axolotl, mud puppy, Ambystoma mexicanum,
+bullfrog, Rana catesbeiana,
+tree frog, tree-frog,
+tailed frog, bell toad, ribbed toad, tailed toad, Ascaphus trui,
+loggerhead, loggerhead turtle, Caretta caretta,
+leatherback turtle, leatherback, leathery turtle, Dermochelys coriacea,
+mud turtle,
+terrapin,
+box turtle, box tortoise,
+banded gecko,
+common iguana, iguana, Iguana iguana,
+American chameleon, anole, Anolis carolinensis,
+whiptail, whiptail lizard,
+agama,
+frilled lizard, Chlamydosaurus kingi,
+alligator lizard,
+Gila monster, Heloderma suspectum,
+green lizard, Lacerta viridis,
+African chameleon, Chamaeleo chamaeleon,
+Komodo dragon, Komodo lizard, dragon lizard, giant lizard, Varanus komodoensis,
+African crocodile, Nile crocodile, Crocodylus niloticus,
+American alligator, Alligator mississipiensis,
+triceratops,
+thunder snake, worm snake, Carphophis amoenus,
+ringneck snake, ring-necked snake, ring snake,
+hognose snake, puff adder, sand viper,
+green snake, grass snake,
+king snake, kingsnake,
+garter snake, grass snake,
+water snake,
+vine snake,
+night snake, Hypsiglena torquata,
+boa constrictor, Constrictor constrictor,
+rock python, rock snake, Python sebae,
+Indian cobra, Naja naja,
+green mamba,
+sea snake,
+horned viper, cerastes, sand viper, horned asp, Cerastes cornutus,
+diamondback, diamondback rattlesnake, Crotalus adamanteus,
+sidewinder, horned rattlesnake, Crotalus cerastes,
+trilobite,
+harvestman, daddy longlegs, Phalangium opilio,
+scorpion,
+black and gold garden spider, Argiope aurantia,
+barn spider, Araneus cavaticus,
+garden spider, Aranea diademata,
+black widow, Latrodectus mactans,
+tarantula,
+wolf spider, hunting spider,
+tick,
+centipede,
+black grouse,
+ptarmigan,
+ruffed grouse, partridge, Bonasa umbellus,
+prairie chicken, prairie grouse, prairie fowl,
+peacock,
+quail,
+partridge,
+African grey, African gray, Psittacus erithacus,
+macaw,
+sulphur-crested cockatoo, Kakatoe galerita, Cacatua galerita,
+lorikeet,
+coucal,
+bee eater,
+hornbill,
+hummingbird,
+jacamar,
+toucan,
+drake,
+red-breasted merganser, Mergus serrator,
+goose,
+black swan, Cygnus atratus,
+tusker,
+echidna, spiny anteater, anteater,
+platypus, duckbill, duckbilled platypus, duck-billed platypus, Ornithorhynchus anatinus,
+wallaby, brush kangaroo,
+koala, koala bear, kangaroo bear, native bear, Phascolarctos cinereus,
+wombat,
+jellyfish,
+sea anemone, anemone,
+brain coral,
+flatworm, platyhelminth,
+nematode, nematode worm, roundworm,
+conch,
+snail,
+slug,
+sea slug, nudibranch,
+chiton, coat-of-mail shell, sea cradle, polyplacophore,
+chambered nautilus, pearly nautilus, nautilus,
+Dungeness crab, Cancer magister,
+rock crab, Cancer irroratus,
+fiddler crab,
+king crab, Alaska crab, Alaskan king crab, Alaska king crab, Paralithodes camtschatica,
+American lobster, Northern lobster, Maine lobster, Homarus americanus,
+spiny lobster, langouste, rock lobster, crawfish, crayfish, sea crawfish,
+crayfish, crawfish, crawdad, crawdaddy,
+hermit crab,
+isopod,
+white stork, Ciconia ciconia,
+black stork, Ciconia nigra,
+spoonbill,
+flamingo,
+little blue heron, Egretta caerulea,
+American egret, great white heron, Egretta albus,
+bittern,
+crane,
+limpkin, Aramus pictus,
+European gallinule, Porphyrio porphyrio,
+American coot, marsh hen, mud hen, water hen, Fulica americana,
+bustard,
+ruddy turnstone, Arenaria interpres,
+red-backed sandpiper, dunlin, Erolia alpina,
+redshank, Tringa totanus,
+dowitcher,
+oystercatcher, oyster catcher,
+pelican,
+king penguin, Aptenodytes patagonica,
+albatross, mollymawk,
+grey whale, gray whale, devilfish, Eschrichtius gibbosus, Eschrichtius robustus,
+killer whale, killer, orca, grampus, sea wolf, Orcinus orca,
+dugong, Dugong dugon,
+sea lion,
+Chihuahua,
+Japanese spaniel,
+Maltese dog, Maltese terrier, Maltese,
+Pekinese, Pekingese, Peke,
+Shih-Tzu,
+Blenheim spaniel,
+papillon,
+toy terrier,
+Rhodesian ridgeback,
+Afghan hound, Afghan,
+basset, basset hound,
+beagle,
+bloodhound, sleuthhound,
+bluetick,
+black-and-tan coonhound,
+Walker hound, Walker foxhound,
+English foxhound,
+redbone,
+borzoi, Russian wolfhound,
+Irish wolfhound,
+Italian greyhound,
+whippet,
+Ibizan hound, Ibizan Podenco,
+Norwegian elkhound, elkhound,
+otterhound, otter hound,
+Saluki, gazelle hound,
+Scottish deerhound, deerhound,
+Weimaraner,
+Staffordshire bullterrier, Staffordshire bull terrier,
+American Staffordshire terrier, Staffordshire terrier, American pit bull terrier, pit bull terrier,
+Bedlington terrier,
+Border terrier,
+Kerry blue terrier,
+Irish terrier,
+Norfolk terrier,
+Norwich terrier,
+Yorkshire terrier,
+wire-haired fox terrier,
+Lakeland terrier,
+Sealyham terrier, Sealyham,
+Airedale, Airedale terrier,
+cairn, cairn terrier,
+Australian terrier,
+Dandie Dinmont, Dandie Dinmont terrier,
+Boston bull, Boston terrier,
+miniature schnauzer,
+giant schnauzer,
+standard schnauzer,
+Scotch terrier, Scottish terrier, Scottie,
+Tibetan terrier, chrysanthemum dog,
+silky terrier, Sydney silky,
+soft-coated wheaten terrier,
+West Highland white terrier,
+Lhasa, Lhasa apso,
+flat-coated retriever,
+curly-coated retriever,
+golden retriever,
+Labrador retriever,
+Chesapeake Bay retriever,
+German short-haired pointer,
+vizsla, Hungarian pointer,
+English setter,
+Irish setter, red setter,
+Gordon setter,
+Brittany spaniel,
+clumber, clumber spaniel,
+English springer, English springer spaniel,
+Welsh springer spaniel,
+cocker spaniel, English cocker spaniel, cocker,
+Sussex spaniel,
+Irish water spaniel,
+kuvasz,
+schipperke,
+groenendael,
+malinois,
+briard,
+kelpie,
+komondor,
+Old English sheepdog, bobtail,
+Shetland sheepdog, Shetland sheep dog, Shetland,
+collie,
+Border collie,
+Bouvier des Flandres, Bouviers des Flandres,
+Rottweiler,
+German shepherd, German shepherd dog, German police dog, alsatian,
+Doberman, Doberman pinscher,
+miniature pinscher,
+Greater Swiss Mountain dog,
+Bernese mountain dog,
+Appenzeller,
+EntleBucher,
+boxer,
+bull mastiff,
+Tibetan mastiff,
+French bulldog,
+Great Dane,
+Saint Bernard, St Bernard,
+Eskimo dog, husky,
+malamute, malemute, Alaskan malamute,
+Siberian husky,
+dalmatian, coach dog, carriage dog,
+affenpinscher, monkey pinscher, monkey dog,
+basenji,
+pug, pug-dog,
+Leonberg,
+Newfoundland, Newfoundland dog,
+Great Pyrenees,
+Samoyed, Samoyede,
+Pomeranian,
+chow, chow chow,
+keeshond,
+Brabancon griffon,
+Pembroke, Pembroke Welsh corgi,
+Cardigan, Cardigan Welsh corgi,
+toy poodle,
+miniature poodle,
+standard poodle,
+Mexican hairless,
+timber wolf, grey wolf, gray wolf, Canis lupus,
+white wolf, Arctic wolf, Canis lupus tundrarum,
+red wolf, maned wolf, Canis rufus, Canis niger,
+coyote, prairie wolf, brush wolf, Canis latrans,
+dingo, warrigal, warragal, Canis dingo,
+dhole, Cuon alpinus,
+African hunting dog, hyena dog, Cape hunting dog, Lycaon pictus,
+hyena, hyaena,
+red fox, Vulpes vulpes,
+kit fox, Vulpes macrotis,
+Arctic fox, white fox, Alopex lagopus,
+grey fox, gray fox, Urocyon cinereoargenteus,
+tabby, tabby cat,
+tiger cat,
+Persian cat,
+Siamese cat, Siamese,
+Egyptian cat,
+cougar, puma, catamount, mountain lion, painter, panther, Felis concolor,
+lynx, catamount,
+leopard, Panthera pardus,
+snow leopard, ounce, Panthera uncia,
+jaguar, panther, Panthera onca, Felis onca,
+lion, king of beasts, Panthera leo,
+tiger, Panthera tigris,
+cheetah, chetah, Acinonyx jubatus,
+brown bear, bruin, Ursus arctos,
+American black bear, black bear, Ursus americanus, Euarctos americanus,
+ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus,
+sloth bear, Melursus ursinus, Ursus ursinus,
+mongoose,
+meerkat, mierkat,
+tiger beetle,
+ladybug, ladybeetle, lady beetle, ladybird, ladybird beetle,
+ground beetle, carabid beetle,
+long-horned beetle, longicorn, longicorn beetle,
+leaf beetle, chrysomelid,
+dung beetle,
+rhinoceros beetle,
+weevil,
+fly,
+bee,
+ant, emmet, pismire,
+grasshopper, hopper,
+cricket,
+walking stick, walkingstick, stick insect,
+cockroach, roach,
+mantis, mantid,
+cicada, cicala,
+leafhopper,
+lacewing, lacewing fly,
+"dragonfly, darning needle, devils darning needle, sewing needle, snake feeder, snake doctor, mosquito hawk, skeeter hawk",
+damselfly,
+admiral,
+ringlet, ringlet butterfly,
+monarch, monarch butterfly, milkweed butterfly, Danaus plexippus,
+cabbage butterfly,
+sulphur butterfly, sulfur butterfly,
+lycaenid, lycaenid butterfly,
+starfish, sea star,
+sea urchin,
+sea cucumber, holothurian,
+wood rabbit, cottontail, cottontail rabbit,
+hare,
+Angora, Angora rabbit,
+hamster,
+porcupine, hedgehog,
+fox squirrel, eastern fox squirrel, Sciurus niger,
+marmot,
+beaver,
+guinea pig, Cavia cobaya,
+sorrel,
+zebra,
+hog, pig, grunter, squealer, Sus scrofa,
+wild boar, boar, Sus scrofa,
+warthog,
+hippopotamus, hippo, river horse, Hippopotamus amphibius,
+ox,
+water buffalo, water ox, Asiatic buffalo, Bubalus bubalis,
+bison,
+ram, tup,
+bighorn, bighorn sheep, cimarron, Rocky Mountain bighorn, Rocky Mountain sheep, Ovis canadensis,
+ibex, Capra ibex,
+hartebeest,
+impala, Aepyceros melampus,
+gazelle,
+Arabian camel, dromedary, Camelus dromedarius,
+llama,
+weasel,
+mink,
+polecat, fitch, foulmart, foumart, Mustela putorius,
+black-footed ferret, ferret, Mustela nigripes,
+otter,
+skunk, polecat, wood pussy,
+badger,
+armadillo,
+three-toed sloth, ai, Bradypus tridactylus,
+orangutan, orang, orangutang, Pongo pygmaeus,
+gorilla, Gorilla gorilla,
+chimpanzee, chimp, Pan troglodytes,
+gibbon, Hylobates lar,
+siamang, Hylobates syndactylus, Symphalangus syndactylus,
+guenon, guenon monkey,
+patas, hussar monkey, Erythrocebus patas,
+baboon,
+macaque,
+langur,
+colobus, colobus monkey,
+proboscis monkey, Nasalis larvatus,
+marmoset,
+capuchin, ringtail, Cebus capucinus,
+howler monkey, howler,
+titi, titi monkey,
+spider monkey, Ateles geoffroyi,
+squirrel monkey, Saimiri sciureus,
+Madagascar cat, ring-tailed lemur, Lemur catta,
+indri, indris, Indri indri, Indri brevicaudatus,
+Indian elephant, Elephas maximus,
+African elephant, Loxodonta africana,
+lesser panda, red panda, panda, bear cat, cat bear, Ailurus fulgens,
+giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca,
+barracouta, snoek,
+eel,
+coho, cohoe, coho salmon, blue jack, silver salmon, Oncorhynchus kisutch,
+rock beauty, Holocanthus tricolor,
+anemone fish,
+sturgeon,
+gar, garfish, garpike, billfish, Lepisosteus osseus,
+lionfish,
+puffer, pufferfish, blowfish, globefish,
+abacus,
+abaya,
+"academic gown, academic robe, judges robe",
+accordion, piano accordion, squeeze box,
+acoustic guitar,
+aircraft carrier, carrier, flattop, attack aircraft carrier,
+airliner,
+airship, dirigible,
+altar,
+ambulance,
+amphibian, amphibious vehicle,
+analog clock,
+apiary, bee house,
+apron,
+ashcan, trash can, garbage can, wastebin, ash bin, ash-bin, ashbin, dustbin, trash barrel, trash bin,
+assault rifle, assault gun,
+backpack, back pack, knapsack, packsack, rucksack, haversack,
+bakery, bakeshop, bakehouse,
+balance beam, beam,
+balloon,
+ballpoint, ballpoint pen, ballpen, Biro,
+Band Aid,
+banjo,
+bannister, banister, balustrade, balusters, handrail,
+barbell,
+barber chair,
+barbershop,
+barn,
+barometer,
+barrel, cask,
+barrow, garden cart, lawn cart, wheelbarrow,
+baseball,
+basketball,
+bassinet,
+bassoon,
+bathing cap, swimming cap,
+bath towel,
+bathtub, bathing tub, bath, tub,
+beach wagon, station wagon, wagon, estate car, beach waggon, station waggon, waggon,
+beacon, lighthouse, beacon light, pharos,
+beaker,
+bearskin, busby, shako,
+beer bottle,
+beer glass,
+bell cote, bell cot,
+bib,
+bicycle-built-for-two, tandem bicycle, tandem,
+bikini, two-piece,
+binder, ring-binder,
+binoculars, field glasses, opera glasses,
+birdhouse,
+boathouse,
+bobsled, bobsleigh, bob,
+bolo tie, bolo, bola tie, bola,
+bonnet, poke bonnet,
+bookcase,
+bookshop, bookstore, bookstall,
+bottlecap,
+bow,
+bow tie, bow-tie, bowtie,
+brass, memorial tablet, plaque,
+brassiere, bra, bandeau,
+breakwater, groin, groyne, mole, bulwark, seawall, jetty,
+breastplate, aegis, egis,
+broom,
+bucket, pail,
+buckle,
+bulletproof vest,
+bullet train, bullet,
+butcher shop, meat market,
+cab, hack, taxi, taxicab,
+caldron, cauldron,
+candle, taper, wax light,
+cannon,
+canoe,
+can opener, tin opener,
+cardigan,
+car mirror,
+carousel, carrousel, merry-go-round, roundabout, whirligig,
+"carpenters kit, tool kit",
+carton,
+car wheel,
+cash machine, cash dispenser, automated teller machine, automatic teller machine, automated teller, automatic teller, ATM,
+cassette,
+cassette player,
+castle,
+catamaran,
+CD player,
+cello, violoncello,
+cellular telephone, cellular phone, cellphone, cell, mobile phone,
+chain,
+chainlink fence,
+chain mail, ring mail, mail, chain armor, chain armour, ring armor, ring armour,
+chain saw, chainsaw,
+chest,
+chiffonier, commode,
+chime, bell, gong,
+china cabinet, china closet,
+Christmas stocking,
+church, church building,
+cinema, movie theater, movie theatre, movie house, picture palace,
+cleaver, meat cleaver, chopper,
+cliff dwelling,
+cloak,
+clog, geta, patten, sabot,
+cocktail shaker,
+coffee mug,
+coffeepot,
+coil, spiral, volute, whorl, helix,
+combination lock,
+computer keyboard, keypad,
+confectionery, confectionary, candy store,
+container ship, containership, container vessel,
+convertible,
+corkscrew, bottle screw,
+cornet, horn, trumpet, trump,
+cowboy boot,
+cowboy hat, ten-gallon hat,
+cradle,
+crane,
+crash helmet,
+crate,
+crib, cot,
+Crock Pot,
+croquet ball,
+crutch,
+cuirass,
+dam, dike, dyke,
+desk,
+desktop computer,
+dial telephone, dial phone,
+diaper, nappy, napkin,
+digital clock,
+digital watch,
+dining table, board,
+dishrag, dishcloth,
+dishwasher, dish washer, dishwashing machine,
+disk brake, disc brake,
+dock, dockage, docking facility,
+dogsled, dog sled, dog sleigh,
+dome,
+doormat, welcome mat,
+drilling platform, offshore rig,
+drum, membranophone, tympan,
+drumstick,
+dumbbell,
+Dutch oven,
+electric fan, blower,
+electric guitar,
+electric locomotive,
+entertainment center,
+envelope,
+espresso maker,
+face powder,
+feather boa, boa,
+file, file cabinet, filing cabinet,
+fireboat,
+fire engine, fire truck,
+fire screen, fireguard,
+flagpole, flagstaff,
+flute, transverse flute,
+folding chair,
+football helmet,
+forklift,
+fountain,
+fountain pen,
+four-poster,
+freight car,
+French horn, horn,
+frying pan, frypan, skillet,
+fur coat,
+garbage truck, dustcart,
+gasmask, respirator, gas helmet,
+gas pump, gasoline pump, petrol pump, island dispenser,
+goblet,
+go-kart,
+golf ball,
+golfcart, golf cart,
+gondola,
+gong, tam-tam,
+gown,
+grand piano, grand,
+greenhouse, nursery, glasshouse,
+grille, radiator grille,
+grocery store, grocery, food market, market,
+guillotine,
+hair slide,
+hair spray,
+half track,
+hammer,
+hamper,
+hand blower, blow dryer, blow drier, hair dryer, hair drier,
+hand-held computer, hand-held microcomputer,
+handkerchief, hankie, hanky, hankey,
+hard disc, hard disk, fixed disk,
+harmonica, mouth organ, harp, mouth harp,
+harp,
+harvester, reaper,
+hatchet,
+holster,
+home theater, home theatre,
+honeycomb,
+hook, claw,
+hoopskirt, crinoline,
+horizontal bar, high bar,
+horse cart, horse-cart,
+hourglass,
+iPod,
+iron, smoothing iron,
+"jack-o-lantern",
+jean, blue jean, denim,
+jeep, landrover,
+jersey, T-shirt, tee shirt,
+jigsaw puzzle,
+jinrikisha, ricksha, rickshaw,
+joystick,
+kimono,
+knee pad,
+knot,
+lab coat, laboratory coat,
+ladle,
+lampshade, lamp shade,
+laptop, laptop computer,
+lawn mower, mower,
+lens cap, lens cover,
+letter opener, paper knife, paperknife,
+library,
+lifeboat,
+lighter, light, igniter, ignitor,
+limousine, limo,
+liner, ocean liner,
+lipstick, lip rouge,
+Loafer,
+lotion,
+loudspeaker, speaker, speaker unit, loudspeaker system, speaker system,
+"loupe, jewelers loupe",
+lumbermill, sawmill,
+magnetic compass,
+mailbag, postbag,
+mailbox, letter box,
+maillot,
+maillot, tank suit,
+manhole cover,
+maraca,
+marimba, xylophone,
+mask,
+matchstick,
+maypole,
+maze, labyrinth,
+measuring cup,
+medicine chest, medicine cabinet,
+megalith, megalithic structure,
+microphone, mike,
+microwave, microwave oven,
+military uniform,
+milk can,
+minibus,
+miniskirt, mini,
+minivan,
+missile,
+mitten,
+mixing bowl,
+mobile home, manufactured home,
+Model T,
+modem,
+monastery,
+monitor,
+moped,
+mortar,
+mortarboard,
+mosque,
+mosquito net,
+motor scooter, scooter,
+mountain bike, all-terrain bike, off-roader,
+mountain tent,
+mouse, computer mouse,
+mousetrap,
+moving van,
+muzzle,
+nail,
+neck brace,
+necklace,
+nipple,
+notebook, notebook computer,
+obelisk,
+oboe, hautboy, hautbois,
+ocarina, sweet potato,
+odometer, hodometer, mileometer, milometer,
+oil filter,
+organ, pipe organ,
+oscilloscope, scope, cathode-ray oscilloscope, CRO,
+overskirt,
+oxcart,
+oxygen mask,
+packet,
+paddle, boat paddle,
+paddlewheel, paddle wheel,
+padlock,
+paintbrush,
+"pajama, pyjama, pjs, jammies",
+palace,
+panpipe, pandean pipe, syrinx,
+paper towel,
+parachute, chute,
+parallel bars, bars,
+park bench,
+parking meter,
+passenger car, coach, carriage,
+patio, terrace,
+pay-phone, pay-station,
+pedestal, plinth, footstall,
+pencil box, pencil case,
+pencil sharpener,
+perfume, essence,
+Petri dish,
+photocopier,
+pick, plectrum, plectron,
+pickelhaube,
+picket fence, paling,
+pickup, pickup truck,
+pier,
+piggy bank, penny bank,
+pill bottle,
+pillow,
+ping-pong ball,
+pinwheel,
+pirate, pirate ship,
+pitcher, ewer,
+"plane, carpenters plane, woodworking plane",
+planetarium,
+plastic bag,
+plate rack,
+plow, plough,
+"plunger, plumbers helper",
+Polaroid camera, Polaroid Land camera,
+pole,
+police van, police wagon, paddy wagon, patrol wagon, wagon, black Maria,
+poncho,
+pool table, billiard table, snooker table,
+pop bottle, soda bottle,
+pot, flowerpot,
+"potters wheel",
+power drill,
+prayer rug, prayer mat,
+printer,
+prison, prison house,
+projectile, missile,
+projector,
+puck, hockey puck,
+punching bag, punch bag, punching ball, punchball,
+purse,
+quill, quill pen,
+quilt, comforter, comfort, puff,
+racer, race car, racing car,
+racket, racquet,
+radiator,
+radio, wireless,
+radio telescope, radio reflector,
+rain barrel,
+recreational vehicle, RV, R.V.,
+reel,
+reflex camera,
+refrigerator, icebox,
+remote control, remote,
+restaurant, eating house, eating place, eatery,
+revolver, six-gun, six-shooter,
+rifle,
+rocking chair, rocker,
+rotisserie,
+rubber eraser, rubber, pencil eraser,
+rugby ball,
+rule, ruler,
+running shoe,
+safe,
+safety pin,
+saltshaker, salt shaker,
+sandal,
+sarong,
+sax, saxophone,
+scabbard,
+scale, weighing machine,
+school bus,
+schooner,
+scoreboard,
+screen, CRT screen,
+screw,
+screwdriver,
+seat belt, seatbelt,
+sewing machine,
+shield, buckler,
+shoe shop, shoe-shop, shoe store,
+shoji,
+shopping basket,
+shopping cart,
+shovel,
+shower cap,
+shower curtain,
+ski,
+ski mask,
+sleeping bag,
+slide rule, slipstick,
+sliding door,
+slot, one-armed bandit,
+snorkel,
+snowmobile,
+snowplow, snowplough,
+soap dispenser,
+soccer ball,
+sock,
+solar dish, solar collector, solar furnace,
+sombrero,
+soup bowl,
+space bar,
+space heater,
+space shuttle,
+spatula,
+speedboat,
+"spider web, spiders web",
+spindle,
+sports car, sport car,
+spotlight, spot,
+stage,
+steam locomotive,
+steel arch bridge,
+steel drum,
+stethoscope,
+stole,
+stone wall,
+stopwatch, stop watch,
+stove,
+strainer,
+streetcar, tram, tramcar, trolley, trolley car,
+stretcher,
+studio couch, day bed,
+stupa, tope,
+submarine, pigboat, sub, U-boat,
+suit, suit of clothes,
+sundial,
+sunglass,
+sunglasses, dark glasses, shades,
+sunscreen, sunblock, sun blocker,
+suspension bridge,
+swab, swob, mop,
+sweatshirt,
+swimming trunks, bathing trunks,
+swing,
+switch, electric switch, electrical switch,
+syringe,
+table lamp,
+tank, army tank, armored combat vehicle, armoured combat vehicle,
+tape player,
+teapot,
+teddy, teddy bear,
+television, television system,
+tennis ball,
+thatch, thatched roof,
+theater curtain, theatre curtain,
+thimble,
+thresher, thrasher, threshing machine,
+throne,
+tile roof,
+toaster,
+tobacco shop, tobacconist shop, tobacconist,
+toilet seat,
+torch,
+totem pole,
+tow truck, tow car, wrecker,
+toyshop,
+tractor,
+trailer truck, tractor trailer, trucking rig, rig, articulated lorry, semi,
+tray,
+trench coat,
+tricycle, trike, velocipede,
+trimaran,
+tripod,
+triumphal arch,
+trolleybus, trolley coach, trackless trolley,
+trombone,
+tub, vat,
+turnstile,
+typewriter keyboard,
+umbrella,
+unicycle, monocycle,
+upright, upright piano,
+vacuum, vacuum cleaner,
+vase,
+vault,
+velvet,
+vending machine,
+vestment,
+viaduct,
+violin, fiddle,
+volleyball,
+waffle iron,
+wall clock,
+wallet, billfold, notecase, pocketbook,
+wardrobe, closet, press,
+warplane, military plane,
+washbasin, handbasin, washbowl, lavabo, wash-hand basin,
+washer, automatic washer, washing machine,
+water bottle,
+water jug,
+water tower,
+whiskey jug,
+whistle,
+wig,
+window screen,
+window shade,
+Windsor tie,
+wine bottle,
+wing,
+wok,
+wooden spoon,
+wool, woolen, woollen,
+worm fence, snake fence, snake-rail fence, Virginia fence,
+wreck,
+yawl,
+yurt,
+web site, website, internet site, site,
+comic book,
+crossword puzzle, crossword,
+street sign,
+traffic light, traffic signal, stoplight,
+book jacket, dust cover, dust jacket, dust wrapper,
+menu,
+plate,
+guacamole,
+consomme,
+hot pot, hotpot,
+trifle,
+ice cream, icecream,
+ice lolly, lolly, lollipop, popsicle,
+French loaf,
+bagel, beigel,
+pretzel,
+cheeseburger,
+hotdog, hot dog, red hot,
+mashed potato,
+head cabbage,
+broccoli,
+cauliflower,
+zucchini, courgette,
+spaghetti squash,
+acorn squash,
+butternut squash,
+cucumber, cuke,
+artichoke, globe artichoke,
+bell pepper,
+cardoon,
+mushroom,
+Granny Smith,
+strawberry,
+orange,
+lemon,
+fig,
+pineapple, ananas,
+banana,
+jackfruit, jak, jack,
+custard apple,
+pomegranate,
+hay,
+carbonara,
+chocolate sauce, chocolate syrup,
+dough,
+meat loaf, meatloaf,
+pizza, pizza pie,
+potpie,
+burrito,
+red wine,
+espresso,
+cup,
+eggnog,
+alp,
+bubble,
+cliff, drop, drop-off,
+coral reef,
+geyser,
+lakeside, lakeshore,
+promontory, headland, head, foreland,
+sandbar, sand bar,
+seashore, coast, seacoast, sea-coast,
+valley, vale,
+volcano,
+ballplayer, baseball player,
+groom, bridegroom,
+scuba diver,
+rapeseed,
+daisy,
+"yellow ladys slipper, yellow lady-slipper, Cypripedium calceolus, Cypripedium parviflorum",
+corn,
+acorn,
+hip, rose hip, rosehip,
+buckeye, horse chestnut, conker,
+coral fungus,
+agaric,
+gyromitra,
+stinkhorn, carrion fungus,
+earthstar,
+hen-of-the-woods, hen of the woods, Polyporus frondosus, Grifola frondosa,
+bolete,
+ear, spike, capitulum,
+toilet tissue, toilet paper, bathroom tissue
+aerosol_can :  a dispenser that holds a substance under pressure
+air_conditioner :  a machine that keeps air cool and dry
+airplane :  an aircraft that has a fixed wing and is powered by propellers or jets
+alarm_clock :  a clock that wakes a sleeper at some preset time
+alcohol :  a liquor or brew containing alcohol as the active agent
+alligator :  amphibious reptiles related to crocodiles but with shorter broader snouts
+almond :  oval-shaped edible seed of the almond tree
+ambulance :  a vehicle that takes people to and from hospitals
+amplifier :  electronic equipment that increases strength of signals
+anklet :  an ornament worn around the ankle
+antenna :  an electrical device that sends or receives radio or television signals
+apple :  fruit with red or yellow or green skin and sweet to tart crisp whitish flesh
+applesauce :  puree of stewed apples usually sweetened and spiced
+apricot :  downy yellow to rosy-colored fruit resembling a small peach
+apron :  a garment of cloth that is tied about the waist and worn to protect clothing
+aquarium :  a tank/pool/bowl filled with water for keeping live fish and underwater animals
+arctic_(type_of_shoe) :  a waterproof overshoe that protects shoes from water or snow
+armband :  a band worn around the upper arm
+armchair :  chair with a support on each side for arms
+armoire :  a large wardrobe or cabinet
+armor :  protective covering made of metal and used in combat
+artichoke :  a thistlelike flower head with edible fleshy leaves and heart
+trash_can :  a bin that holds rubbish until it is collected
+ashtray :  a receptacle for the ash from smokers' cigars or cigarettes
+asparagus :  edible young shoots of the asparagus plant
+atomizer :  a dispenser that turns a liquid (such as perfume) into a fine mist
+avocado :  a pear-shaped fruit with green or blackish skin and rich yellowish pulp enclosing a single large seed
+award :  a tangible symbol signifying approval or distinction
+awning :  a canopy made of canvas to shelter people or things from rain or sun
+ax :  an edge tool with a heavy bladed head mounted across a handle
+baboon :  large terrestrial monkeys having doglike muzzles
+baby_buggy :  a small vehicle with four wheels in which a baby or child is pushed around
+basketball_backboard :  a raised vertical board with basket attached; used to play basketball
+backpack :  a bag carried by a strap on your back or shoulder
+handbag :  a container used for carrying money and small personal items or accessories
+suitcase :  cases used to carry belongings when traveling
+bagel :  glazed yeast-raised doughnut-shaped roll with hard crust
+bagpipe :  a tubular wind instrument; the player blows air into a bag and squeezes it out
+baguet :  narrow French stick loaf
+bait :  something used to lure fish or other animals into danger so they can be trapped or killed
+ball :  a spherical object used as a plaything
+ballet_skirt :  very short skirt worn by ballerinas
+balloon :  large tough nonrigid bag filled with gas or heated air
+bamboo :  woody tropical grass having hollow woody stems
+banana :  elongated crescent-shaped yellow fruit with soft sweet flesh
+Band_Aid :  trade name for an adhesive bandage to cover small cuts or blisters
+bandage :  a piece of soft material that covers and protects an injured part of the body
+bandanna :  large and brightly colored handkerchief; often used as a neckerchief
+banjo :  a stringed instrument of the guitar family with a long neck and circular body
+banner :  long strip of cloth or paper used for decoration or advertising
+barbell :  a bar to which heavy discs are attached at each end; used in weightlifting
+barge :  a flatbottom boat for carrying heavy loads (especially on canals)
+barrel :  a cylindrical container that holds liquids
+barrette :  a pin for holding women's hair in place
+barrow :  a cart for carrying small loads; has handles and one or more wheels
+baseball_base :  a place that the runner must touch before scoring
+baseball :  a ball used in playing baseball
+baseball_bat :  an implement used in baseball by the batter
+baseball_cap :  a cap with a bill
+baseball_glove :  the handwear used by fielders in playing baseball
+basket :  a container that is usually woven and has handles
+basketball :  an inflated ball used in playing basketball
+bass_horn :  the lowest brass wind instrument
+bat_(animal) :  nocturnal mouselike mammal with forelimbs modified to form membranous wings
+bath_mat :  a heavy towel or mat to stand on while drying yourself after a bath
+bath_towel :  a large towel; to dry yourself after a bath
+bathrobe :  a loose-fitting robe of towelling; worn after a bath or swim
+bathtub :  a large open container that you fill with water and use to wash the body
+batter_(food) :  a liquid or semiliquid mixture, as of flour, eggs, and milk, used in cooking
+battery :  a portable device that produces electricity
+beachball :  large and light ball; for play at the seaside
+bead :  a small ball with a hole through the middle used for ornamentation, jewellery, etc.
+bean_curd :  cheeselike food made of curdled soybean milk
+beanbag :  a bag filled with dried beans or similar items; used in games or to sit on
+beanie :  a small skullcap; formerly worn by schoolboys and college freshmen
+bear :  large carnivorous or omnivorous mammals with shaggy coats and claws
+bed :  a piece of furniture that provides a place to sleep
+bedpan :  a shallow vessel used by a bedridden patient for defecation and urination
+bedspread :  decorative cover for a bed
+cow :  cattle/cow
+beef_(food) :  meat from an adult domestic bovine
+beeper :  an device that beeps when the person carrying it is being paged
+beer_bottle :  a bottle that holds beer
+beer_can :  a can that holds beer
+beetle :  insect with hard wing covers
+bell :  a hollow device made of metal that makes a ringing sound when struck
+bell_pepper :  large bell-shaped sweet pepper in green or red or yellow or orange or black varieties
+belt :  a band to tie or buckle around the body (usually at the waist)
+belt_buckle :  the buckle used to fasten a belt
+bench :  a long seat for more than one person
+beret :  a cap with no brim or bill; made of soft cloth
+bib :  a napkin tied under the chin of a child while eating
+Bible :  the sacred writings of the Christian religions
+bicycle :  a wheeled vehicle that has two wheels and is moved by foot pedals
+visor :  a brim that projects to the front to shade the eyes
+billboard :  large outdoor signboard
+binder :  holds loose papers or magazines
+binoculars :  an optical instrument designed for simultaneous use by both eyes
+bird :  animal characterized by feathers and wings
+birdfeeder :  an outdoor device that supplies food for wild birds
+birdbath :  an ornamental basin (usually in a garden) for birds to bathe in
+birdcage :  a cage in which a bird can be kept
+birdhouse :  a shelter for birds
+birthday_cake :  decorated cake served at a birthday party
+birthday_card :  a card expressing a birthday greeting
+pirate_flag :  a flag usually bearing a white skull and crossbones on a black background
+black_sheep :  sheep with a black coat
+blackberry :  large sweet black or very dark purple edible aggregate fruit
+blackboard :  sheet of slate; for writing with chalk
+blanket :  bedding that keeps a person warm in bed
+blazer :  lightweight jacket; often striped in the colors of a club or school
+blender :  an electrically powered mixer that mix or chop or liquefy foods
+blimp :  a small nonrigid airship used for observation or as a barrage balloon
+blinker :  a light that flashes on and off; used as a signal or to send messages
+blouse :  a top worn by women
+blueberry :  sweet edible dark-blue berries of blueberry plants
+gameboard :  a flat portable surface (usually rectangular) designed for board games
+boat :  a vessel for travel on water
+bob :  a small float usually made of cork; attached to a fishing line
+bobbin :  a thing around which thread/tape/film or other flexible materials can be wound
+bobby_pin :  a flat wire hairpin used to hold bobbed hair in place
+boiled_egg :  egg cooked briefly in the shell in gently boiling water
+bolo_tie :  a cord fastened around the neck with an ornamental clasp and worn as a necktie
+deadbolt :  the part of a lock that is engaged or withdrawn with a key
+bolt :  a screw that screws into a nut to form a fastener
+bonnet :  a hat tied under the chin
+book :  a written work or composition that has been published
+bookcase :  a piece of furniture with shelves for storing books
+booklet :  a small book usually having a paper cover
+bookmark :  a marker (a piece of paper or ribbon) placed between the pages of a book
+boom_microphone :  a pole carrying an overhead microphone projected over a film or tv set
+boot :  footwear that covers the whole foot and lower leg
+bottle :  a glass or plastic vessel used for storing drinks or other liquids
+bottle_opener :  an opener for removing caps or corks from bottles
+bouquet :  an arrangement of flowers that is usually given as a present
+bow_(weapon) :  a weapon for shooting arrows
+bow_(decorative_ribbons) :  a decorative interlacing of ribbons
+bow-tie :  a man's tie that ties in a bow
+bowl :  a dish that is round and open at the top for serving foods
+pipe_bowl :  a small round container that is open at the top for holding tobacco
+bowler_hat :  a felt hat that is round and hard with a narrow brim
+bowling_ball :  a large ball with finger holes used in the sport of bowling
+box :  a (usually rectangular) container; may have a lid
+boxing_glove :  large glove coverings the fists of a fighter worn for the sport of boxing
+suspenders :  elastic straps that hold trousers up (usually used in the plural)
+bracelet :  jewelry worn around the wrist for decoration
+brass_plaque :  a memorial made of brass
+brassiere :  an undergarment worn by women to support their breasts
+bread-bin :  a container used to keep bread or cake in
+bread :  food made from dough of flour or meal and usually raised with yeast or baking powder and then baked
+breechcloth :  a garment that provides covering for the loins
+bridal_gown :  a gown worn by the bride at a wedding
+briefcase :  a case with a handle; for carrying papers or files or books
+broccoli :  plant with dense clusters of tight green flower buds
+broach :  a decorative pin worn by women
+broom :  bundle of straws or twigs attached to a long handle; used for cleaning
+brownie :  square or bar of very rich chocolate cake usually with nuts
+brussels_sprouts :  the small edible cabbage-like buds growing along a stalk
+bubble_gum :  a kind of chewing gum that can be blown into bubbles
+bucket :  a roughly cylindrical vessel that is open at the top
+horse_buggy :  a small lightweight carriage; drawn by a single horse
+bull :  a cow with horns
+bulldog :  a thickset short-haired dog with a large head and strong undershot lower jaw
+bulldozer :  large powerful tractor; a large blade in front flattens areas of ground
+bullet_train :  a high-speed passenger train
+bulletin_board :  a board that hangs on a wall; displays announcements
+bulletproof_vest :  a vest capable of resisting the impact of a bullet
+bullhorn :  a portable loudspeaker with built-in microphone and amplifier
+bun :  small rounded bread either plain or sweet
+bunk_bed :  beds built one above the other
+buoy :  a float attached by rope to the seabed to mark channels in a harbor or underwater hazards
+burrito :  a flour tortilla folded around a filling
+bus_(vehicle) :  a vehicle carrying many passengers; used for public transport
+business_card :  a card on which are printed the person's name and business affiliation
+butter :  an edible emulsion of fat globules made by churning milk or cream; for cooking and table use
+butterfly :  insect typically having a slender body with knobbed antennae and broad colorful wings
+button :  a round fastener sewn to shirts and coats etc to fit through buttonholes
+cab_(taxi) :  a car that takes passengers where they want to go in exchange for money
+cabana :  a small tent used as a dressing room beside the sea or a swimming pool
+cabin_car :  a car on a freight train for use of the train crew; usually the last car on the train
+cabinet :  a piece of furniture resembling a cupboard with doors and shelves and drawers
+locker :  a storage compartment for clothes and valuables; usually it has a lock
+cake :  baked goods made from or based on a mixture of flour, sugar, eggs, and fat
+calculator :  a small machine that is used for mathematical calculations
+calendar :  a list or register of events (appointments/social events/court cases, etc)
+calf :  young of domestic cattle
+camcorder :  a portable television camera and videocassette recorder
+camel :  cud-chewing mammal used as a draft or saddle animal in desert regions
+camera :  equipment for taking photographs
+camera_lens :  a lens that focuses the image in a camera
+camper_(vehicle) :  a recreational vehicle equipped for camping out while traveling
+can :  airtight sealed metal container for food or drink or paint etc.
+can_opener :  a device for cutting cans open
+candle :  stick of wax with a wick in the middle
+candle_holder :  a holder with sockets for candles
+candy_bar :  a candy shaped as a bar
+candy_cane :  a hard candy in the shape of a rod (usually with stripes)
+walking_cane :  a stick that people can lean on to help them walk
+canister :  metal container for storing dry foods such as tea or flour
+canoe :  small and light boat; pointed at both ends; propelled with a paddle
+cantaloup :  the fruit of a cantaloup vine; small to medium-sized melon with yellowish flesh
+canteen :  a flask for carrying water; used by soldiers or travelers
+cap_(headwear) :  a tight-fitting headwear
+bottle_cap :  a top (as for a bottle)
+cape :  a sleeveless garment like a cloak but shorter
+cappuccino :  equal parts of espresso and steamed milk
+car_(automobile) :  a motor vehicle with four wheels
+railcar_(part_of_a_train) :  a wheeled vehicle adapted to the rails of railroad (mark each individual railcar separately)
+elevator_car :  where passengers ride up and down
+car_battery :  a battery in a motor vehicle
+identity_card :  a card certifying the identity of the bearer
+card :  a rectangular piece of paper used to send messages (e.g. greetings or pictures)
+cardigan :  knitted jacket that is fastened up the front with buttons or a zipper
+cargo_ship :  a ship designed to carry cargo
+carnation :  plant with pink to purple-red spice-scented usually double flowers
+horse_carriage :  a vehicle with wheels drawn by one or more horses
+carrot :  deep orange edible root of the cultivated carrot plant
+tote_bag :  a capacious bag or basket
+cart :  a heavy open wagon usually having two wheels and drawn by an animal
+carton :  a container made of cardboard for holding food or drink
+cash_register :  a cashbox with an adding machine to register transactions
+casserole :  food cooked and served in a casserole
+cassette :  a container that holds a magnetic tape used for recording or playing sound or video
+cast :  bandage consisting of a firm covering that immobilizes broken bones while they heal
+cat :  a domestic house cat
+cauliflower :  edible compact head of white undeveloped flowers
+cayenne_(spice) :  ground pods and seeds of pungent red peppers of the genus Capsicum
+CD_player :  electronic equipment for playing compact discs (CDs)
+celery :  widely cultivated herb with aromatic leaf stalks that are eaten raw or cooked
+cellular_telephone :  a hand-held mobile telephone
+chain_mail :  (Middle Ages) flexible armor made of interlinked metal rings
+chair :  a seat for one person, with a support for the back
+chaise_longue :  a long chair; for reclining
+chalice :  a bowl-shaped drinking vessel; especially the Eucharistic cup
+chandelier :  branched lighting fixture; often ornate; hangs from the ceiling
+chap :  leather leggings without a seat; worn over trousers by cowboys to protect their legs
+checkbook :  a book issued to holders of checking accounts
+checkerboard :  a board having 64 squares of two alternating colors
+cherry :  a red fruit with a single hard stone
+chessboard :  a checkerboard used to play chess
+chicken_(animal) :  a domestic fowl bred for flesh or eggs
+chickpea :  the seed of the chickpea plant; usually dried
+chili_(vegetable) :  very hot and finely tapering pepper of special pungency
+chime :  an instrument consisting of a set of bells that are struck with a hammer
+chinaware :  dishware made of high quality porcelain
+crisp_(potato_chip) :  a thin crisp slice of potato fried in deep fat
+poker_chip :  a small disk-shaped counter used to represent money when gambling
+chocolate_bar :  a bar of chocolate candy
+chocolate_cake :  cake containing chocolate
+chocolate_milk :  milk flavored with chocolate syrup
+chocolate_mousse :  dessert mousse made with chocolate
+choker :  shirt collar, animal collar, or tight-fitting necklace
+chopping_board :  a wooden board where meats or vegetables can be cut
+chopstick :  one of a pair of slender sticks used as oriental tableware to eat food with
+Christmas_tree :  an ornamented evergreen used as a Christmas decoration
+slide :  sloping channel through which things can descend
+cider :  a beverage made from juice pressed from apples
+cigar_box :  a box for holding cigars
+cigarette :  finely ground tobacco wrapped in paper; for smoking
+cigarette_case :  a small flat case for holding cigarettes
+cistern :  a tank that holds the water used to flush a toilet
+clarinet :  a single-reed instrument with a straight tube
+clasp :  a fastener (as a buckle or hook) that is used to hold two things together
+cleansing_agent :  a preparation used in cleaning something
+cleat_(for_securing_rope) :  a fastener (usually with two projecting horns) around which a rope can be secured
+clementine :  a variety of mandarin orange
+clip :  any of various small fasteners used to hold loose articles together
+clipboard :  a small writing board with a clip at the top for holding papers
+clippers_(for_plants) :  shears for cutting grass or shrubbery (often used in the plural)
+cloak :  a loose outer garment
+clock :  a timepiece that shows the time of day
+clock_tower :  a tower with a large clock visible high up on an outside face
+clothes_hamper :  a hamper that holds dirty clothes to be washed or wet clothes to be dried
+clothespin :  wood or plastic fastener; for holding clothes on a clothesline
+clutch_bag :  a woman's strapless purse that is carried in the hand
+coaster :  a covering (plate or mat) that protects the surface of a table
+coat :  an outer garment that has sleeves and covers the body from shoulder down
+coat_hanger :  a hanger that is shaped like a person's shoulders
+coatrack :  a rack with hooks for temporarily holding coats and hats
+cock :  adult male chicken
+cockroach :  any of numerous chiefly nocturnal insects; some are domestic pests
+cocoa_(beverage) :  a beverage made from cocoa powder and milk and sugar; usually drunk hot
+coconut :  large hard-shelled brown oval nut with a fibrous husk
+coffee_maker :  a kitchen appliance for brewing coffee automatically
+coffee_table :  low table where magazines can be placed and coffee or cocktails are served
+coffeepot :  tall pot in which coffee is brewed
+coil :  tubing that is wound in a spiral
+coin :  a flat metal piece (usually a disc) used as money
+colander :  bowl-shaped strainer; used to wash or drain foods
+coleslaw :  basically shredded cabbage
+coloring_material :  any material used for its color
+combination_lock :  lock that can be opened only by turning dials in a special sequence
+pacifier :  device used for an infant to suck or bite on
+comic_book :  a magazine devoted to comic strips
+compass :  navigational instrument for finding directions
+computer_keyboard :  a keyboard that is a data input device for computers
+condiment :  a preparation (a sauce or relish or spice) to enhance flavor or enjoyment
+cone :  a cone-shaped object used to direct traffic
+control :  a mechanism that controls the operation of a machine
+convertible_(automobile) :  a car that has top that can be folded or removed
+sofa_bed :  a sofa that can be converted into a bed
+cooker :  a utensil for cooking
+cookie :  any of various small flat sweet cakes (`biscuit' is the British term)
+cooking_utensil :  a kitchen utensil made of material that does not melt easily; used for cooking
+cooler_(for_food) :  an insulated box for storing food often with ice
+cork_(bottle_plug) :  the plug in the mouth of a bottle (especially a wine bottle)
+corkboard :  a sheet consisting of cork granules
+corkscrew :  a bottle opener that pulls corks
+edible_corn :  ears or kernels of corn that can be prepared and served for human food (only mark individual ears or kernels)
+cornbread :  bread made primarily of cornmeal
+cornet :  a brass musical instrument with a narrow tube and a flared bell and many valves
+cornice :  a decorative framework to conceal curtain fixtures at the top of a window casing
+cornmeal :  coarsely ground corn
+corset :  a woman's close-fitting foundation garment
+costume :  the attire characteristic of a country or a time or a social class
+cougar :  large American feline resembling a lion
+coverall :  a loose-fitting protective garment that is worn over other clothing
+cowbell :  a bell hung around the neck of cow so that the cow can be easily located
+cowboy_hat :  a hat with a wide brim and a soft crown; worn by American ranch hands
+crab_(animal) :  decapod having eyes on short stalks and a broad flattened shell and pincers
+crabmeat :  the edible flesh of any of various crabs
+cracker :  a thin crisp wafer
+crape :  small very thin pancake
+crate :  a rugged box (usually made of wood); used for shipping
+crayon :  writing or drawing implement made of a colored stick of composition wax
+cream_pitcher :  a small pitcher for serving cream
+crescent_roll :  very rich flaky crescent-shaped roll
+crib :  baby bed with high sides made of slats
+crock_pot :  an earthen jar (made of baked clay) or a modern electric crockpot
+crossbar :  a horizontal bar that goes across something
+crouton :  a small piece of toasted or fried bread; served in soup or salads
+crow :  black birds having a raucous call
+crowbar :  a heavy iron lever with one end forged into a wedge
+crown :  an ornamental jeweled headdress signifying sovereignty
+crucifix :  representation of the cross on which Jesus died
+cruise_ship :  a passenger ship used commercially for pleasure cruises
+police_cruiser :  a car in which policemen cruise the streets
+crumb :  small piece of e.g. bread or cake
+crutch :  a wooden or metal staff that fits under the armpit and reaches to the ground
+cub_(animal) :  the young of certain carnivorous mammals such as the bear or wolf or lion
+cube :  a block in the (approximate) shape of a cube
+cucumber :  cylindrical green fruit with thin green rind and white flesh eaten as a vegetable
+cufflink :  jewelry consisting of linked buttons used to fasten the cuffs of a shirt
+cup :  a small open container usually used for drinking; usually has a handle
+trophy_cup :  a metal award or cup-shaped vessel with handles that is awarded as a trophy to a competition winner
+cupboard :  a small room (or recess) or cabinet used for storage space
+cupcake :  small cake baked in a muffin tin
+hair_curler :  a cylindrical tube around which the hair is wound to curl it
+curling_iron :  a cylindrical home appliance that heats hair that has been curled around it
+curtain :  hanging cloth used as a blind (especially for a window)
+cushion :  a soft bag filled with air or padding such as feathers or foam rubber
+cylinder :  a cylindrical container
+cymbal :  a percussion instrument consisting of a concave brass disk
+dagger :  a short knife with a pointed blade used for piercing or stabbing
+dalmatian :  a large breed having a smooth white coat with black or brown spots
+dartboard :  a circular board of wood or cork used as the target in the game of darts
+date_(fruit) :  sweet edible fruit of the date palm with a single long woody seed
+deck_chair :  a folding chair for use outdoors; a wooden frame supports a length of canvas
+deer :  distinguished from Bovidae by the male's having solid deciduous antlers
+dental_floss :  a soft thread for cleaning the spaces between the teeth
+desk :  a piece of furniture with a writing surface and usually drawers or other compartments
+detergent :  a surface-active chemical widely used in industry and laundering
+diaper :  garment consisting of a folded cloth drawn up between the legs and fastened at the waist
+diary :  yearly planner book
+die :  a small cube with 1 to 6 spots on the six faces; used in gambling
+dinghy :  a small boat of shallow draft with seats and oars with which it is propelled
+dining_table :  a table at which meals are served
+tux :  semiformal evening dress for men
+dish :  a piece of dishware normally used as a container for holding or serving food
+dish_antenna :  directional antenna consisting of a parabolic reflector
+dishrag :  a cloth for washing dishes or cleaning in general
+dishtowel :  a towel for drying dishes
+dishwasher :  a machine for washing dishes
+dishwasher_detergent :  dishsoap or dish detergent designed for use in dishwashers
+dispenser :  a container so designed that the contents can be used in prescribed amounts
+diving_board :  a springboard from which swimmers can dive
+Dixie_cup :  a disposable cup made of paper; for holding drinks
+dog :  a common domesticated dog
+dog_collar :  a collar for a dog
+doll :  a toy replica of a HUMAN (NOT AN ANIMAL)
+dollar :  a piece of paper money worth one dollar
+dollhouse :  a house so small that it is likened to a child's plaything
+dolphin :  any of various small toothed whales with a beaklike snout; larger than porpoises
+domestic_ass :  domestic beast of burden descended from the African wild ass; patient but stubborn
+doorknob :  a knob used to open a door (often called `doorhandle' in Great Britain)
+doormat :  a mat placed outside an exterior door for wiping the shoes before entering
+doughnut :  a small ring-shaped friedcake
+dove :  any of numerous small pigeons
+dragonfly :  slender-bodied non-stinging insect having iridescent wings that are outspread at rest
+drawer :  a boxlike container in a piece of furniture; made so as to slide in and out
+underdrawers :  underpants worn by men
+dress :  a one-piece garment for a woman; has skirt and bodice
+dress_hat :  a man's hat with a tall crown; usually covered with silk or with beaver fur
+dress_suit :  formalwear consisting of full evening dress for men
+dresser :  a cabinet with shelves
+drill :  a tool with a sharp rotating point for making holes in hard materials
+drone :  an aircraft without a pilot that is operated by remote control
+dropper :  pipet consisting of a small tube with a vacuum bulb at one end for drawing liquid in and releasing it a drop at a time
+drum_(musical_instrument) :  a musical percussion instrument; usually consists of a hollow cylinder with a membrane stretched across each end
+drumstick :  a stick used for playing a drum
+duck :  small web-footed broad-billed swimming bird
+duckling :  young duck
+duct_tape :  a wide silvery adhesive tape
+duffel_bag :  a large cylindrical bag of heavy cloth (does not include suitcases)
+dumbbell :  an exercising weight with two ball-like ends connected by a short handle
+dumpster :  a container designed to receive and transport and dump waste
+dustpan :  a short-handled receptacle into which dust can be swept
+eagle :  large birds of prey noted for their broad wings and strong soaring flight
+earphone :  device for listening to audio that is held over or inserted into the ear
+earplug :  a soft plug that is inserted into the ear canal to block sound
+earring :  jewelry to ornament the ear
+easel :  an upright tripod for displaying something (usually an artist's canvas)
+eclair :  oblong cream puff
+eel :  an elongate fish with fatty flesh
+egg :  oval reproductive body of a fowl (especially a hen) used as food
+egg_roll :  minced vegetables and meat wrapped in a pancake and fried
+egg_yolk :  the yellow spherical part of an egg
+eggbeater :  a mixer for beating eggs or whipping cream
+eggplant :  egg-shaped vegetable having a shiny skin typically dark purple
+electric_chair :  a chair-shaped instrument of execution by electrocution
+refrigerator :  a refrigerator in which the coolant is pumped around by an electric motor
+elephant :  a common elephant
+elk :  large northern deer with enormous flattened antlers in the male
+envelope :  a flat (usually rectangular) container for a letter, thin package, etc.
+eraser :  an implement used to erase something
+escargot :  edible snail usually served in the shell with a sauce of melted butter and garlic
+eyepatch :  a protective cloth covering for an injured eye
+falcon :  birds of prey having long pointed powerful wings adapted for swift flight
+fan :  a device for creating a current of air by movement of a surface or surfaces
+faucet :  a regulator for controlling the flow of a liquid from a reservoir
+fedora :  a hat made of felt with a creased crown
+ferret :  domesticated albino variety of the European polecat bred for hunting rats and rabbits
+Ferris_wheel :  a large wheel with suspended seats that remain upright as the wheel rotates
+ferry :  a boat that transports people or vehicles across a body of water and operates on a regular schedule
+fig_(fruit) :  fleshy sweet pear-shaped yellowish or purple fruit eaten fresh or preserved or dried
+fighter_jet :  a high-speed military or naval airplane designed to destroy enemy targets
+figurine :  a small carved or molded figure
+file_cabinet :  office furniture consisting of a container for keeping papers in order
+file_(tool) :  a steel hand tool with small sharp teeth on some or all of its surfaces; used for smoothing wood or metal
+fire_alarm :  an alarm that is tripped off by fire or smoke
+fire_engine :  large trucks that carry firefighters and equipment to the site of a fire
+fire_extinguisher :  a manually operated device for extinguishing small fires
+fire_hose :  a large hose that carries water from a fire hydrant to the site of the fire
+fireplace :  an open recess in a wall at the base of a chimney where a fire can be built
+fireplug :  an upright hydrant for drawing water to use in fighting a fire
+first-aid_kit :  kit consisting of a set of bandages and medicines for giving first aid
+fish :  any of various mostly cold-blooded aquatic vertebrates usually having scales and breathing through gills
+fish_(food) :  the flesh of fish used as food
+fishbowl :  a transparent bowl in which small fish are kept
+fishing_rod :  a rod that is used in fishing to extend the fishing line
+flag :  emblem usually consisting of a rectangular piece of cloth of distinctive design (do not include pole)
+flagpole :  a tall staff or pole on which a flag is raised
+flamingo :  large pink web-footed bird with down-bent bill
+flannel :  a soft light woolen fabric; used for clothing
+flap :  any broad thin covering attached at one edge, such as a mud flap next to a wheel or a flap on an airplane wing
+flash :  a lamp for providing momentary light to take a photograph
+flashlight :  a small portable battery-powered electric lamp
+fleece :  a soft bulky fabric with deep pile; used chiefly for clothing
+flip-flop_(sandal) :  a backless sandal held to the foot by a thong between two toes
+flipper_(footwear) :  a shoe to aid a person in swimming
+flower_arrangement :  a decorative arrangement of flowers
+flute_glass :  a tall narrow wineglass
+foal :  a young horse
+folding_chair :  a chair that can be folded flat for storage
+food_processor :  a kitchen appliance for shredding, blending, chopping, or slicing food
+football_(American) :  the inflated oblong ball used in playing American football
+football_helmet :  a padded helmet with a face mask to protect the head of football players
+footstool :  a low seat or a stool to rest the feet of a seated person
+fork :  cutlery used for serving and eating food
+forklift :  an industrial vehicle with a power operated fork in front that can be inserted under loads to lift and move them
+freight_car :  a railway car that carries freight
+French_toast :  bread slice dipped in egg and milk and fried
+freshener :  anything that freshens air by removing or covering odor
+frisbee :  a light, plastic disk propelled with a flip of the wrist for recreation or competition
+frog :  a tailless stout-bodied amphibians with long hind limbs for leaping
+fruit_juice :  drink produced by squeezing or crushing fruit
+frying_pan :  a pan used for frying foods
+fudge :  soft creamy candy
+funnel :  a cone-shaped utensil used to channel a substance into a container with a small mouth
+futon :  a pad that is used for sleeping on the floor or on a raised frame
+gag :  restraint put into a person's mouth to prevent speaking or shouting
+garbage :  a receptacle where waste can be discarded
+garbage_truck :  a truck for collecting domestic refuse
+garden_hose :  a hose used for watering a lawn or garden
+gargle :  a medicated solution used for gargling and rinsing the mouth
+gargoyle :  an ornament consisting of a grotesquely carved figure of a person or animal
+garlic :  aromatic bulb used as seasoning
+gasmask :  a protective face mask with a filter
+gazelle :  small swift graceful antelope of Africa and Asia having lustrous eyes
+gelatin :  an edible jelly made with gelatin and used as a dessert or salad base or a coating for foods
+gemstone :  a crystalline rock that can be cut and polished for jewelry
+generator :  engine that converts mechanical energy into electrical energy by electromagnetic induction
+giant_panda :  large black-and-white herbivorous mammal of bamboo forests of China and Tibet
+gift_wrap :  attractive wrapping paper suitable for wrapping gifts
+ginger :  the root of the common ginger plant; used fresh as a seasoning
+giraffe :  tall animal having a spotted coat and small horns and very long neck and legs
+cincture :  a band of material around the waist that strengthens a skirt or trousers
+glass_(drink_container) :  a container for holding liquids while drinking
+globe :  a sphere on which a map (especially of the earth) is represented
+glove :  handwear covering the hand
+goat :  a common goat
+goggles :  tight-fitting spectacles worn to protect the eyes
+goldfish :  small golden or orange-red freshwater fishes used as pond or aquarium pets
+golf_club :  golf equipment used by a golfer to hit a golf ball
+golfcart :  a small motor vehicle in which golfers can ride between shots
+gondola_(boat) :  long narrow flat-bottomed boat propelled by sculling; traditionally used on canals of Venice
+goose :  loud, web-footed long-necked aquatic birds usually larger than ducks
+gorilla :  largest ape
+gourd :  any of numerous inedible fruits with hard rinds
+grape :  any of various juicy fruit with green or purple skins; grow in clusters
+grater :  utensil with sharp perforations for shredding foods (as vegetables or cheese)
+gravestone :  a stone that is used to mark a grave
+gravy_boat :  a dish (often boat-shaped) for serving gravy or sauce
+green_bean :  a common bean plant cultivated for its slender green edible pods
+green_onion :  a young onion before the bulb has enlarged
+griddle :  cooking utensil consisting of a flat heated surface on which food is cooked
+grill :  a framework of metal bars used as a partition or a grate
+grits :  coarsely ground corn boiled as a breakfast dish
+grizzly :  powerful brownish-yellow bear of the uplands of western North America
+grocery_bag :  a sack for holding customer's groceries
+guitar :  a stringed instrument usually having six strings; played by strumming or plucking
+gull :  mostly white aquatic bird having long pointed wings and short legs
+gun :  a weapon that discharges a bullet at high velocity from a metal tube
+hairbrush :  a brush used to groom a person's hair
+hairnet :  a small net that someone wears over their hair to keep it in place
+hairpin :  a double pronged pin used to hold women's hair in place
+halter_top :  a woman's top that fastens behind the back and neck leaving the back and arms uncovered
+ham :  meat cut from the thigh of a hog (usually smoked)
+hamburger :  a sandwich consisting of a patty of minced beef served on a bun
+hammer :  a hand tool with a heavy head and a handle; used to deliver an impulsive force by striking
+hammock :  a hanging bed of canvas or rope netting (usually suspended between two trees)
+hamper :  a basket usually with a cover
+hamster :  short-tailed burrowing rodent with large cheek pouches
+hair_dryer :  a hand-held electric blower that can blow warm air onto the hair
+hand_glass :  a mirror intended to be held in the hand
+hand_towel :  a small towel used to dry the hands or face
+handcart :  wheeled vehicle that can be pushed by a person
+handcuff :  shackle that consists of a metal loop that can be locked around the wrist
+handkerchief :  a square piece of cloth used for wiping the eyes or nose or as a costume accessory
+handle :  the appendage to an object that is designed to be held in order to use or move it
+handsaw :  a saw used with one hand for cutting wood
+hardback_book :  a book with cardboard or cloth or leather covers
+harmonium :  a free-reed instrument in which air is forced through the reeds by bellows
+hat :  headwear that protects the head from bad weather, sun, or worn for fashion
+hatbox :  a round piece of luggage for carrying hats
+veil :  a garment that covers the head OR face
+headband :  a band worn around or over the head
+headboard :  a vertical board or panel forming the head of a bedstead
+headlight :  a powerful light with reflector; attached to the front of an automobile or locomotive
+headscarf :  a kerchief worn over the head and tied under the chin
+headset :  receiver consisting of a pair of headphones
+headstall_(for_horses) :  the band that is the part of a bridle that fits around a horse's head
+heart :  a muscular organ; its contractions move the blood through the body
+heater :  device that heats water or supplies warmth to a room
+helicopter :  an aircraft without wings that obtains its lift from the rotation of overhead blades
+helmet :  a protective headgear made of hard material to resist blows
+heron :  grey or white wading bird with long neck and long legs and (usually) long bill
+highchair :  a chair for feeding a very young child
+hinge :  a joint that holds two parts together so that one can swing relative to the other
+hippopotamus :  massive thick-skinned animal living in or around rivers of tropical Africa
+hockey_stick :  sports implement consisting of a stick used by hockey players to move the puck
+hog :  domestic swine
+home_plate_(baseball) :  (baseball) a rubber slab where the batter stands; it must be touched by a base runner in order to score
+honey :  a sweet yellow liquid produced by bees
+fume_hood :  metal covering leading to a vent that exhausts smoke or fumes
+hook :  a curved or bent implement for suspending or pulling something
+hookah :  a tobacco pipe with a long flexible tube connected to a container where the smoke is cooled by passing through water
+hornet :  large stinging wasp
+horse :  a common horse
+hose :  a flexible pipe for conveying a liquid or gas
+hot-air_balloon :  balloon for travel through the air in a basket suspended below a large bag of heated air
+hotplate :  a portable electric appliance for heating or cooking or keeping food warm
+hot_sauce :  a pungent peppery sauce
+hourglass :  a sandglass timer that runs for sixty minutes
+houseboat :  a barge that is designed and equipped for use as a dwelling
+hummingbird :  tiny American bird having brilliant iridescent plumage and long slender bills
+hummus :  a thick spread made from mashed chickpeas
+polar_bear :  white bear of Arctic regions
+icecream :  frozen dessert containing cream and sugar and flavoring
+popsicle :  ice cream or water ice on a small wooden stick
+ice_maker :  an appliance included in some electric refrigerators for making ice cubes
+ice_pack :  a waterproof bag filled with ice: applied to the body (especially the head) to cool or reduce swelling
+ice_skate :  skate consisting of a boot with a steel blade fitted to the sole
+igniter :  a substance or device used to start a fire
+inhaler :  a dispenser that produces a chemical vapor to be inhaled through mouth or nose
+iPod :  a pocket-sized device used to play music files
+iron_(for_clothing) :  home appliance consisting of a flat metal base that is heated and used to smooth cloth
+ironing_board :  narrow padded board on collapsible supports; used for ironing clothes
+jacket :  a waist-length coat
+jam :  preserve of crushed fruit
+jar :  a vessel (usually cylindrical) with a wide mouth and without handles
+jean :  (usually plural) close-fitting trousers of heavy denim for manual work or casual wear
+jeep :  a car suitable for traveling over rough terrain
+jelly_bean :  sugar-glazed jellied candy
+jersey :  a close-fitting pullover shirt
+jet_plane :  an airplane powered by one or more jet engines
+jewel :  a precious or semiprecious stone incorporated into a piece of jewelry
+jewelry :  an adornment (as a bracelet or ring or necklace) made of precious metals and set with gems (or imitation gems)
+joystick :  a control device for computers consisting of a vertical handle that can move freely in two directions
+jumpsuit :  one-piece garment fashioned after a parachutist's uniform
+kayak :  a small canoe consisting of a light frame made watertight with animal skins
+keg :  small cask or barrel
+kennel :  outbuilding that serves as a shelter for a dog
+kettle :  a metal pot for stewing or boiling; usually has a lid
+key :  metal instrument used to unlock a lock
+keycard :  a plastic card used to gain access typically to a door
+kilt :  a knee-length pleated tartan skirt worn by men as part of the traditional dress in the Highlands of northern Scotland
+kimono :  a loose robe; imitated from robes originally worn by Japanese
+kitchen_sink :  a sink in a kitchen
+kitchen_table :  a table in the kitchen
+kite :  plaything consisting of a light frame covered with tissue paper; flown in wind at end of a string
+kitten :  young domestic cat
+kiwi_fruit :  fuzzy brown egg-shaped fruit with slightly tart green flesh
+knee_pad :  protective garment consisting of a pad worn by football or baseball or hockey players
+knife :  tool with a blade and point used as a cutting instrument
+knitting_needle :  needle consisting of a slender rod with pointed ends; usually used in pairs
+knob :  a round handle often found on a door
+knocker_(on_a_door) :  a device (usually metal and ornamental) attached by a hinge to a door
+koala :  sluggish tailless Australian marsupial with grey furry ears and coat
+lab_coat :  a light coat worn to protect clothing from substances used while working in a laboratory
+ladder :  steps consisting of two parallel members connected by rungs
+ladle :  a spoon-shaped vessel with a long handle frequently used to transfer liquids
+ladybug :  small round bright-colored and spotted beetle, typically red and black
+lamb_(animal) :  young sheep
+lamb-chop :  chop cut from a lamb
+lamp :  a piece of furniture holding one or more electric light bulbs
+lamppost :  a metal post supporting an outdoor lamp (such as a streetlight)
+lampshade :  a protective ornamental shade used to screen a light bulb from direct view
+lantern :  light in a transparent protective case
+lanyard :  a cord worn around the neck to hold a knife or whistle, etc.
+laptop_computer :  a portable computer small enough to use in your lap
+lasagna :  baked dish of layers of lasagna pasta with sauce and cheese and meat or vegetables
+latch :  a bar that can be lowered or slid into a groove to fasten a door or gate
+lawn_mower :  garden tool for mowing grass on lawns
+leather :  an animal skin made smooth and flexible by removing the hair and then tanning
+legging_(clothing) :  a garment covering the leg (usually extending from the knee to the ankle)
+Lego :  a child's plastic construction set for making models from blocks
+legume :  the fruit or seed of bean or pea plants
+lemon :  yellow oval fruit with juicy acidic flesh
+lemonade :  sweetened beverage of diluted lemon juice
+lettuce :  leafy plant commonly eaten in salad or on sandwiches
+license_plate :  a plate mounted on the front and back of car and bearing the car's registration number
+life_buoy :  a ring-shaped life preserver used to prevent drowning (NOT a life-jacket or vest)
+life_jacket :  life preserver consisting of a sleeveless jacket of buoyant or inflatable design
+lightbulb :  lightblub/source of light
+lightning_rod :  a metallic conductor that is attached to a high point and leads to the ground
+lime :  the green acidic fruit of any of various lime trees
+limousine :  long luxurious car; usually driven by a chauffeur
+lion :  large gregarious predatory cat of Africa and India
+lip_balm :  a balm applied to the lips
+liquor :  liquor or beer
+lizard :  a reptile with usually two pairs of legs and a tapering tail
+log :  a segment of the trunk of a tree when stripped of branches
+lollipop :  hard candy on a stick
+speaker_(stero_equipment) :  electronic device that produces sound often as part of a stereo system
+loveseat :  small sofa that seats two people
+machine_gun :  a rapidly firing automatic gun
+magazine :  a paperback periodic publication
+magnet :  a device that attracts iron and produces a magnetic field
+mail_slot :  a slot (usually in a door) through which mail can be delivered
+mailbox_(at_home) :  a private box for delivery of mail
+mallard :  wild dabbling duck from which domestic ducks are descended
+mallet :  a sports implement with a long handle and a hammer-like head used to hit a ball
+mammoth :  any of numerous extinct elephants widely distributed in the Pleistocene
+manatee :  sirenian mammal of tropical coastal waters of America
+mandarin_orange :  a somewhat flat reddish-orange loose skinned citrus of China
+manger :  a container (usually in a barn or stable) from which cattle or horses feed
+manhole :  a hole (usually with a flush cover) through which a person can gain access to an underground structure
+map :  a diagrammatic representation of the earth's surface (or part of it)
+marker :  a writing implement for making a mark
+martini :  a cocktail made of gin (or vodka) with dry vermouth
+mascot :  a person or animal that is adopted by a team or other group as a symbolic figure
+mashed_potato :  potato that has been peeled and boiled and then mashed
+masher :  a kitchen utensil used for mashing (e.g. potatoes)
+mask :  a protective covering worn over the face
+mast :  a vertical spar for supporting sails
+mat_(gym_equipment) :  sports equipment consisting of a piece of thick padding on the floor for gymnastics
+matchbox :  a box for holding matches
+mattress :  a thick pad filled with resilient material used as a bed or part of a bed
+measuring_cup :  graduated cup used to measure liquid or granular ingredients
+measuring_stick :  measuring instrument having a sequence of marks at regular intervals
+meatball :  ground meat formed into a ball and fried or simmered in broth
+medicine :  something that treats or prevents or alleviates the symptoms of disease
+melon :  fruit of the gourd family having a hard rind and sweet juicy flesh
+microphone :  device for converting sound waves into electrical energy
+microscope :  magnifier of the image of small objects
+microwave_oven :  kitchen appliance that cooks food by passing an electromagnetic wave through it
+milestone :  stone post at side of a road to show distances
+milk :  a white nutritious liquid secreted by mammals and used as food by human beings
+milk_can :  can for transporting milk
+milkshake :  frothy drink of milk and flavoring and sometimes fruit or ice cream
+minivan :  a small box-shaped passenger van
+mint_candy :  a candy that is flavored with a mint oil
+mirror :  polished surface that forms images by reflecting light
+mitten :  glove that encases the thumb separately and the other four fingers together
+mixer_(kitchen_tool) :  a kitchen utensil that is used for mixing foods
+money :  the official currency issued by a government or national bank
+monitor_(computer_equipment) computer_monitor :  a computer monitor
+monkey :  any of various long-tailed primates
+motor :  machine that converts other forms of energy into mechanical energy and so imparts motion
+motor_scooter :  a wheeled vehicle with small wheels and a low-powered engine
+motor_vehicle :  a self-propelled wheeled vehicle that does not run on rails
+motorcycle :  a motor vehicle with two wheels and a strong frame
+mound_(baseball) :  (baseball) the slight elevation on which the pitcher stands
+mouse_(computer_equipment) :  a computer input device that controls an on-screen pointer (does not include trackpads / touchpads)
+mousepad :  a small portable pad that provides an operating surface for a computer mouse
+muffin :  a sweet quick bread baked in a cup-shaped pan
+mug :  with handle and usually cylindrical
+mushroom :  a common mushroom
+music_stool :  a stool for piano players; usually adjustable in height
+musical_instrument :  any of various devices or contrivances that can be used to produce musical tones or sounds
+nailfile :  a small flat file for shaping the nails
+napkin :  a small piece of table linen or paper that is used to wipe the mouth and to cover the lap in order to protect clothing
+neckerchief :  a kerchief worn around the neck
+necklace :  jewelry consisting of a cord or chain (often bearing gems) worn about the neck as an ornament
+necktie :  neckwear consisting of a long narrow piece of material worn under a collar and tied in knot at the front
+needle :  a sharp pointed implement (usually metal)
+nest :  a structure in which animals lay eggs or give birth to their young
+newspaper :  a daily or weekly publication on folded sheets containing news, articles, and advertisements
+newsstand :  a stall where newspapers and other periodicals are sold
+nightshirt :  garments designed to be worn in bed
+nosebag_(for_animals) :  a canvas bag that is used to feed an animal (such as a horse); covers the muzzle and fastens at the top of the head
+noseband_(for_animals) :  a strap that is the part of a bridle that goes over the animal's nose
+notebook :  a book with blank pages for recording notes or memoranda
+notepad :  a pad of paper for keeping notes
+nut :  a small metal block (usually square or hexagonal) with internal screw thread to be fitted onto a bolt
+nutcracker :  a hand tool used to crack nuts open
+oar :  an implement used to propel or steer a boat
+octopus_(food) :  tentacles of octopus prepared as food
+octopus_(animal) :  bottom-living cephalopod having a soft oval body with eight long tentacles
+oil_lamp :  a lamp that burns oil (as kerosine) for light
+olive_oil :  oil from olives
+omelet :  beaten eggs cooked until just set; may be folded around e.g. ham or cheese or jelly
+onion :  the bulb of an onion plant
+orange_(fruit) :  orange (FRUIT of an orange tree)
+orange_juice :  bottled or freshly squeezed juice of oranges
+ostrich :  fast-running African flightless bird with two-toed feet; largest living bird
+ottoman :  a thick standalone cushion used as a seat or footrest, often next to a chair
+oven :  kitchen appliance used for baking or roasting
+overalls_(clothing) :  work clothing consisting of denim trousers usually with a bib and shoulder straps
+owl :  nocturnal bird of prey with hawk-like beak and claws and large head with front-facing eyes
+packet :  a small package or bundle
+inkpad :  absorbent material saturated with ink used to transfer ink evenly to a rubber stamp
+pad :  mostly arm/knee pads labeled
+paddle :  a short light oar used without an oarlock to propel a canoe or small boat
+padlock :  a detachable, portable lock
+paintbrush :  a brush used as an applicator to apply paint
+painting :  graphic art consisting of an artistic composition made by applying paints to a surface
+pajamas :  loose-fitting nightclothes worn for sleeping or lounging
+palette :  board that provides a flat surface on which artists mix paints and the range of colors used
+pan_(for_cooking) :  cooking utensil consisting of a wide metal vessel
+pan_(metal_container) :  shallow container made of metal
+pancake :  a flat cake of thin batter fried on both sides on a griddle
+pantyhose :  a woman's tights consisting of underpants and stockings
+papaya :  large oval melon-like tropical fruit with yellowish flesh
+paper_plate :  a disposable plate made of cardboard
+paper_towel :  a disposable towel made of absorbent paper
+paperback_book :  a book with paper covers
+paperweight :  a weight used to hold down a stack of papers
+parachute :  rescue equipment consisting of a device that fills with air and retards your fall
+parakeet :  any of numerous small slender long-tailed parrots
+parasail_(sports) :  parachute that will lift a person up into the air when it is towed by a motorboat or a car
+parasol :  a handheld collapsible source of shade
+parchment :  a superior paper resembling sheepskin
+parka :  a kind of heavy jacket (`windcheater' is a British term)
+parking_meter :  a coin-operated timer located next to a parking space
+parrot :  usually brightly colored tropical birds with short hooked beaks and the ability to mimic sounds
+passenger_car_(part_of_a_train) :  a railcar where passengers ride
+passenger_ship :  a ship built to carry passengers
+passport :  a document issued by a country to a citizen allowing that person to travel abroad and re-enter the home country
+pastry :  any of various baked foods made of dough or batter
+patty_(food) :  small flat mass of chopped food
+pea_(food) :  seed of a pea plant used for food
+peach :  downy juicy fruit with sweet yellowish or whitish flesh
+peanut_butter :  a spread made from ground peanuts
+pear :  sweet juicy gritty-textured fruit available in many varieties
+peeler_(tool_for_fruit_and_vegetables) :  a device for peeling vegetables or fruits
+wooden_leg :  a prosthesis that replaces a missing leg
+pegboard :  a board perforated with regularly spaced holes into which pegs can be fitted
+pelican :  large long-winged warm-water seabird having a large bill with a distensible pouch for fish
+pen :  a writing implement with a point from which ink flows
+pencil :  a thin cylindrical pointed writing implement made of wood and graphite
+pencil_box :  a box for holding pencils
+pencil_sharpener :  a rotary implement for sharpening the point on pencils
+pendulum :  an apparatus consisting of an object mounted so that it swings freely under the influence of gravity
+penguin :  short-legged flightless birds of cold southern regions having webbed feet and wings modified as flippers
+pennant :  a flag longer than it is wide (and often tapering)
+penny_(coin) :  a coin worth one-hundredth of the value of the basic unit
+pepper :  pungent seasoning from the berry of the common pepper plant; whole or ground
+pepper_mill :  a mill for grinding pepper
+perfume :  a toiletry that emits and diffuses a fragrant odor
+persimmon :  orange fruit resembling a plum; edible when fully ripe
+person :  a human being
+pet :  a domesticated animal kept for companionship or amusement
+pew_(church_bench) :  long bench with backs; used in church by the congregation
+phonebook :  a directory containing an alphabetical list of telephone subscribers and their telephone numbers
+phonograph_record :  sound recording consisting of a typically black disk with a continuous groove
+piano :  a keyboard instrument that is played by depressing keys that cause hammers to strike tuned strings and produce sounds
+pickle :  vegetables (especially cucumbers) preserved in brine or vinegar
+pickup_truck :  a light truck with an open body and low sides and a tailboard
+pie :  dish baked in pastry-lined pan often with a pastry top
+pigeon :  wild and domesticated birds having a heavy body and short legs
+piggy_bank :  a child's coin bank (often shaped like a pig)
+pillow :  a cushion to support the head of a sleeping person
+pin_(non_jewelry) :  a small slender (often pointed) piece of wood or metal used to support or fasten or attach things
+pineapple :  large sweet fleshy tropical fruit with a tuft of stiff leaves
+pinecone :  the seed-producing cone of a pine tree
+ping-pong_ball :  light hollow ball used in playing table tennis
+pinwheel :  a toy consisting of vanes of colored paper or plastic that is pinned to a stick and spins when it is pointed into the wind
+tobacco_pipe :  a tube with a small bowl at one end; used for smoking tobacco
+pipe :  a long tube made of metal or plastic that is used to carry water or oil or gas etc.
+pistol :  a firearm that is held and fired with one hand
+pita_(bread) :  usually small round bread that can open into a pocket for filling
+pitcher_(vessel_for_liquid) :  an open vessel with a handle and a spout for pouring
+pitchfork :  a long-handled hand tool with sharp widely spaced prongs for lifting and pitching hay
+pizza :  Italian open pie made of thin bread dough spread with a spiced mixture of e.g. tomato sauce and cheese
+place_mat :  a mat placed on a table for an individual place setting
+plate :  dish on which food is served or from which food is eaten
+platter :  a large shallow dish used for serving food
+playpen :  a portable enclosure in which babies may be left to play
+pliers :  a gripping hand tool with two hinged arms and (usually) serrated jaws
+plow_(farm_equipment) :  a farm tool having one or more heavy blades to break the soil and cut a furrow prior to sowing
+plume :  a feather or cluster of feathers worn as an ornament
+pocket_watch :  a watch that is carried in a small watch pocket
+pocketknife :  a knife with a blade that folds into the handle; suitable for carrying in the pocket
+poker_(fire_stirring_tool) :  fire iron consisting of a metal rod with a handle; used to stir a fire
+pole :  a long (usually round) rod of wood or metal or plastic
+polo_shirt :  a shirt with short sleeves designed for comfort and casual wear
+poncho :  a blanket-like cloak with a hole in the center for the head
+pony :  any of various breeds of small gentle horses usually less than five feet high at the shoulder
+pool_table :  game equipment consisting of a heavy table on which pool is played
+pop_(soda) :  a sweet drink containing carbonated water and flavoring
+postbox_(public) :  public box for deposit of mail
+postcard :  a card for sending messages by post without an envelope
+poster :  a sign posted in a public place as an advertisement
+pot :  metal or earthenware cooking vessel that is usually round and deep; often has a handle and lid
+flowerpot :  a container in which plants are cultivated
+potato :  an edible tuber native to South America
+potholder :  an insulated pad for holding hot pots
+pottery :  ceramic ware made from clay and baked in a kiln
+pouch :  a small or medium size container for holding or carrying things
+power_shovel :  a machine for excavating
+prawn :  any of various edible decapod crustaceans
+pretzel :  glazed and salted cracker typically in the shape of a loose knot
+printer :  a machine that prints
+projectile_(weapon) :  a weapon that is forcibly thrown or projected at a targets
+projector :  an optical instrument that projects an enlarged image onto a screen
+propeller :  a mechanical device that rotates to push against air or water
+prune :  dried plum
+pudding :  any of various soft thick unsweetened baked dishes
+puffer_(fish) :  fishes whose elongated spiny body can inflate itself with water or air to form a globe
+puffin :  seabirds having short necks and brightly colored compressed bills
+pug-dog :  small compact smooth-coated breed of Asiatic origin having a tightly curled tail and broad flat wrinkled muzzle
+pumpkin :  usually large pulpy deep-yellow round fruit of the squash family maturing in late summer or early autumn
+puncher :  a tool for making holes or indentations
+puppet :  a small figure of a person operated from above with strings by a puppeteer
+puppy :  a young dog
+quesadilla :  a tortilla that is filled with cheese and heated
+quiche :  a tart filled with rich unsweetened custard; often contains other ingredients (as cheese or ham or seafood or vegetables)
+quilt :  bedding made of two layers of cloth filled with stuffing and stitched together
+rabbit :  any of various burrowing animals of the family Leporidae having long ears and short tails
+race_car :  a fast car that competes in races
+racket :  a sports implement used to strike a ball in various games
+radar :  measuring instrument in which the echo of a pulse of microwave radiation is used to detect and locate distant objects
+radiator :  a mechanism consisting of a metal honeycomb through which hot fluids circulate
+radio_receiver :  an electronic receiver that detects and demodulates and amplifies transmitted radio signals
+radish :  pungent edible root of any of various cultivated radish plants
+raft :  a flat float (usually made of logs or planks) that can be used for transport or as a platform for swimmers
+rag_doll :  a cloth doll that is stuffed and (usually) painted
+raincoat :  a water-resistant coat
+ram_(animal) :  uncastrated adult male sheep
+raspberry :  red or black edible aggregate berries usually smaller than the related blackberries
+rat :  any of various long-tailed rodents similar to but larger than a mouse
+razorblade :  a blade that has very sharp edge
+reamer_(juicer) :  a squeezer with a conical ridged center that is used for squeezing juice from citrus fruit
+rearview_mirror :  vehicle mirror (side or rearview)
+receipt :  an acknowledgment (usually tangible) that payment has been made
+recliner :  an armchair whose back can be lowered and foot can be raised to allow the sitter to recline in it
+record_player :  machine in which rotating records cause a stylus to vibrate and the vibrations are amplified acoustically or electronically
+reflector :  device that reflects light, radiation, etc.
+remote_control :  a device that can be used to control a machine or apparatus from a distance
+rhinoceros :  massive powerful herbivorous odd-toed ungulate of southeast Asia and Africa having very thick skin and one or two horns on the snout
+rib_(food) :  cut of meat including one or more ribs
+rifle :  a shoulder firearm with a long barrel
+ring :  jewelry consisting of a circlet of precious metal (often set with jewels) worn on the finger
+river_boat :  a boat used on rivers or to ply a river
+road_map :  (NOT A ROAD) a MAP showing roads (for automobile travel)
+robe :  any loose flowing garment
+rocking_chair :  a chair mounted on rockers
+rodent :  relatively small placental mammals having a single pair of constantly growing incisor teeth specialized for gnawing
+roller_skate :  a shoe with pairs of rollers (small hard wheels) fixed to the sole
+Rollerblade :  an in-line variant of a roller skate
+rolling_pin :  utensil consisting of a cylinder (usually of wood) with a handle at each end; used to roll out dough
+root_beer :  carbonated drink containing extracts of roots and herbs
+router_(computer_equipment) :  a device that forwards data packets between computer networks
+rubber_band :  a narrow band of elastic rubber used to hold things (such as papers) together
+runner_(carpet) :  a long narrow carpet
+plastic_bag :  a bag made of paper or plastic for holding customer's purchases
+saddle_(on_an_animal) :  a seat for the rider of a horse or camel
+saddle_blanket :  stable gear consisting of a blanket placed under the saddle
+saddlebag :  a large bag (or pair of bags) hung over a saddle
+safety_pin :  a pin in the form of a clasp; has a guard so the point of the pin will not stick the user
+sail :  a large piece of fabric by means of which wind is used to propel a sailing vessel
+salad :  food mixtures either arranged on a plate or tossed and served with a moist dressing; usually consisting of or including greens
+salad_plate :  a plate or bowl for individual servings of salad
+salami :  highly seasoned fatty sausage of pork and beef usually dried
+salmon_(fish) :  any of various large food and game fishes of northern waters
+salmon_(food) :  flesh of any of various marine or freshwater fish of the family Salmonidae
+salsa :  spicy sauce of tomatoes and onions and chili peppers to accompany Mexican foods
+saltshaker :  a shaker with a perforated top for sprinkling salt
+sandal_(type_of_shoe) :  a shoe consisting of a sole fastened by straps to the foot
+sandwich :  two (or more) slices of bread with a filling between them
+satchel :  luggage consisting of a small case with a flat bottom and (usually) a shoulder strap
+saucepan :  a deep pan with a handle; used for stewing or boiling
+saucer :  a small shallow dish for holding a cup at the table
+sausage :  highly seasoned minced meat stuffed in casings
+sawhorse :  a framework for holding wood that is being sawed
+saxophone :  a wind instrument with a `J'-shaped form typically made of brass
+scale_(measuring_instrument) :  a measuring instrument for weighing; shows amount of mass
+scarecrow :  an effigy in the shape of a man to frighten birds away from seeds
+scarf :  a garment worn around the head or neck or shoulders for warmth or decoration
+school_bus :  a bus used to transport children to or from school
+scissors :  a tool having two crossed pivoting blades with looped handles
+scoreboard :  a large board for displaying the score of a contest (and some other information)
+scraper :  any of various hand tools for scraping
+screwdriver :  a hand tool for driving screws; has a tip that fits into the head of a screw
+scrubbing_brush :  a brush with short stiff bristles for heavy cleaning
+sculpture :  a three-dimensional work of art
+seabird :  a bird that frequents coastal waters and the open ocean: gulls; pelicans; gannets; cormorants; albatrosses; petrels; etc.
+seahorse :  small fish with horse-like heads bent sharply downward and curled tails
+seaplane :  an airplane that can land on or take off from water
+seashell :  the shell of a marine organism
+sewing_machine :  a textile machine used as a home appliance for sewing
+shaker :  a container in which something can be shaken
+shampoo :  cleansing agent consisting of soaps or detergents used for washing the hair
+shark :  typically large carnivorous fishes with sharpe teeth
+sharpener :  any implement that is used to make something (an edge or a point) sharper
+Sharpie :  a pen with indelible ink that will write on any surface
+shaver_(electric) :  a razor powered by an electric motor
+shaving_cream :  toiletry consisting that forms a rich lather for softening the beard before shaving
+shawl :  cloak consisting of an oblong piece of cloth used to cover the head and shoulders
+shears :  large scissors with strong blades
+sheep :  woolly usually horned ruminant mammal related to the goat
+shepherd_dog :  any of various usually long-haired breeds of dog reared to herd and guard sheep
+sherbert :  a frozen dessert made primarily of fruit juice and sugar
+shield :  armor carried on the arm to intercept blows
+shirt :  a garment worn on the upper half of the body
+shoe :  common footwear covering the foot
+shopping_bag :  a bag made of plastic or strong paper (often with handles); used to transport goods after shopping
+shopping_cart :  a handcart that holds groceries or other goods while shopping
+short_pants :  trousers that end at or above the knee
+shot_glass :  a small glass adequate to hold a single swallow of whiskey
+shoulder_bag :  a large handbag that can be carried by a strap looped over the shoulder
+shovel :  a hand tool for lifting loose material such as snow, dirt, etc.
+shower_head :  a plumbing fixture that sprays water over you
+shower_cap :  a tight cap worn to keep hair dry while showering
+shower_curtain :  a curtain that keeps water from splashing out of the shower area
+shredder_(for_paper) :  a device that shreds documents
+signboard :  structure displaying a board on which advertisements can be posted
+silo :  a cylindrical tower used for storing goods
+sink :  plumbing fixture consisting of a water basin fixed to a wall or floor and having a drainpipe
+skateboard :  a board with wheels that is ridden in a standing or crouching position and propelled by foot
+skewer :  a long pin for holding meat in position while it is being roasted
+ski :  sports equipment for skiing on snow
+ski_boot :  a stiff boot that is fastened to a ski with a ski binding
+ski_parka :  a parka to be worn while skiing
+ski_pole :  a pole with metal points used as an aid in skiing
+skirt :  a garment hanging from the waist; worn mainly by girls and women
+skullcap :  rounded brimless cap fitting the crown of the head
+sled :  a vehicle or flat object for transportation over snow by sliding or pulled by dogs, etc.
+sleeping_bag :  large padded bag designed to be slept in outdoors
+sling_(bandage) :  bandage to support an injured forearm; slung over the shoulder or neck
+slipper_(footwear) :  low footwear that can be slipped on and off easily; usually worn indoors
+smoothie :  a thick smooth drink consisting of fresh fruit pureed with ice cream or yoghurt or milk
+snake :  limbless scaly elongate reptile; some are venomous
+snowboard :  a board that resembles a broad ski or a small surfboard; used in a standing position to slide down snow-covered slopes
+snowman :  a figure of a person made of packed snow
+snowmobile :  tracked vehicle for travel on snow having skis in front
+soap :  a cleansing agent made from the salts of vegetable or animal fats
+soccer_ball :  an inflated ball used in playing soccer (called `football' outside of the United States)
+sock :  cloth covering for the foot; worn inside the shoe; reaches to between the ankle and the knee
+sofa :  an upholstered seat for more than one person
+softball :  ball used in playing softball
+solar_array :  electrical device consisting of a large array of connected solar cells
+sombrero :  a straw hat with a tall crown and broad brim; worn in American southwest and in Mexico
+soup :  liquid food especially of meat or fish or vegetable stock often containing pieces of solid food
+soup_bowl :  a bowl for serving soup
+soupspoon :  a spoon with a rounded bowl for eating soup
+sour_cream :  soured light cream
+soya_milk :  a milk substitute containing soybean flour and water; used in some infant formulas and in making tofu
+space_shuttle :  a reusable spacecraft with wings for a controlled descent through the Earth's atmosphere
+sparkler_(fireworks) :  a firework that burns slowly and throws out a shower of sparks
+spatula :  a hand tool with a thin flexible blade used to mix or spread soft substances
+spear :  a long pointed rod used as a tool or weapon
+spectacles :  optical instrument consisting of a frame that holds a pair of lenses for correcting defective vision
+spice_rack :  a rack for displaying containers filled with spices
+spider :  predatory arachnid with eight legs, two poison fangs, two feelers, and usually two silk-spinning organs at the back end of the body
+crawfish :  large edible marine crustacean having a spiny carapace but lacking the large pincers of true lobsters
+sponge :  a porous mass usable to absorb water typically used for cleaning
+spoon :  a piece of cutlery with a shallow bowl-shaped container and a handle
+portswear :  attire worn for sport or for casual wear
+spotlight :  a lamp that produces a strong beam of light to illuminate a restricted area; used to focus attention of a stage performer
+squid_(food) :  (Italian cuisine) squid prepared as food
+squirrel :  a kind of arboreal rodent having a long bushy tail
+stagecoach :  a large coach-and-four formerly used to carry passengers and mail on regular routes between towns
+stapler_(stapling_machine) :  a machine that inserts staples into sheets of paper in order to fasten them together
+starfish :  echinoderms characterized by five arms extending from a central disk
+statue_(sculpture) :  a sculpture representing a human or animal
+steak_(food) :  a slice of meat cut from the fleshy part of an animal or large fish
+steak_knife :  a sharp table knife used in eating steak
+steering_wheel :  a handwheel that is used for steering
+stepladder :  a folding portable ladder hinged at the top
+step_stool :  a stool that has one or two steps that fold under the seat
+stereo_(sound_system) :  electronic device for playing audio
+stew :  food prepared by stewing especially meat or fish with vegetables
+stirrer :  an implement used for stirring
+stirrup :  support consisting of metal loops into which rider's feet go
+stool :  a simple seat without a back or arms
+stop_sign :  a traffic sign to notify drivers that they must come to a complete stop
+brake_light :  a red light on the rear of a motor vehicle that signals when the brakes are applied
+stove :  a kitchen appliance used for cooking food
+strainer :  a filter to retain larger pieces while smaller pieces and liquids pass through
+strap :  an elongated strip of material for binding things together or holding
+straw_(for_drinking) :  a thin paper or plastic tube used to suck liquids into the mouth
+strawberry :  sweet fleshy red fruit
+street_sign :  a sign visible from the street
+streetlight :  a lamp supported on a lamppost; for illuminating a street
+string_cheese :  cheese formed in long strings twisted together
+stylus :  a pointed tool for writing or drawing or engraving, including pens
+subwoofer :  a loudspeaker that is designed to reproduce very low bass frequencies
+sugar_bowl :  a dish in which sugar is served
+sugarcane_(plant) :  juicy canes whose sap is a source of molasses and commercial sugar; fresh canes are sometimes chewed for the juice
+suit_(clothing) :  a set of garments (usually including a jacket and trousers or skirt) for outerwear all of the same fabric and color
+sunflower :  any plant of the genus Helianthus having large flower heads with dark disk florets and showy yellow rays
+sunglasses :  spectacles that are darkened or polarized to protect the eyes from the glare of the sun
+sunhat :  a hat with a broad brim that protects the face from direct exposure to the sun
+surfboard :  a narrow buoyant board for riding surf
+sushi :  rice (with raw fish) wrapped in seaweed
+mop :  cleaning implement consisting of absorbent material fastened to a handle; for cleaning floors
+sweat_pants :  loose-fitting trousers with elastic cuffs; worn by athletes
+sweatband :  a band of material tied around the forehead or wrist to absorb sweat
+sweater :  a crocheted or knitted garment covering the upper part of the body
+sweatshirt :  cotton knit pullover with long sleeves worn during athletic activity
+sweet_potato :  the edible tuberous root of the sweet potato vine
+swimsuit :  garment worn for swimming
+sword :  a cutting or thrusting weapon that has a long metal blade
+syringe :  a medical instrument used to inject or withdraw fluids
+Tabasco_sauce :  very spicy sauce (trade name Tabasco) made from fully-aged red peppers
+table-tennis_table :  a table used for playing table tennis
+table :  a piece of furniture having a smooth flat top that is usually supported by one or more vertical legs
+table_lamp :  a lamp that sits on a table
+tablecloth :  a covering spread over a dining table
+tachometer :  measuring instrument for indicating speed of rotation
+taco :  a small tortilla cupped around a filling
+tag :  a label associated with something for the purpose of identification or information
+taillight :  lamp (usually red) mounted at the rear of a motor vehicle
+tambourine :  a shallow drum with a single drumhead and with metallic disks in the sides
+army_tank :  an enclosed armored military vehicle; has a cannon and moves on caterpillar treads
+tank_(storage_vessel) :  a large (usually metallic) vessel for holding gases or liquids
+tank_top_(clothing) :  a tight-fitting sleeveless shirt with wide shoulder straps and low neck and no front opening
+tape_(sticky_cloth_or_paper) :  a long thin piece of cloth or paper as used for binding or fastening
+tape_measure :  measuring instrument consisting of a narrow strip (cloth or metal) marked in inches or centimeters and used for measuring lengths
+tapestry :  a heavy textile with a woven design; used for curtains and upholstery
+tarp :  waterproofed canvas
+tartan :  a cloth having a crisscross design
+tassel :  adornment consisting of a bunch of cords fastened at one end
+tea_bag :  a measured amount of tea in a bag for an individual serving of tea
+teacup :  a cup from which tea is drunk
+teakettle :  kettle for boiling water to make tea
+teapot :  pot for brewing tea; usually has a spout and handle
+teddy_bear :  plaything consisting of a child's toy bear (usually plush and stuffed with soft materials)
+telephone :  electronic device for communicating by voice over long distances (includes wired and wireless/cell phones)
+telephone_booth :  booth for using a telephone
+telephone_pole :  tall pole supporting telephone wires
+telephoto_lens :  a camera lens that magnifies the image
+television_camera :  television equipment for capturing and recording video
+television_set :  an electronic device that receives television signals and displays them on a screen
+tennis_ball :  ball about the size of a fist used in playing tennis
+tennis_racket :  a racket used to play tennis
+tequila :  Mexican liquor made from fermented juices of an agave plant
+thermometer :  measuring instrument for measuring temperature
+thermos_bottle :  vacuum flask that preserves temperature of hot or cold drinks
+thermostat :  a regulator for automatically regulating temperature by starting or stopping the supply of heat
+thimble :  a small metal cap to protect the finger while sewing; can be used as a small container
+thread :  a fine cord of twisted fibers (of cotton or silk or wool or nylon etc.) used in sewing and weaving
+thumbtack :  a tack for attaching papers to a bulletin board or drawing board
+tiara :  a jeweled headdress worn by women on formal occasions
+tiger :  large feline of forests in most of Asia having a tawny coat with black stripes
+tights_(clothing) :  skintight knit hose covering the body from the waist to the feet worn by acrobats and dancers and as stockings by women and girls
+timer :  a timepiece that measures a time interval and signals its end
+tinfoil :  foil made of tin or an alloy of tin and lead
+tinsel :  a showy decoration that is basically valueless
+tissue_paper :  a soft thin (usually translucent) paper
+toast_(food) :  slice of bread that has been toasted
+toaster :  a kitchen appliance (usually electric) for toasting bread
+toaster_oven :  kitchen appliance consisting of a small electric oven for toasting or warming food
+toilet :  a plumbing fixture for defecation and urination
+toilet_tissue :  a soft thin absorbent paper for use in toilets
+tomato :  mildly acid red or yellow pulpy fruit eaten as a vegetable
+tongs :  any of various devices for taking hold of objects; usually have two hinged legs with handles above and pointed hooks below
+toolbox :  a box or chest or cabinet for holding hand tools
+toothbrush :  small brush; has long handle; used to clean teeth
+toothpaste :  a dentifrice in the form of a paste
+toothpick :  pick consisting of a small strip of wood or plastic; used to pick food from between the teeth
+cover :  covering for a hole (especially a hole in the top of a container)
+tortilla :  thin unleavened pancake made from cornmeal or wheat flour
+tow_truck :  a truck equipped to hoist and pull wrecked cars (or to remove cars from no-parking zones)
+towel :  a rectangular piece of absorbent cloth (or paper) for drying or wiping
+towel_rack :  a rack consisting of one or more bars on which towels can be hung
+toy :  a device regarded as providing amusement
+tractor_(farm_equipment) :  a wheeled vehicle with large wheels; used in farming and other applications
+traffic_light :  a device to control vehicle traffic often consisting of three or more lights
+dirt_bike :  a lightweight motorcycle equipped with rugged tires and suspension for off-road use
+trailer_truck :  a truck consisting of a tractor and trailer together
+train_(railroad_vehicle) :  public or private transport provided by a line of railway cars coupled together and drawn by a locomotive
+trampoline :  gymnastic apparatus consisting of a strong canvas sheet attached with springs to a metal frame
+tray :  an open receptacle for holding or displaying or serving articles or food
+trench_coat :  a military style raincoat; belted with deep pockets
+triangle_(musical_instrument) :  a percussion instrument consisting of a metal bar bent in the shape of an open triangle
+tricycle :  a vehicle with three wheels that is moved by foot pedals
+tripod :  a three-legged rack used for support
+trousers :  a garment extending from the waist to the knee or ankle, covering each leg separately
+truck :  an automotive vehicle suitable for hauling
+truffle_(chocolate) :  creamy chocolate candy
+trunk :  luggage consisting of a large strong case used when traveling or for storage
+vat :  a large vessel for holding or storing liquids
+turban :  a traditional headdress consisting of a long scarf wrapped around the head
+turkey_(food) :  flesh of large domesticated fowl usually roasted
+turnip :  widely cultivated plant having a large fleshy edible white or yellow root
+turtle :  any of various aquatic and land reptiles having a bony shell and flipper-like limbs for swimming
+turtleneck_(clothing) :  a sweater or jersey with a high close-fitting collar
+typewriter :  hand-operated character printer for printing written messages one character at a time
+umbrella :  a lightweight handheld collapsible canopy
+underwear :  undergarment worn next to the skin and under the outer garments
+unicycle :  a vehicle with a single wheel that is driven by pedals
+urinal :  a plumbing fixture (usually attached to the wall) used by men to urinate
+urn :  a large vase that usually has a pedestal or feet
+vacuum_cleaner :  an electrical home appliance that cleans by suction
+vase :  an open jar of glass or porcelain used as an ornament or to hold flowers
+vending_machine :  a slot machine for selling goods
+vent :  a hole for the escape of gas or air
+vest :  a man's sleeveless garment worn underneath a coat
+videotape :  a video recording made on magnetic tape
+vinegar :  sour-tasting liquid produced usually by oxidation of the alcohol in wine or cider and used as a condiment or food preservative
+violin :  bowed stringed instrument that is the highest member of the violin family
+vodka :  unaged colorless liquor originating in Russia
+volleyball :  an inflated ball used in playing volleyball
+vulture :  any of various large birds of prey having naked heads and weak claws and feeding chiefly on carrion
+waffle :  pancake batter baked in a waffle iron
+waffle_iron :  a kitchen appliance for baking waffles
+wagon :  any of various kinds of wheeled vehicles drawn by an animal or a tractor
+wagon_wheel :  a wheel of a wagon
+walking_stick :  a stick carried in the hand for support in walking
+wall_clock :  a clock mounted on a wall
+wall_socket :  receptacle providing a place in a wiring system where current can be taken to run electrical devices
+wallet :  a pocket-size case for holding papers and paper money
+walrus :  either of two large northern marine mammals having ivory tusks and tough hide over thick blubber
+wardrobe :  a tall piece of furniture that provides storage space for clothes; has a door and rails or hooks for hanging clothes
+washbasin :  a bathroom sink that is permanently installed and connected to a water supply and drainpipe; where you can wash your hands and face
+automatic_washer :  a home appliance for washing clothes and linens automatically
+watch :  a small, portable timepiece
+water_bottle :  a bottle for holding water
+water_cooler :  a device for cooling and dispensing drinking water
+water_faucet :  a faucet for drawing water from a pipe or cask
+water_heater :  a heater and storage tank to supply heated water
+water_jug :  a jug that holds water
+water_gun :  plaything consisting of a toy pistol that squirts water
+water_scooter :  a motorboat resembling a motor scooter (NOT A SURFBOARD OR WATER SKI)
+water_ski :  broad ski for skimming over water towed by a speedboat (DO NOT MARK WATER)
+water_tower :  a large reservoir for water
+watering_can :  a container with a handle and a spout with a perforated nozzle; used to sprinkle water over plants
+watermelon :  large oblong or roundish melon with a hard green rind and sweet watery red or occasionally yellowish pulp
+weathervane :  mechanical device attached to an elevated structure; rotates freely to show the direction of the wind
+webcam :  a digital camera designed to take digital photographs and transmit them over the internet
+wedding_cake :  a rich cake with two or more tiers and covered with frosting and decorations; served at a wedding reception
+wedding_ring :  a ring given to the bride and/or groom at the wedding
+wet_suit :  a close-fitting garment made of a permeable material; worn in cold water to retain body heat
+wheel :  a circular frame with spokes (or a solid disc) that can rotate on a shaft or axle
+wheelchair :  a movable chair mounted on large wheels
+whipped_cream :  cream that has been beaten until light and fluffy
+whistle :  a small wind instrument that produces a whistling sound by blowing into it
+wig :  hairpiece covering the head and made of real or synthetic hair
+wind_chime :  a decorative arrangement of pieces of metal or glass or pottery that hang together loosely so the wind can cause them to tinkle
+windmill :  A mill or turbine that is powered by wind
+window_box_(for_plants) :  a container for growing plants on a windowsill
+windshield_wiper :  a mechanical device that cleans the windshield
+windsock :  a truncated cloth cone mounted on a mast/pole; shows wind direction
+wine_bottle :  a bottle for holding wine
+wine_bucket :  a bucket of ice used to chill a bottle of wine
+wineglass :  a glass that has a stem and in which wine is served
+blinder_(for_horses) :  blinds that prevent a horse from seeing something on either side
+wok :  pan with a convex bottom; used for frying in Chinese cooking
+wolf :  a wild carnivorous mammal of the dog family, living and hunting in packs
+wooden_spoon :  a spoon made of wood
+wreath :  an arrangement of flowers, leaves, or stems fastened in a ring
+wrench :  a hand tool that is used to hold or twist a nut or bolt
+wristband :  band consisting of a part of a sleeve that covers the wrist
+wristlet :  a band or bracelet worn around the wrist
+yacht :  an expensive vessel propelled by sail or power and used for cruising or racing
+yogurt :  a custard-like food made from curdled milk
+yoke_(animal_equipment) :  gear joining two animals at the neck; NOT egg yolk
+zebra :  any of several fleet black-and-white striped African equines
+zucchini :  small cucumber-shaped vegetable marrow; typically dark green
+airplane
+bear
+bird
+boat
+car
+cat
+cow
+deer
+dog
+duck
+earless_seal
+elephant
+fish
+flying_disc
+fox
+frog
+giant_panda
+giraffe
+horse
+leopard
+lizard
+monkey
+motorbike
+mouse
+parrot
+person
+rabbit
+shark
+skateboard
+snake
+snowboard
+squirrel
+surfboard
+tennis_racket
+tiger
+train
+truck
+turtle
+whale
+zebra
+Person
+Bird
+Cat
+Dog
+Horse
+Sheep
+Cow
+Elephant
+Bear
+Zebra
+Giraffe
+Poultry
+Giant_panda
+Lizard
+Parrot
+Monkey
+Rabbit
+Tiger
+Fish
+Turtle
+Bicycle
+Motorcycle
+Airplane
+Boat
+Vehical
+pedestrian
+rider 
+car 
+truck 
+bus 
+train 
+motorcycle 
+bicycle
+Person
+Sneakers
+Chair
+Other Shoes
+Hat
+Car
+Lamp
+Glasses
+Bottle
+Desk
+Cup
+Street Lights
+Cabinet/shelf
+Handbag/Satchel
+Bracelet
+Plate
+Picture/Frame
+Helmet
+Book
+Gloves
+Storage box
+Boat
+Leather Shoes
+Flower
+Bench
+Potted Plant
+Bowl/Basin
+Flag
+Pillow
+Boots
+Vase
+Microphone
+Necklace
+Ring
+SUV
+Wine Glass
+Belt
+Moniter/TV
+Backpack
+Umbrella
+Traffic Light
+Speaker
+Watch
+Tie
+Trash bin Can
+Slippers
+Bicycle
+Stool
+Barrel/bucket
+Van
+Couch
+Sandals
+Bakset
+Drum
+Pen/Pencil
+Bus
+Wild Bird
+High Heels
+Motorcycle
+Guitar
+Carpet
+Cell Phone
+Bread
+Camera
+Canned
+Truck
+Traffic cone
+Cymbal
+Lifesaver
+Towel
+Stuffed Toy
+Candle
+Sailboat
+Laptop
+Awning
+Bed
+Faucet
+Tent
+Horse
+Mirror
+Power outlet
+Sink
+Apple
+Air Conditioner
+Knife
+Hockey Stick
+Paddle
+Pickup Truck
+Fork
+Traffic Sign
+Ballon
+Tripod
+Dog
+Spoon
+Clock
+Pot
+Cow
+Cake
+Dinning Table
+Sheep
+Hanger
+Blackboard/Whiteboard
+Napkin
+Other Fish
+Orange/Tangerine
+Toiletry
+Keyboard
+Tomato
+Lantern
+Machinery Vehicle
+Fan
+Green Vegetables
+Banana
+Baseball Glove
+Airplane
+Mouse
+Train
+Pumpkin
+Soccer
+Skiboard
+Luggage
+Nightstand
+Tea pot
+Telephone
+Trolley
+Head Phone
+Sports Car
+Stop Sign
+Dessert
+Scooter
+Stroller
+Crane
+Remote
+Refrigerator
+Oven
+Lemon
+Duck
+Baseball Bat
+Surveillance Camera
+Cat
+Jug
+Broccoli
+Piano
+Pizza
+Elephant
+Skateboard
+Surfboard
+Gun
+Skating and Skiing shoes
+Gas stove
+Donut
+Bow Tie
+Carrot
+Toilet
+Kite
+Strawberry
+Other Balls
+Shovel
+Pepper
+Computer Box
+Toilet Paper
+Cleaning Products
+Chopsticks
+Microwave
+Pigeon
+Baseball
+Cutting/chopping Board
+Coffee Table
+Side Table
+Scissors
+Marker
+Pie
+Ladder
+Snowboard
+Cookies
+Radiator
+Fire Hydrant
+Basketball
+Zebra
+Grape
+Giraffe
+Potato
+Sausage
+Tricycle
+Violin
+Egg
+Fire Extinguisher
+Candy
+Fire Truck
+Billards
+Converter
+Bathtub
+Wheelchair
+Golf Club
+Briefcase
+Cucumber
+Cigar/Cigarette
+Paint Brush
+Pear
+Heavy Truck
+Hamburger
+Extractor
+Extention Cord
+Tong
+Tennis Racket
+Folder
+American Football
+earphone
+Mask
+Kettle
+Tennis
+Ship
+Swing
+Coffee Machine
+Slide
+Carriage
+Onion
+Green beans
+Projector
+Frisbee
+Washing Machine/Drying Machine
+Chicken
+Printer
+Watermelon
+Saxophone
+Tissue
+Toothbrush
+Ice cream
+Hotair ballon
+Cello
+French Fries
+Scale
+Trophy
+Cabbage
+Hot dog
+Blender
+Peach
+Rice
+Wallet/Purse
+Volleyball
+Deer
+Goose
+Tape
+Tablet
+Cosmetics
+Trumpet
+Pineapple
+Golf Ball
+Ambulance
+Parking meter
+Mango
+Key
+Hurdle
+Fishing Rod
+Medal
+Flute
+Brush
+Penguin
+Megaphone
+Corn
+Lettuce
+Garlic
+Swan
+Helicopter
+Green Onion
+Sandwich
+Nuts
+Speed Limit Sign
+Induction Cooker
+Broom
+Trombone
+Plum
+Rickshaw
+Goldfish
+Kiwi fruit
+Router/modem
+Poker Card
+Toaster
+Shrimp
+Sushi
+Cheese
+Notepaper
+Cherry
+Pliers
+CD
+Pasta
+Hammer
+Cue
+Avocado
+Hamimelon
+Flask
+Mushroon
+Screwdriver
+Soap
+Recorder
+Bear
+Eggplant
+Board Eraser
+Coconut
+Tape Measur/ Ruler
+Pig
+Showerhead
+Globe
+Chips
+Steak
+Crosswalk Sign
+Stapler
+Campel
+Formula
+Pomegranate
+Dishwasher
+Crab
+Hoverboard
+Meat ball
+Rice Cooker
+Tuba
+Calculator
+Papaya
+Antelope
+Parrot
+Seal
+Buttefly
+Dumbbell
+Donkey
+Lion
+Urinal
+Dolphin
+Electric Drill
+Hair Dryer
+Egg tart
+Jellyfish
+Treadmill
+Lighter
+Grapefruit
+Game board
+Mop
+Radish
+Baozi
+Target
+French
+Spring Rolls
+Monkey
+Rabbit
+Pencil Case
+Yak
+Red Cabbage
+Binoculars
+Asparagus
+Barbell
+Scallop
+Noddles
+Comb
+Dumpling
+Oyster
+Table Teniis paddle
+Cosmetics Brush/Eyeliner Pencil
+Chainsaw
+Eraser
+Lobster
+Durian
+Okra
+Lipstick
+Cosmetics Mirror
+Curling
+Table Tennis
+person
+bicycle
+car
+motorcycle
+airplane
+bus
+train
+truck
+boat
+traffic light
+fire hydrant
+stop sign
+parking meter
+bench
+bird
+cat
+dog
+horse
+sheep
+cow
+elephant
+bear
+zebra
+giraffe
+backpack
+umbrella
+handbag
+tie
+suitcase
+frisbee
+skis
+snowboard
+sports ball
+kite
+baseball bat
+baseball glove
+skateboard
+surfboard
+tennis racket
+bottle
+wine glass
+cup
+fork
+knife
+spoon
+bowl
+banana
+apple
+sandwich
+orange
+broccoli
+carrot
+hot dog
+pizza
+donut
+cake
+chair
+couch
+potted plant
+bed
+dining table
+toilet
+tv
+laptop
+mouse
+remote
+keyboard
+cell phone
+microwave
+oven
+toaster
+sink
+refrigerator
+book
+clock
+vase
+scissors
+teddy bear
+hair drier
+toothbrush
+banner
+blanket
+bridge
+cardboard
+counter
+curtain
+door-stuff
+floor-wood
+flower
+fruit
+gravel
+house
+light
+mirror-stuff
+net
+pillow
+platform
+playingfield
+railroad
+river
+road
+roof
+sand
+sea
+shelf
+snow
+stairs
+tent
+towel
+wall-brick
+wall-stone
+wall-tile
+wall-wood
+water-other
+window-blind
+window-other
+tree-merged
+fence-merged
+ceiling-merged
+sky-other-merged
+cabinet-merged
+table-merged
+floor-other-merged
+pavement-merged
+mountain-merged
+grass-merged
+dirt-merged
+paper-merged
+food-other-merged
+building-other-merged
+rock-merged
+wall-other-merged
+rug-merged
+wall
+building
+sky
+floor
+tree
+ceiling
+road route
+bed
+window
+grass
+cabinet
+sidewalk, pavement
+person
+earth, ground
+door
+table
+mountain, mount
+plant
+curtain
+chair
+car
+water
+painting, picture
+sofa
+shelf
+house
+sea
+mirror
+rug
+field
+armchair
+seat
+fence
+desk
+rock, stone
+wardrobe, closet, press
+lamp
+tub
+rail
+cushion
+base, pedestal, stand
+box
+column, pillar
+signboard, sign
+chest of drawers, chest, bureau, dresser
+counter
+sand
+sink
+skyscraper
+fireplace
+refrigerator, icebox
+grandstand, covered stand
+path
+stairs
+runway
+case, display case, showcase, vitrine
+pool table, billiard table, snooker table
+pillow
+screen door, screen
+stairway, staircase
+river
+bridge, span
+bookcase
+blind, screen
+coffee table
+toilet, can, commode, crapper, pot, potty, stool, throne
+flower
+book
+hill
+bench
+countertop
+stove
+palm, palm tree
+kitchen island
+computer
+swivel chair
+boat
+bar
+arcade machine
+hovel, hut, hutch, shack, shanty
+bus
+towel
+light
+truck
+tower
+chandelier
+awning, sunshade, sunblind
+street lamp
+booth
+tv
+plane
+dirt track
+clothes
+pole
+land, ground, soil
+bannister, banister, balustrade, balusters, handrail
+escalator, moving staircase, moving stairway
+ottoman, pouf, pouffe, puff, hassock
+bottle
+buffet, counter, sideboard
+poster, posting, placard, notice, bill, card
+stage
+van
+ship
+fountain
+conveyer belt, conveyor belt, conveyer, conveyor, transporter
+canopy
+washer, automatic washer, washing machine
+plaything, toy
+pool
+stool
+barrel, cask
+basket, handbasket
+falls
+tent
+bag
+minibike, motorbike
+cradle
+oven
+ball
+food, solid food
+step, stair
+tank, storage tank
+trade name
+microwave
+pot
+animal
+bicycle
+lake
+dishwasher
+screen
+blanket, cover
+sculpture
+hood, exhaust hood
+sconce
+vase
+traffic light
+tray
+trash can
+fan
+pier
+crt screen
+plate
+monitor
+bulletin board
+shower
+radiator
+glass, drinking glass
+clock
+flag
+wall 
+ceiling 
+door 
+stair 
+ladder 
+escalator 
+Playground_slide 
+handrail_or_fence 
+window 
+rail 
+goal 
+pillar 
+pole 
+floor 
+ground 
+grass 
+sand 
+athletic_field 
+road 
+path 
+crosswalk 
+building 
+house 
+bridge 
+tower 
+windmill 
+well_or_well_lid 
+other_construction 
+sky 
+mountain 
+stone 
+wood 
+ice 
+snowfield 
+grandstand 
+sea 
+river 
+lake 
+waterfall 
+water 
+billboard_or_Bulletin_Board 
+sculpture 
+pipeline 
+flag 
+parasol_or_umbrella 
+cushion_or_carpet 
+tent 
+roadblock 
+car 
+bus 
+truck 
+bicycle 
+motorcycle 
+wheeled_machine 
+ship_or_boat 
+raft 
+airplane 
+tyre 
+traffic_light 
+lamp 
+person 
+cat 
+dog 
+horse 
+cattle 
+other_animal 
+tree 
+flower 
+other_plant 
+toy 
+ball_net 
+backboard 
+skateboard 
+bat 
+ball 
+cupboard_or_showcase_or_storage_rack 
+box 
+traveling_case_or_trolley_case 
+basket 
+bag_or_package 
+trash_can 
+cage 
+plate 
+tub_or_bowl_or_pot 
+bottle_or_cup 
+barrel 
+fishbowl 
+bed 
+pillow 
+table_or_desk 
+chair_or_seat 
+bench 
+sofa 
+shelf 
+bathtub 
+gun 
+commode 
+roaster 
+other_machine 
+refrigerator 
+washing_machine 
+Microwave_oven 
+fan 
+curtain 
+textiles 
+clothes 
+painting_or_poster 
+mirror 
+flower_pot_or_vase 
+clock 
+book 
+tool 
+blackboard 
+tissue 
+screen_or_television 
+computer 
+printer 
+Mobile_phone 
+keyboard 
+other_electronic_product 
+fruit 
+food 
+instrument 
+train 
+person
+giant_panda
+lizard
+parrot
+skateboard
+sedan
+ape
+dog
+snake
+monkey
+hand
+rabbit
+duck
+cat
+cow
+fish
+train
+horse
+turtle
+bear
+motorbike
+giraffe
+leopard
+fox
+deer
+owl
+surfboard
+airplane
+truck
+zebra
+tiger
+elephant
+snowboard
+boat
+shark
+mouse
+frog
+eagle
+earless_seal
+tennis_racket
+table
+rigid_container
+box
+cup
+cable
+chair
+poster
+drink
+towel
+plate
+kitchen cabinets
+rug
+paper
+kitchen_sink
+man
+facility
+can_light
+kitchen_pot
+dining_table
+cow
+signboard
+motorbike
+basket
+woman
+barrel
+electric_wire
+handbag
+bag
+painting
+cushion
+mat
+utility
+plugs_and_sockets
+stool
+couch
+noncommon_furniture
+ceiling_lamp
+ordniary_sofa
+blanket
+remote_control
+media
+flexible_container
+fooddrink
+doll
+trash_bin
+umbrella
+person
+outdoor_supplies
+microphone
+street_light
+tv_receiver
+car
+bicycle
+boy
+land_transportation
+mobilephone
+pen
+laptop
+chandilier
+entertainment_appliances
+plastic_bag
+coat
+surveillance_camera
+cloth
+billboard
+horse
+rope
+backpack
+book
+sofa
+girl
+filling cabinets
+footwear
+giraffe
+branch
+vegetable
+gas_stove
+kitchen_tool
+cutting_board
+light
+kitchen_appliances
+glass
+fork
+napkin
+candle
+curtain
+traffic_sign
+traffic_light
+spoon
+photo
+wineglass
+tableware
+table-knife
+scooter
+bedroom bed
+pillow
+nightstand
+television
+bus
+bowl
+mouse
+speaker
+keyboard
+screen
+paper_bag
+orange
+flower
+leaf
+food_processor
+toy
+seat_furniture
+bottle
+saucer
+hanger
+flag
+camera
+cabinets
+packaging_paper
+switch
+folder
+apple
+trunk
+sculpture
+suitcase
+pizza
+sconce
+earthware_pot_with_handle
+kite
+fast_food
+decoration
+mirror
+beddings
+van
+dog
+fitness_equipment
+train
+kiosk
+meat
+jar
+fruit
+T-shirt
+accessories
+knife
+bench
+ship
+blanket_furniture
+flowerpot
+dessert_snacks
+sheep
+spatula
+pigeon
+birds
+leather_shoes
+musical_instrument
+airplane
+repair_tool
+paddle
+boat
+ski
+ski_pole
+gloves
+trolley
+sausage
+coffee cup
+hoodie
+elephant
+zebra
+cat
+played_blocks
+ladder
+scarf
+faucet
+plant
+pipe
+seasoning
+tire
+ball
+gym_equipment
+bath_tool
+ski_board
+deer
+mammal
+lemon
+duck
+canoe
+pumkin
+hot_ballon
+turtle
+fish
+strawberry
+sailboat
+tube
+golf
+mushroom
+chicken
+sparrow
+insect
+rifle
+screwdriver
+underwater_vehicle
+radish
+wrench
+medical_equipment
+tong
+crumb
+cable_car
+unknown
+man
+car
+sky
+chair
+utility_ot
+tree
+street_light
+potted_plants
+signboard
+facility_ot
+rigid_container_ot
+grass
+sculpture
+book
+shrub
+box
+table_ot
+electricpole
+noncommon_furniture
+can_light
+concretewall
+floor_structure_ot
+sunk_fence
+painting
+house
+traffic_sign
+barrier_ot
+floor
+paper
+boat
+entertainment_appliances_ot
+bottle
+mountain
+birds_ot
+cushion
+pole
+cup_ot
+backpack
+soil
+fence
+non-buildinghouse_ot
+sconce
+fooddrink_ot
+stone
+gutter
+handbag
+decoration
+electric_wire
+trash_bin
+road
+plate
+drink_ot
+ceiling
+sea
+toy_ot
+pen
+flag
+rock
+outdoor_supplies_ot
+curtain
+chandilier
+fish_ot
+window
+light_ot
+plugs_and_sockets
+rope
+building_houses_ot
+land_transportation_ot
+bicycle
+stool
+wiredfence
+kitchen_tool_ot
+building_structure_ot
+high-rise
+mat
+bench
+nonindividual_plants_ot
+sidewalk
+billboard
+flower
+bowl
+leaf
+cow_ot
+dessert_snacks_ot
+dog
+bag_ot
+photo
+bath_tool_ot
+towel
+step
+ceiling_lamp
+musical_instrument
+barrel
+traffic_light
+wineglass
+plastic_bag
+cloth_ot
+jar
+mobilephone
+pipe
+cable
+fitness_equipment_ot
+poster
+glass
+branch
+repair_tool_ot
+pillow
+cabinets_ot
+apple
+sheep
+lake
+doll_ot
+fruit_ot
+sand
+kitchen cabinets
+bridge
+river
+trunk
+media_ot
+wall_ot
+candle
+bread
+duck
+pigeon
+spoon
+park_ground
+artifical_ground_ot
+fluid_ot
+dining_table
+pumkin
+snow
+horse_ot
+vegetable_ot
+flexible_container_ot
+surveillance_camera
+motorbike
+ordniary_sofa
+banister
+laptop
+umbrella
+faucet
+mammal_ot
+building_ot
+napkin
+bus
+speaker
+camera
+mirror
+paddle
+cake
+sneakers
+basket
+ventilation
+sailboat
+ship
+can
+cat
+screen
+wine
+orange
+bedroom bed
+ball_ot
+log
+switch
+elephant
+blanket
+airplane
+kiosk
+television
+trolley
+bee
+gravel
+couch
+van
+meat_ot
+accessories_ot
+blanket_furniture_ot
+hanger
+rug
+paper_bag
+remote_control
+kitchen_sink
+fork
+kitchen_pot_ot
+insect_ot
+dirt
+path
+underwater_vehicle_ot
+double_sofa
+condiment
+drug
+table-knife
+gym_equipment
+hose
+peach
+flowerpot
+ballon
+bagel
+tent
+tv_receiver
+nightstand
+kitchen_appliances_ot
+ski_pole
+coat
+cutting_board
+stair
+plant_part_ot
+footwear_ot
+microphone
+lemon
+vine
+upper_body_clothing_os
+hat_ot
+mushroom
+tire
+filling cabinets
+billards
+teapot
+awning
+keyboard
+ladder
+mouse
+platter
+seat_furniture_ot
+spatula
+kite
+lantern
+train
+sofa_ot
+trail
+integrated_table_and_chair
+castle
+lab_tool_ot
+seasoning_ot
+cable_car
+fast_food_ot
+railroad
+tableware
+court
+played_blocks
+lightbulb
+chess
+crops
+suitcase
+lizard
+earthware_pot_with_handle
+pizza
+tower
+truck_ot
+cigarette
+scarf
+refrigerator
+racket_ot
+giraffe
+scooter
+appliances_ot
+banana
+ski_board
+clean_tool_ot
+dice
+crumb
+commonfig
+tomato
+goose
+desk
+packaging_paper
+poker
+pier
+swimmingpool
+surfboard
+ medical_equipment
+leather_shoes
+blackboard
+egg
+air_conditioner
+gamepad
+pipe
+moth
+crustacea_ot
+jellyfish
+table_cloth
+wardrobe
+bar
+canoe
+chicken
+pond
+T-shirt
+splippers
+bulletin_board
+strawberry
+corded_telephone
+saucer
+turtle
+coffee cup
+solid_ot
+glasswall
+carrot
+tissue
+individual_plants_ot
+fire_hyrant
+ high-heeled_shoes
+potato
+radiator
+wrench
+gas_stove
+zebra
+fountain_ground
+knife_ot
+rifle
+monkey
+straw
+golf
+ folder
+gloves
+screwdriver
+drinking_straw
+pig
+plant_ot
+bathroom cabinets
+vent
+washing_machine
+tennis_racket
+chopsticks
+seal
+lighthouse
+kettle
+parachute
+blanket
+juice
+food_processor
+pickup_truck
+teddy_bear
+deer_ot
+blur
+clock
+beddings_ot
+tube
+fountain
+parterre
+human_accessories_ot
+parrot
+toilet
+dumbbell
+pear
+pineapple
+temple
+brush
+onion
+crab
+camel_ot
+guideboard
+watch
+range_hood
+alarm clock
+cage
+tennis
+salt_shaker
+frying_pan
+sausage
+mango
+lion
+oven
+vehicle_part_ot
+sword
+bell_papper
+seafood_ot
+bed_ot
+wheelchair
+goldfish
+chest_of_drawers
+shampoo
+squirrel
+sealion
+chimney
+fireplace
+helmet_ot
+bathhub
+micro-wave_oven
+golf_club
+seating_area
+sunglasses_ot
+ventilation_appliances_ot
+wall clock
+baseball bat
+shovel
+fishing_tool
+hotdog
+snail
+shrimp
+broom
+antelope
+cement_floor
+hose
+briefcase
+brook
+weapon_ot
+snake
+shirt
+football
+watermelon
+alley
+skyscraper
+toilet_paper
+banner
+grape
+radish
+coffee
+palm
+waterfall
+solar_pannel
+radio
+hammer
+carriage
+doughnut
+dragonfly
+crutch
+ruler
+mollusca_ot
+leopard
+jewlery_ot
+extension_cord
+tong
+motorboat
+moss
+parking_meter
+ski
+hot_ballon
+eagle
+kangaroo
+dolphin
+necklace
+ceiling_fan
+basketball
+bow_and_arrow
+tank
+boat_part_ot
+barbie_doll
+cabbage
+ant
+lobster
+tiger
+baseball
+frisbee
+hairdryer
+cookie
+sparrow
+polar_bear
+helicopter
+trophies_medals_certification
+bear_ot
+sunglasses
+toothbrush
+sushi
+rabbit
+platform
+sunhat
+mechanical_fan
+clock_furniture_ot
+container_ot
+owl
+starfish
+seahorse
+frog
+parkinglot
+playground
+billiard_table
+swing
+spider
+fox
+earrings
+coffeemaker
+soap
+hammock
+candy
+french_fries
+cucumber
+church
+hoodie
+pants
+stove_ot
+crib
+crane
+caterpillar
+crocodile
+sunflower
+stage
+slide
+kitchen-knife
+segway
+snowmobile
+hamster
+ring
+blueberry
+ice_cream
+baseball_cap
+digital clock
+air_traffic_ot
+brown_bear
+cloud
+sandals
+punching_bag
+door
+electronic_stove
+dance_pole
+cannon
+christmas_tree
+inanimate_natural_objects_ot
+wood_stove
+mop
+dagger
+countertop
+treadmill
+liquid_soap
+spacecraft
+wheel
+sika_deer
+alpaca
+rose
+flashlight
+rugby
+cake_stand
+tripod
+golf_cart
+windshield_wiper
+mast
+coconut
+zucchini
+peacock
+shark
+raccoon
+stove
+cellular_telephone
+coffee_table
+tank
+binoculars
+hambuger
+broccolli
+animal_ot
+ladybug
+trousers_ot
+toaster
+telephone_ot
+measuring cup
+snow_plow
+stuffed-animal
+popcorn
+taco
+dinosar
+rhinoceros
+lavender
+glass_window
+sofa_bed
+balance
+pancake
+pomegranate
+asparagus
+beetle
+canary
+reptile_ot
+whale
+donkey
+sun
+waterdrop
+sweing_machine
+drawer
+crossbar
+ax
+drill
+bolt
+slow_cooker
+dustpan
+mattress
+handgun
+sandwich
+crow
+woodpecker
+goggles
+cowboy_hat
+volleyball
+casserole
+vacuum_cleaner
+waffle
+pie
+escalator
+balcony
+bracelet
+bicyclehelmet
+dishwasher
+clean_appliances_ot
+converter
+storage box
+table_tennis_racket
+scoreboard
+sports_musical_ot
+stretcher
+vehicle_ot
+moon
+cage
+lower_body_clothing_ot
+crown
+dog bed
+fitness_chair
+pretzel
+puff_pastry
+dress_ot
+mixer
+tennis_table
+beaker
+papper
+salad
+parasite
+tunnel
+conveyor_belt
+jacket
+tank_top
+one-piece_dress
+cradle
+wax_gourd
+cocktail
+centipede
+lily
+maple
+rainbow
+statium
+jersey
+hockey
+pressure_cooker
+nail_clippers
+sleeping-bag
+rearview_mirror
+shotgun
+missle
+beehive
+spaghetti
+grapefruit
+amphibians_ot
+porcupine
+willow
+shorts
+person_ot
+woman
+boy
+girl

@@ -1,0 +1,27 @@
+def clean_strings(strings):
+    unexpected = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', "(", ")"]
+    if isinstance(strings, list):
+        for i, string in enumerate(strings):
+            string = ' '.join(string.split('_'))
+            string_l = list(string)
+            string_l = [word for word in string_l if word not in unexpected]
+            strings[i] = clean_string_exp(''.join(string_l))
+
+        return strings
+
+    else:
+        strings = ' '.join(strings.split('_'))
+        string_l = list(strings)
+        string_l = [word for word in string_l if word not in unexpected]
+        string_l = clean_string_exp(''.join(string_l))
+
+        return string_l
+
+
+def clean_string_exp(expression):
+    return re.sub(r"([.,'!?\"()*#:;])", '', expression.lower()).replace('-', ' ').replace('/', ' ')
+
+
+if __name__ == "__main__":
+    class_names = ['person', 'dog']
+    flatten_input_ids = pre_tokenize(class_names)

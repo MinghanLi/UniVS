@@ -1,0 +1,7 @@
+_BASE_: univs_swint_vos_ytvos18_c1+univs.yaml
+DATASETS:
+  TEST: ("sot_davis17_val", )
+INPUT:
+  SAMPLING_FRAME_NUM: 4
+  MIN_SIZE_TEST: 720
+OUTPUT_DIR: output/inf/swint_c1+univs/stage3/davis17/

@@ -1,0 +1,45 @@
+MODEL:
+  BACKBONE:
+    NAME: "build_resnet_backbone"
+  WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
+  PIXEL_MEAN: [123.675, 116.280, 103.530]
+  PIXEL_STD: [58.395, 57.120, 57.375]
+  RESNETS:
+    DEPTH: 50
+    STEM_TYPE: "basic"  # not used
+    STEM_OUT_CHANNELS: 64
+    STRIDE_IN_1X1: False
+    OUT_FEATURES: ["res2", "res3", "res4", "res5"]
+    # NORM: "SyncBN"
+    RES5_MULTI_GRID: [1, 1, 1]  # not used
+  META_ARCHITECTURE: "UniVS_Prompt"
+  MASK_ON: True
+  SEM_SEG_HEAD:
+    NAME: "MaskFormerHead"
+    IGNORE_VALUE: 255
+    NUM_CLASSES: 133
+    LOSS_WEIGHT: 1.0
+    CONVS_DIM: 256
+    MASK_DIM: 256
+    NORM: "GN"
+    # pixel decoder
+    PIXEL_DECODER_NAME: "MSDeformAttnPixelDecoder"
+    IN_FEATURES: [ "res2", "res3", "res4", "res5" ]
+    DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES: [ "res3", "res4", "res5" ]
+    COMMON_STRIDE: 4
+    TRANSFORMER_ENC_LAYERS: 6
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoder"
+    TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
+  UniVS:
+    VISUAL_PROMPT_PIXELS_PER_IMAGE: 256
+    TEST:
+      VIDEO_UNIFIED_INFERENCE_QUERIES: 'prompt+learn'
+DATASETS:
+  TEST: ("pvos_viposeg_val", )
+INPUT:
+  MIN_SIZE_TEST: 640
+  MAX_SIZE_TEST: 1333
+TEST:
+  DETECTIONS_PER_IMAGE: 75
+VERSION: 2

@@ -1,0 +1,39 @@
+MODEL:
+  BACKBONE:
+    FREEZE_AT: 0
+    NAME: "build_resnet_backbone"
+  WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
+  PIXEL_MEAN: [123.675, 116.280, 103.530]
+  PIXEL_STD: [58.395, 57.120, 57.375]
+  RESNETS:
+    DEPTH: 50
+    STEM_TYPE: "basic"  # not used
+    STEM_OUT_CHANNELS: 64
+    STRIDE_IN_1X1: False
+    OUT_FEATURES: ["res2", "res3", "res4", "res5"]
+    # NORM: "SyncBN"
+    RES5_MULTI_GRID: [1, 1, 1]  # not used
+  META_ARCHITECTURE: "UniVS_Prompt"
+  MASK_ON: True
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoder"
+    TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
+  UniVS:
+    VISUAL_PROMPT_PIXELS_PER_IMAGE: 128
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep-blocked'  # Important!!! 
+    TEST:
+      VIDEO_UNIFIED_INFERENCE_QUERIES: 'prompt'
+  BoxVIS:
+    TEST:
+      NUM_FRAMES_WINDOW: 5
+      CLIP_STRIDE: 1
+      LSJ_AUG_ENABLED: True
+      APPLY_CLS_THRES: 0.05
+DATASETS:
+  TEST: ("rvos-refdavis-val-0", "rvos-refdavis-val-1", "rvos-refdavis-val-2", "rvos-refdavis-val-3")
+INPUT:
+  MIN_SIZE_TEST: 640
+  MAX_SIZE_TEST: 1333
+TEST:
+  DETECTIONS_PER_IMAGE: 100
+VERSION: 2

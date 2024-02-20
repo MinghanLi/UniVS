@@ -1,0 +1,33 @@
+_BASE_: univs_R50_coco_c1+univs.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  SWIN:
+    EMBED_DIM: 128
+    DEPTHS: [2, 2, 18, 2]
+    NUM_HEADS: [4, 8, 16, 32]
+    WINDOW_SIZE: 12
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    PRETRAIN_IMG_SIZE: 384
+  WEIGHTS: 'pretrained/univs/univs_prompt_swinb_bs16_f1_sa1b+coco+ref_2x_200queries_c1+univs+casa.pth'
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniVS"
+  UniVS:
+    POSITION_EMBEDDING_SINE3D: 'FixedT'
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: False
+    PROMPT_AS_QUERIES: True
+    TEXT_PROMPT_TO_IMAGE_ENABLE: True
+    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+DATASETS:
+  TEST: ("coco_2017_val_panoptic_with_sem_seg", )
+INPUT:
+  SAMPLING_FRAME_NUM: 1
+  MIN_SIZE_TEST: 800
+TEST:
+  DETECTIONS_PER_IMAGE: 100
+OUTPUT_DIR: output/inf/swinb_c1+univs/stage1/coco/

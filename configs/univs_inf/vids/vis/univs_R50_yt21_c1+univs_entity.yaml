@@ -1,0 +1,37 @@
+_BASE_: univs_R50_yt21_c1+univs.yaml
+MODEL:
+  WEIGHTS: 'pretrained/univs/univs_prompt_R50_bs16_f3_vis+vps_100k_200queries_c1+univs+casa.pth'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  SEM_SEG_HEAD:
+    NUM_CLASSES: 40
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniVS"
+    NUM_OBJECT_QUERIES: 200
+  UniVS:
+    PROMPT_SELF_ATTN_LAYERS: -1
+    VISUAL_PROMPT_PIXELS_PER_IMAGE: 128
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: False
+    PROMPT_AS_QUERIES: True
+    TEXT_PROMPT_TO_IMAGE_ENABLE: False
+    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+    TEST:
+      VIDEO_UNIFIED_INFERENCE_ENABLE: True
+      BOX_NMS_THRESH: 0.85
+      DETECT_NEWLY_OBJECT_THRESHOLD: 0.05
+      TEMPORAL_CONSISTENCY_THRESHOLD: 0.05
+  BoxVIS:
+    TEST:
+      NUM_FRAMES_WINDOW: 5
+      APPLY_CLS_THRES: 0.25
+DATASETS:
+  TEST: ("ytvis_2021_val", )
+INPUT:
+  SAMPLING_FRAME_NUM: 5
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 640
+TEST:
+  DETECTIONS_PER_IMAGE: 35
+OUTPUT_DIR: output/inf/r50_c1+univs/stage2/yt21/entity/

@@ -1,0 +1,39 @@
+_BASE_: Base.yaml
+MODEL:
+  WEIGHTS: 'pretrained/univs/univs_prompt_R50_bs16_f3_vis+vps_100k_200queries_c1+casa.pth'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  SEM_SEG_HEAD:
+    NUM_CLASSES: 124
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniVS"
+    NUM_OBJECT_QUERIES: 200
+    TEST:
+      SEMANTIC_ON: False
+      INSTANCE_ON: True
+      PANOPTIC_ON: False
+      OVERLAP_THRESHOLD: 0.8
+      OBJECT_MASK_THRESHOLD: 0.05
+  UniVS:
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: False
+    PROMPT_AS_QUERIES: True
+    VISUAL_PROMPT_TO_IMAGE_ENABLE: True
+    TEXT_PROMPT_TO_IMAGE_ENABLE: True
+    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+    DISABLE_LEARNABLE_QUERIES_SA1B: False
+  BoxVIS:
+    TEST:
+      NUM_FRAMES_WINDOW: 1
+      CLIP_STRIDE: 1
+      LSJ_AUG_ENABLED: True
+      APPLY_CLS_THRES: 0.05
+DATASETS:
+  TEST: ("vipseg_panoptic_val", )
+INPUT:
+  SAMPLING_FRAME_NUM: 2
+  MIN_SIZE_TEST: 720
+TEST:
+  DETECTIONS_PER_IMAGE: 100
+OUTPUT_DIR: output/inf/r50_c1+univs/stage2/vps/

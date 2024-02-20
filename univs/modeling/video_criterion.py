@@ -1,0 +1,1083 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+# Modified by Bowen Cheng from https://github.com/facebookresearch/detr/blob/master/models/detr.py
+"""
+MaskFormer criterion.
+"""
+import math
+import torch
+import torch.nn.functional as F
+from torch import nn
+from einops import rearrange, repeat
+
+from detectron2.utils.comm import get_world_size
+from detectron2.projects.point_rend.point_features import (
+    get_uncertain_point_coords_with_randomness,
+    point_sample
+)
+
+from mask2former_video.utils.misc import is_dist_avail_and_initialized, nested_tensor_from_tensor_list
+from datasets.concept_emb.combined_datasets_category_info import combined_datasets_category_info
+
+
+def dice_loss(
+        inputs: torch.Tensor,
+        targets: torch.Tensor,
+        num_masks: float,
+    ):
+    """
+    Compute the DICE loss, similar to generalized IOU for masks
+    Args:
+        inputs: A float tensor of arbitrary shape.
+                The predictions for each example.
+        targets: A float tensor with the same shape as inputs. Stores the binary
+                 classification label for each element in inputs
+                (0 for the negative class and 1 for the positive class).
+    """
+    inputs = inputs.sigmoid()
+    inputs = inputs.flatten(1)
+    targets = targets.flatten(1)
+    numerator = 2 * (inputs * targets).sum(1)
+    denominator = inputs.sum(1) + targets.sum(1)
+    loss = 1 - (numerator + 1) / (denominator + 1)
+    return loss.sum() / num_masks
+
+
+dice_loss_jit = torch.jit.script(
+    dice_loss
+)  # type: torch.jit.ScriptModule
+
+
+def sigmoid_ce_loss(
+        inputs: torch.Tensor,
+        targets: torch.Tensor,
+        num_masks: float,
+    ):
+    """
+    Args:
+        inputs: A float tensor of arbitrary shape.
+                The predictions for each example.
+        targets: A float tensor with the same shape as inputs. Stores the binary
+                 classification label for each element in inputs
+                (0 for the negative class and 1 for the positive class).
+        num_masks: the average number of masks in the mini-batch
+
+    Returns:
+        Loss tensor
+    """
+    loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction="none")
+    loss = loss.sum(1) / max(1, loss.shape[1])
+
+    return loss.sum() / num_masks
+
+
+sigmoid_ce_loss_jit = torch.jit.script(
+    sigmoid_ce_loss
+)  # type: torch.jit.ScriptModule
+
+
+def sigmoid_ce_with_weight_loss(
+        inputs: torch.Tensor,
+        targets: torch.Tensor,
+        weights: torch.Tensor,
+        num_masks: float,
+    ):
+    """
+    Args:
+        inputs: A float tensor of arbitrary shape.
+                The predictions for each example.
+        targets: A float tensor with the same shape as inputs. Stores the binary
+                 classification label for each element in inputs
+                (0 for the negative class and 1 for the positive class).
+        num_masks: the average number of masks in the mini-batch
+
+    Returns:
+        Loss tensor
+    """
+    inputs = inputs.flatten(1)
+    targets = targets.flatten(1)
+    weights = weights.flatten(1)
+    loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction="none")
+    loss = (loss * weights).sum(dim=1) / weights.sum(dim=1).clamp(min=1)
+
+    return loss.sum() / max(num_masks, 0.5)
+
+
+sigmoid_ce_with_weight_loss_jit = torch.jit.script(
+    sigmoid_ce_with_weight_loss
+)  # type: torch.jit.ScriptModule
+
+
+def dice_coefficient_loss(
+        inputs: torch.Tensor,
+        targets: torch.Tensor,
+        num_masks: float,
+    ):
+    """
+    Compute the DICE loss, similar to generalized IOU for masks
+    Args:
+        inputs: A float tensor of arbitrary shape.
+                The predictions for each example. Nx...
+        targets: A float tensor with the same shape as inputs. Stores the binary
+                 classification label for each element in inputs
+                (0 for the negative class and 1 for the positive class).
+        num_masks: the average number of masks in the mini-batch
+    """
+    inputs = inputs.flatten(1)
+    targets = targets.flatten(1)
+    numerator = 2 * (inputs * targets).sum(-1)
+    denominator = (inputs**2).sum(-1) + (targets**2).sum(-1)
+    loss = 1 - numerator / denominator.clamp(min=1e-6)
+    return loss.sum() / num_masks
+
+
+dice_coefficient_loss_jit = torch.jit.script(
+    dice_coefficient_loss
+)  # type: torch.jit.ScriptModule
+
+
+def focal_conf_sigmoid_loss(inputs, targets, alpha=0.5, gamma=2, is_cls=False):
+    """
+    Focal loss but using sigmoid like the original paper, where alpha balances the positive or negative samples,
+    and gamma controls the easy or difficult samples.
+    inputs: ... x N x K, masked these classes do not belong to this dataset
+    targets: ... x N x k, one-hot embedding of targets
+    Note: To make learnables mesh easier, the network predicts K+1 class confidences in this mode,
+          but it has been masked with '-inf'.
+    """
+    # inputs = inputs.flatten(0, -2)    # N, num_classes
+    # targets = targets.flatten(0, -2)  # N, num_classes
+
+    targets_pm = targets * 2 - 1  # -1 if non-target classes, +1 if target class
+
+    logpt = F.logsigmoid(inputs * targets_pm)  # note: 1 - sigmoid(x) = sigmoid(-x)
+    pt = logpt.exp()
+
+    # multi-class focal losses
+    num_neg_classes = torch.logical_not(targets).sum(-1).clamp(min=1).unsqueeze(-1)
+    at = alpha * targets + (1 - alpha) * (1 - targets)
+
+    loss = -at * (1 - pt) ** gamma * logpt
+    loss = loss.sum(-1)
+    if not is_cls:
+        loss = loss / targets.sum(-1).clamp(min=1)
+
+    return loss
+
+def contrastive_loss(inputs, targets, topk=50):
+    if inputs.nelement() == 0:
+        return inputs[:0].sum().detach()
+
+    inputs = inputs.flatten(1)    # N, K
+    targets = targets.flatten(1)  # N, K
+    N = inputs.shape[0]
+
+    pos_indices = targets.argmax(1)
+    pos_inputs = inputs[torch.arange(N), pos_indices]
+
+    pos_inputs_mean = (inputs * targets).sum(-1) / targets.sum(-1).clamp(min=1)
+    pos_inputs = torch.stack([pos_inputs, pos_inputs_mean], dim=1)  # N K_pos
+    
+    neg_indices = torch.nonzero(targets.sum(0) > 0.).reshape(-1)
+    bg_indices = torch.nonzero(targets.sum(0) == 0.).reshape(-1)
+    neg_indices = neg_indices[torch.randperm(len(neg_indices))[:int(0.75*topk)]]
+    bg_indices = bg_indices[torch.randperm(len(bg_indices))[:int(0.25*topk)]]
+    neg_indices = torch.cat([neg_indices, bg_indices]).sort()[0]
+    
+    inputs = inputs[:, neg_indices]  # N K_neg
+    targets = targets[:, neg_indices]  # N K_neg
+
+    negpos_inputs = (inputs[:, :, None] - pos_inputs[:, None]) * torch.logical_not(targets)[:, :, None]  # N K_neg K_pos 
+    negpos_inputs = negpos_inputs.clamp(max=10.).exp() * torch.logical_not(targets)[:, :, None]  # N K_neg K_pos
+    
+    # loss = torch.logsumexp(inputs_negpos, dim=-1)
+    loss = (1 + torch.sum(negpos_inputs.flatten(1), dim=-1)).log()
+    loss = loss.sum() / max(len(loss), 1)
+
+    return loss
+
+def contrastive_aux_loss(inputs, targets, topk=10):
+    if inputs.nelement() == 0:
+        return inputs[:0].sum().detach()
+    
+    # assert inputs.min() >= -1 and inputs.max() <= 1, f'invalid values: min {inputs.min()} and max {inputs.max()}'
+    inputs = inputs.flatten(1)    # N, K
+    targets = targets.flatten(1)  # N, K
+    N = inputs.shape[0]
+
+    pos_indices = torch.nonzero(targets.sum(0) > 0.).reshape(-1)
+    bg_indices = torch.nonzero(targets.sum(0) == 0.).reshape(-1)
+    bg_indices = bg_indices[torch.randperm(len(bg_indices))[:topk]]
+    indices = torch.cat([pos_indices, bg_indices]).sort()[0]
+
+    inputs = inputs[:, indices].clamp(min=0.)  # N K_neg
+    targets = targets[:, indices]  # N K_neg
+
+    return F.smooth_l1_loss(inputs, targets, reduction='sum') / max(len(inputs), 1)
+
+def calculate_uncertainty(logits):
+    """
+    We estimate uncertainty as L1 distance between 0.0 and the logit prediction in 'logits' for the
+        foreground class in `classes`.
+    Args:
+        logits (Tensor): A tensor of shape (R, 1, ...) for class-specific or
+            class-agnostic, where R is the total number of predicted masks in all images and C is
+            the number of foreground classes. The values are logits.
+    Returns:
+        scores (Tensor): A tensor of shape (R, 1, ...) that contains uncertainty scores with
+            the most uncertain locations having the highest uncertainty score.
+    """
+    assert logits.shape[1] == 1
+    gt_class_logits = logits.clone()
+    return -(torch.abs(gt_class_logits))
+
+
+class BoxVISTeacherSetPseudoMask(nn.Module):
+    def __init__(self, matcher):
+        """Create the criterion.
+        Parameters:
+            matcher: matching objects between targets and proposals
+        """
+        super().__init__()
+        self.matcher = matcher
+
+    def forward(self, outputs, targets):
+        """This performs the loss computation.
+        Parameters:
+             outputs: dict of tensors, see the output specification of the model for the format
+             targets: list of dicts, such that len(targets) == batch_size.
+                      The expected keys in each dict depends on the losses applied, see each loss' doc.
+                      The mask in targets is generated mask via bounding boxes
+        """
+        outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
+
+        # Retrieve the matching between the outputs of the last layer and the targets
+        indices = self.matcher(outputs_without_aux, targets)
+        targets = self.set_pseudo_mask(indices, outputs_without_aux, targets)
+        for bs, target in enumerate(targets):
+            tgt_mask_box = target["masks"]
+            tgt_mask_pseudo = target["masks_pseudo"]
+            tgt_mask_pseudo_score = target["mask_pseudo_scores"]
+
+            tgt_h, tgt_w = tgt_mask_box.shape[-2:]
+            tgt_mask_pseudo = F.interpolate(tgt_mask_pseudo, (tgt_h, tgt_w),
+                                            mode='bilinear', align_corners=False)  # cQ, T, Ht, Wt
+
+            #  project term --------------------------
+            tgt_mask_pseudo_y = tgt_mask_pseudo.sigmoid().max(dim=-2, keepdim=True)[0].flatten(1)
+            tgt_mask_box_y = tgt_mask_box.max(dim=-2, keepdim=True)[0].flatten(1)
+            numerator = 2 * (tgt_mask_pseudo_y * tgt_mask_box_y).sum(-1)
+            denominator = (tgt_mask_pseudo_y ** 2).sum(-1) + (tgt_mask_box_y ** 2).sum(-1)
+            mask_proj_y = numerator / denominator.clamp(min=1e-6)
+
+            tgt_mask_pseudo_x = tgt_mask_pseudo.sigmoid().max(dim=-1, keepdim=True)[0].flatten(1)
+            tgt_mask_box_x = tgt_mask_box.max(dim=-1, keepdim=True)[0].flatten(1)
+            numerator = 2 * (tgt_mask_pseudo_x * tgt_mask_box_x).sum(-1)
+            denominator = (tgt_mask_pseudo_x ** 2).sum(-1) + (tgt_mask_box_x ** 2).sum(-1)
+            mask_proj_x = numerator / denominator.clamp(min=1e-6)
+
+            mask_proj_score = 0.5 * (mask_proj_x + mask_proj_y)
+
+            target["mask_pseudo_scores"] = tgt_mask_pseudo_score * mask_proj_score
+            target["masks_pseudo"] = tgt_mask_box * tgt_mask_pseudo.sigmoid()
+
+        return targets
+
+    def set_pseudo_mask(self, indices, outputs, targets):
+        src_masks = outputs["pred_masks"].clone().detach()  # B, cQ, T, Hp, Wp
+        src_logits = outputs["pred_logits"].softmax(dim=-1).clone().detach()  # B, cQ, k
+
+        for i, ((src_idx, tgt_idx), target) in enumerate(zip(indices, targets)):
+            assert len(tgt_idx) == target["masks"].shape[0]
+            tgt_idx, tgt_idx_sorted = tgt_idx.sort()
+            src_idx = src_idx[tgt_idx_sorted]
+            tgt_labels = target["labels"]
+            target["mask_pseudo_scores"] = src_logits[i, src_idx, tgt_labels]
+            target["masks_pseudo"] = src_masks[i, src_idx]
+
+        return targets
+
+
+class VideoSetCriterion(nn.Module):
+    """This class computes the loss for DETR.
+    The process happens in two steps:
+        1) we compute hungarian assignment between ground truth boxes and the outputs of the model
+        2) we supervise each pair of matched ground-truth / prediction (supervise class and box)
+    """
+
+    def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses, num_frames, 
+                 num_points, oversample_ratio, importance_sample_ratio, 
+                 use_ctt_loss=True, max_num_masks: int=50, is_coco=True,
+                 boxvis_enabled=False,  boxvis_pairwise_enable=False, boxvis_pairwise_num_stpair=7,
+                 boxvis_pairwise_dilation=4, boxvis_pairwise_color_thresh=0.3,
+                 boxvis_pairwise_corr_kernel_size=3, boxvis_pairwise_corr_stride=2, boxvis_pairwise_corr_thresh=0.9,
+                 boxvis_ema_enabled=False, boxvis_pseudo_mask_score_thresh=0.5, max_iters=10000,
+                 ):
+        """Create the criterion.
+        Parameters:
+            num_classes: number of object categories, omitting the special no-object category
+            matcher: module able to compute a matching between targets and proposals
+            weight_dict: dict containing as key the names of the losses and as values their relative weight
+            eos_coef: relative classification weight applied to the no-object category
+            losses: list of all the losses to be applied. See get_loss for list of available losses
+            boxvis_enabled: It controls the annotation types: pixel-wise or box-level annotations for VIS task
+            boxvis_ema_enabled: It controls whether to use Teacher Net to produce pseudo instance masks for VIS task
+        """
+        super().__init__()
+        self.num_classes = num_classes
+        self.matcher = matcher
+        self.weight_dict = weight_dict
+        self.eos_coef = eos_coef
+        self.losses = losses
+        self.num_frames = num_frames
+        empty_weight = torch.ones(self.num_classes + 1)
+        empty_weight[-1] = self.eos_coef
+        self.register_buffer("empty_weight", empty_weight)
+
+        self.use_ctt_loss = use_ctt_loss
+
+        # pointwise mask loss parameters
+        self.num_points = num_points
+        self.oversample_ratio = oversample_ratio
+        self.importance_sample_ratio = importance_sample_ratio
+        self.max_num_masks = max_num_masks
+        self.is_coco = is_coco
+
+        # box-supervised video instance segmentation
+        self.boxvis_enabled = boxvis_enabled
+        self.boxvis_pairwise_enable = boxvis_pairwise_enable
+        self.boxvis_pairwise_dilation = boxvis_pairwise_dilation
+        self.boxvis_pairwise_color_thresh = boxvis_pairwise_color_thresh
+        self.boxvis_pairwise_corr_kernel_size = boxvis_pairwise_corr_kernel_size
+        self.boxvis_pairwise_corr_stride = boxvis_pairwise_corr_stride
+        self.boxvis_pairwise_corr_thresh = boxvis_pairwise_corr_thresh
+        self.register_buffer("_iter", torch.zeros([1]))
+
+        # Teacher net to produce pseudo masks
+        self.boxvis_ema_enabled = boxvis_ema_enabled
+        self.pseudo_mask_score_thresh = boxvis_pseudo_mask_score_thresh
+        self.max_iters = max_iters
+
+        # spatial-temporal pairwise loss
+        self.unfold_patch = nn.Unfold(kernel_size=(boxvis_pairwise_corr_kernel_size, boxvis_pairwise_corr_kernel_size),
+                                      padding=boxvis_pairwise_corr_kernel_size//2, stride=boxvis_pairwise_corr_stride)
+        self.unfold_pixel = nn.Unfold(kernel_size=(1, 1), padding=0, stride=boxvis_pairwise_corr_stride)
+        d = max(boxvis_pairwise_dilation // boxvis_pairwise_corr_stride, 1)
+        if boxvis_pairwise_num_stpair == 2:
+            self.enable_patch_corr = False
+            self.enable_box_center_shifting = False
+            self.pixel_offsets = torch.as_tensor([[0, d, 0], [0, 0, d]]).reshape(-1, 3)
+        elif boxvis_pairwise_num_stpair == 4:
+            self.enable_patch_corr = True
+            self.enable_box_center_shifting = False
+            self.pixel_offsets = torch.as_tensor([[0, d, 0], [0, 0, d], [0, -d, d], [0, d, d]]).reshape(-1, 3)
+        elif boxvis_pairwise_num_stpair == 5:
+            self.enable_patch_corr = True
+            self.enable_box_center_shifting = True
+            self.pixel_offsets = torch.as_tensor([[0, d, 0], [0, 0, d],
+                                                  [1, 0, 0], [1, d, 0], [1, 0, d]]).reshape(-1, 3)
+        elif boxvis_pairwise_num_stpair == 7:
+            self.enable_patch_corr = False
+            self.enable_box_center_shifting = True
+            self.pixel_offsets = torch.as_tensor([[0, d, 0], [0, 0, d],
+                                                  [1, 0, 0], [1, d, 0], [1, 0, d], [1, -d, 0], [1, 0, -d]]
+                                                 ).reshape(-1, 3)
+
+        elif boxvis_pairwise_num_stpair == 9:
+            self.enable_patch_corr = True
+            self.enable_box_center_shifting = True
+            self.pixel_offsets = torch.as_tensor([[0, d, 0], [0, 0, d], [0, -d, d], [0, d, d],
+                                                  [1, 0, 0], [1, d, 0], [1, 0, d], [1, -d, 0], [1, 0, -d]]
+                                                 ).reshape(-1, 3)
+        else:
+            raise ValueError
+    
+    def loss_labels_clip(self, outputs, targets, indices, num_masks, l_layer):
+        loss = []
+        num_objs = []
+
+        out_logits = outputs['pred_logits']
+        for t, logits, (src_i, tgt_i) in zip(targets, out_logits, indices):
+            if t['task'] != 'grounding':
+                if t['dataset_name'] not in combined_datasets_category_info:
+                    continue 
+                num_classes, start_idx = combined_datasets_category_info[t['dataset_name']]
+                logits = logits[:, start_idx:start_idx + num_classes]
+
+                tgt_classes = torch.full(
+                    logits.shape, 0, dtype=torch.int64, device=logits.device
+                )
+                tgt_labels = t["labels"][tgt_i] - 1  # starts from 1
+                tgt_classes[src_i, tgt_labels] = 1
+                loss_focal = focal_conf_sigmoid_loss(logits, tgt_classes, is_cls=True)
+                loss_focal = loss_focal.sum() / max(len(tgt_labels), 1)
+
+                # cross-entroy loss
+                if len(tgt_labels):
+                    loss_ce = F.cross_entropy(logits[src_i], tgt_labels)
+                    loss.append(loss_focal + loss_ce)
+                else:
+                    loss.append(loss_focal)
+                num_objs.append(len(tgt_labels))
+
+            else:
+                logits = logits[:, :len(t["ids"])]  # rm padding expressions
+                ids = t["ids"][:logits.shape[1]]  # rm overflow expressions
+                keep = tgt_i < len(ids)
+                src_i = src_i[keep]
+                tgt_i = tgt_i[keep]
+
+                ids = ids.max(1)[0]  # N, T -> N
+                keep = ids[tgt_i] >= 0
+                src_i = src_i[keep]
+                tgt_i = tgt_i[keep]
+
+                tgt_classes = torch.full(
+                    logits.shape, 0, dtype=torch.int64, device=logits.device
+                )
+
+                ids_multihot = (ids.unique().reshape(-1,1) - ids.reshape(1, -1) == 0).long()
+                tgt_i = [ids.unique().tolist().index(id_) for id_ in ids[tgt_i]]
+                assert tgt_classes[src_i].shape == ids_multihot[tgt_i].shape, \
+                    f'{tgt_classes.shape} and {ids_multihot.shape}'
+                tgt_classes[src_i] = ids_multihot[tgt_i]
+
+                loss_focal = 0.2 * (
+                    contrastive_loss(logits, tgt_classes) + contrastive_loss(logits.t(), tgt_classes.t())
+                ) 
+                loss.append(loss_focal)
+                num_objs.append(len(tgt_i))
+
+        if len(loss) == 0:
+            return {"loss_ce": out_logits[:0].sum().detach()}
+        else:
+            weighted_loss = [num_obj / max(sum(num_objs), 1) * loss_ for num_obj, loss_ in zip(num_objs, loss)]
+            return {"loss_ce": sum(weighted_loss)}
+            # return {"loss_ce": sum(loss) / len(loss)}
+    
+    def loss_reid(self, outputs, targets, indices, num_masks, l_layer):
+        """Classification loss (NLL)
+        targets dicts must contain the key "labels" containing a tensor of dim [nb_target_boxes],
+        we do not take the background class into account
+        outputs["pred_embds"]: B x Q x T x C
+        """
+        assert "pred_embds" in outputs 
+
+        if outputs["pred_embds"].nelement() == 0:
+            if "pred_embds_prompt" in outputs:
+                return {
+                    "loss_reid": outputs["pred_embds"].sum().detach(),
+                    "loss_reid_aux": outputs["pred_embds"].sum().detach(),
+                    "loss_reid_l2p": outputs["pred_embds"].sum().detach(),
+                    "loss_reid_l2p_aux": outputs["pred_embds"].sum().detach()
+                }
+            else:
+                return {
+                    "loss_reid": outputs["pred_embds"].sum().detach(),
+                    "loss_reid_aux": outputs["pred_embds"].sum().detach()
+                }
+    
+        bs = len(targets)
+        device = outputs["pred_embds"].device
+
+        src_indices = self._get_src_permutation_idx(indices)
+        pred_embds = outputs["pred_embds"]                  # B Q T C
+        src_embds = pred_embds[src_indices].flatten(0, -2)  # N_srcT x C
+        tgt_ids = torch.cat([t['ids'][tgt_i] for t, (_, tgt_i) in zip(targets, indices)]).to(device).flatten()  # N_src T 
+        vid_ids = torch.cat([torch.ones_like(tgt_i)[:, None].repeat(1, self.num_frames) * i 
+                             for i, (_, tgt_i) in enumerate(indices)]).to(device).flatten()                     # N_src T 
+
+        keep = tgt_ids >= 0
+        src_embds = src_embds[keep]
+        tgt_ids = tgt_ids[keep]
+        vid_ids = vid_ids[keep]
+
+        src_sim = torch.mm(src_embds, src_embds.t()) / math.sqrt(src_embds.shape[-1])  # N_srcT x N_srcT
+        tgt_classes = (tgt_ids[:, None] == tgt_ids[None]) & (vid_ids[:, None] == vid_ids[None])
+        tgt_classes = tgt_classes.float()
+        
+        if not self.use_ctt_loss:
+            loss_focal = focal_conf_sigmoid_loss(src_sim, tgt_classes, is_cls=False)
+            loss_focal = loss_focal / max(self.num_frames * bs, 1)
+            loss_focal = loss_focal.sum() / max(num_masks * bs, 1)
+        else:
+            loss_focal = contrastive_loss(src_sim, tgt_classes)
+        
+        # aux loss
+        sim_aux = torch.einsum(
+            'qc,kc->qk', F.normalize(src_embds, p=2, dim=-1),
+            F.normalize(src_embds, p=2, dim=-1)
+        )
+        sim_aux = sim_aux[tgt_classes.sum(-1) > 0]
+        tgt_classes = tgt_classes[tgt_classes.sum(-1) > 0]
+        loss_aux = contrastive_aux_loss(sim_aux, tgt_classes) 
+
+        loss =  {"loss_reid": loss_focal, "loss_reid_aux": loss_aux}
+
+        if "pred_embds_prompt" in outputs:
+            loss_l2p = self.loss_reid_l2p(outputs, targets, indices, num_masks, l_layer)
+            loss.update(loss_l2p)
+        
+        # store query embds to calculate inter-clip reid loss for stage3
+        if len(targets) == 1:
+            assert len(targets) == 1, 'Only support bacth size = 1'
+            targets[0]['src_embds'][l_layer].append(src_embds)
+            targets[0]['tgt_ids'][l_layer].append(tgt_ids)
+
+        return loss
+    
+    def loss_reid_l2p(self, outputs, targets, indices, num_masks, l_layer):
+        """Reid loss from learnable to prompt queries (NLL)
+        for detection task, the reid loss is based on whether they have same classes;
+        for grounding task, the reid loss is base on whether the expressions describe the same object or not.
+        for sot task, the reid loss is base on whether the visual prompt comes from the same entity
+        targets dicts must contain the key "pred_embds_prompt" containing a tensor of dim [nb_target_boxes],
+        we do not take the background class into account
+        outputs["pred_embds"]: B x Q x T x C
+        """
+        assert "pred_embds" in outputs and "pred_embds_prompt" in outputs 
+
+        if outputs["pred_embds_prompt"].nelement() == 0:
+            return {
+                "loss_reid_l2p": outputs["pred_embds"].sum().detach(),
+                "loss_reid_l2p_aux": outputs["pred_embds"].sum().detach(),
+            }
+        
+        bs = len(targets)
+        device = outputs["pred_embds_prompt"].device
+
+        src_indices = self._get_src_permutation_idx(indices)
+        pred_embds = outputs["pred_embds"]  # B Q T C
+        src_embds = pred_embds[src_indices].flatten(0, -2)    # N_src T x C
+        pred_embds_prompt = outputs["pred_embds_prompt"].flatten(0, -2)  # B Q_p T C -> N_src_p T x C
+        
+        # N_l: the number of the matched masks in all predicted masks BQ_lT
+        vid_ids_l = torch.cat([torch.ones_like(tgt_i) * i for i, (_, tgt_i) in enumerate(indices)]).to(device)    
+        vid_ids_l = vid_ids_l.unsqueeze(-1).repeat(1, self.num_frames).flatten() 
+        num_queries_p = int(pred_embds_prompt.shape[0] / bs)
+        vid_ids_p = torch.stack([torch.ones(num_queries_p, device=device) * i for i in range(bs)]).flatten()
+
+        task = targets[0]["task"]
+        if task == "detection" and targets[0]["prompt_type"] == "text":
+            tgt_ids_l = torch.cat([t['labels'][tgt_i] for t, (_, tgt_i) in zip(targets, indices)]).to(device)  # N_l
+            tgt_ids_l = tgt_ids_l.unsqueeze(-1).repeat(1,self.num_frames).flatten()     # N_lT
+            tgt_ids_p = torch.cat([t['prompt_gt_labels'] for t in targets]).to(device)  # BQ_p
+            tgt_ids_p = tgt_ids_p.unsqueeze(-1).repeat(1,self.num_frames).flatten()     # BQ_pT
+            keep_l = tgt_ids_l >= 1
+            keep_p = tgt_ids_p >= 1
+
+        else:
+            tgt_ids_l = torch.cat([t['ids'][tgt_i] for t, (_, tgt_i) in zip(targets, indices)]).to(device)  # N_lxT
+            tgt_ids_l = tgt_ids_l.flatten()   # N_lT
+           
+            tgt_ids_p = []
+            for t in targets:
+                valid = t["prompt_obj_ids"] >= 0
+                tgt_ids_p_cur = t["prompt_obj_ids"][:, None].repeat(1, self.num_frames)
+                tgt_ids_p_cur[valid] = t["ids"][t["prompt_obj_ids"][valid]].long()
+                tgt_ids_p.append(tgt_ids_p_cur)
+            tgt_ids_p = torch.stack(tgt_ids_p).to(device).flatten() # BQ_pT
+
+            keep_l = tgt_ids_l >= 0
+            keep_p = tgt_ids_p >= 0
+    
+        src_embds = src_embds[keep_l]
+        tgt_ids_l = tgt_ids_l[keep_l]
+        vid_ids_l = vid_ids_l[keep_l]
+
+        pred_embds_prompt = pred_embds_prompt[keep_p]
+        tgt_ids_p = tgt_ids_p[keep_p]
+        vid_ids_p = vid_ids_p[keep_p]
+
+        tgt_classes = (tgt_ids_l[:, None] == tgt_ids_p[None]) & (vid_ids_l[:, None] == vid_ids_p[None])
+        tgt_classes = tgt_classes.float()
+
+        src_sim = torch.mm(src_embds, pred_embds_prompt.t()) / math.sqrt(src_embds.shape[-1])
+        if not self.use_ctt_loss:
+            loss_focal = focal_conf_sigmoid_loss(src_sim, tgt_classes, is_cls=False)
+            loss_focal = loss_focal / max(self.num_frames * bs, 1)
+            loss_focal = loss_focal.sum() / max(num_masks * bs, 1)
+        else:
+            loss_focal = contrastive_loss(src_sim, tgt_classes)
+        
+        # aux loss
+        sim_aux = torch.einsum(
+            'qc,kc->qk', F.normalize(src_embds, p=2, dim=-1), 
+            F.normalize(pred_embds_prompt, p=2, dim=-1)
+        )
+        sim_aux = sim_aux[tgt_classes.sum(-1) > 0]
+        tgt_classes = tgt_classes[tgt_classes.sum(-1) > 0]
+        loss_aux = contrastive_aux_loss(sim_aux, tgt_classes) 
+
+        # store query embds to calculate inter-clip reid loss for stage3
+        if len(targets) == 1 and not (task == "detection" and targets[0]["prompt_type"] == "text"):
+            assert len(targets) == 1, 'Only support bacth size = 1'
+            targets[0]['src_embds'][l_layer].append(pred_embds_prompt)
+            targets[0]['tgt_ids'][l_layer].append(tgt_ids_p)
+
+        return {"loss_reid_l2p": loss_focal, "loss_reid_l2p_aux": loss_aux}
+        
+    def loss_masks(self, outputs, targets, indices, num_masks, l_layer):
+        """Compute the losses related to the masks: the focal loss and the dice loss.
+        targets dicts must contain the key "masks" containing a tensor of dim [nb_target_boxes, T, h, w]
+        """
+        assert "pred_masks" in outputs
+
+        src_idx = self._get_src_permutation_idx(indices)
+        src_masks = outputs["pred_masks"]
+        src_masks = src_masks[src_idx]
+        # Modified to handle video
+        target_masks = torch.cat([t['masks'][i] for t, (_, i) in zip(targets, indices)]).to(src_masks)
+
+        # No need to upsample predictions as we are using normalized coordinates :)
+        # NT x 1 x H x W
+        src_masks = src_masks.flatten(0, 1)[:, None]
+        target_masks = target_masks.flatten(0, 1)[:, None]
+
+        with torch.no_grad():
+            # sample point_coords: NT x 12544 x 2
+            point_coords = get_uncertain_point_coords_with_randomness(
+                src_masks,
+                lambda logits: calculate_uncertainty(logits),
+                self.num_points,
+                self.oversample_ratio,
+                self.importance_sample_ratio,
+            )
+            # get gt labels
+            point_labels = point_sample(
+                target_masks,
+                point_coords,
+                align_corners=False,
+            ).squeeze(1)
+
+        point_logits = point_sample(
+            src_masks,
+            point_coords,
+            align_corners=False,
+        ).squeeze(1)
+
+        losses = {
+            "loss_mask": sigmoid_ce_loss_jit(point_logits, point_labels, num_masks),
+            "loss_dice": dice_loss_jit(point_logits, point_labels, num_masks),
+        }
+
+        del src_masks
+        del target_masks
+        return losses
+
+    def loss_masks_with_box_supervised(self, outputs, targets, indices, num_masks, l_layer):
+        """Compute the losses related to the masks with only box annotations: the projection loss and the pairwise loss.
+        If enabling Teacher Net with EMA, the pseudo mask supervision includes the focal loss and the dice loss.
+        targets dicts must contain the key "masks" containing a tensor of dim [nb_target_boxes, T, h, w]
+        """
+        src_idx = self._get_src_permutation_idx(indices)
+        src_masks = outputs["pred_masks"][src_idx]  # NxTxHpxWp
+        target_masks = torch.cat([t['masks'][i] for t, (_, i) in zip(targets, indices)]).to(src_masks)  # NxTxHxW
+        tgt_h, tgt_w = target_masks.shape[-2:]
+
+        # the predicted masks are inaccurate in the initial iterations
+        if self.is_coco or max(tgt_h, tgt_w) > 480:
+            h_, w_ = int(tgt_h/2), int(tgt_w/2)
+            with torch.no_grad():
+                target_masks = F.interpolate(target_masks, (h_, w_),
+                                             mode='nearest', align_corners=False)
+                src_masks = F.interpolate(src_masks, (h_, w_),
+                                          mode='bilinear', align_corners=False)
+        else:
+            # upsampling for videos in VIS videos with low resolution input
+            src_masks = F.interpolate(src_masks, (tgt_h, tgt_w), mode='bilinear', align_corners=False)
+
+        # ----------------------- points out of bounding box / project term --------------------------
+        # max simply selects the greatest value to back-prop, so max is the identity operation for that one element
+        src_masks = src_masks.sigmoid()
+        mask_losses_y = dice_coefficient_loss_jit(
+            src_masks.max(dim=-2, keepdim=True)[0].flatten(1),
+            target_masks.max(dim=-2, keepdim=True)[0].flatten(1),
+            num_masks
+        )
+        mask_losses_x = dice_coefficient_loss_jit(
+            src_masks.max(dim=-1, keepdim=True)[0].flatten(1),
+            target_masks.max(dim=-1, keepdim=True)[0].flatten(1),
+            num_masks
+        )
+        loss_proj = mask_losses_x + mask_losses_y
+        losses = {'loss_mask_proj': loss_proj}
+
+        if self.boxvis_pairwise_enable:
+            losses['loss_mask_pair'] = self.spatial_temporal_pairwise_loss(outputs, targets, indices)
+
+        if self.boxvis_ema_enabled:
+            losses.update(self.loss_masks_pseudo(outputs, targets, indices, num_masks))
+
+        return losses
+
+    def spatial_temporal_pairwise_loss(self, outputs, targets, indices):
+        """Compute the pairwise mask loss without pixel-wise annotation: spatial-temporal pairwise loss.
+        """
+        pred_masks = outputs["pred_masks"]  # bsxQxTxHpxWp
+
+        losses = []
+        for (src_idx, tgt_idx), src_masks, t in zip(indices, pred_masks, targets):
+            if t['masks'].nelement() == 0:
+                continue
+
+            H, W = t['st_pair_spatial_size']
+            dH, dW = t['st_pair_unfold_size']
+            indices_ctr_shift = t['st_pair_indices_ctr_shift'].flatten(1)  # NxTHW
+            is_inbox_pairwise_st = t['st_pair_is_inbox_pairwise']  # n_o [NxTHW]
+
+            src_masks = src_masks[src_idx]  # NxTxHxW
+            indices_ctr_shift = indices_ctr_shift[tgt_idx]  # NxTHW
+            is_inbox_pairwise_st = [x[tgt_idx].flatten() for x in is_inbox_pairwise_st]
+
+            # upsampling for videos in VIS videos with low resolution input
+            src_masks = F.interpolate(src_masks, (H, W), mode='bilinear', align_corners=False)
+            # the mean mask of all pixels in its centered patch
+            src_masks = rearrange(self.unfold_pixel(src_masks),
+                                  'N (T K) (H W) -> N T H W K',
+                                  H=dH, W=dW, K=1).mean(dim=-1)  # NxTxHpxWp
+
+            # box-center guided shifting between the t and t+1 frames
+            src_masks_ctr_shift = torch.zeros_like(src_masks.flatten(1))  # NxTHW
+            for obj_i, indices_ctr_shift_i in enumerate(indices_ctr_shift):
+                keep_next = indices_ctr_shift_i >= 0
+                indices_next = indices_ctr_shift_i[keep_next]
+                src_masks_ctr_shift[obj_i, keep_next] = src_masks[obj_i].flatten()[indices_next]
+            src_masks_ctr_shift = rearrange(src_masks_ctr_shift, 'N (T H W) -> N T H W', H=dH, W=dW)
+
+            tgt_masks_matched, ref_masks_matched = [], []
+            for (dt, dx, dy), is_inbox_pairwise in zip(self.pixel_offsets, is_inbox_pairwise_st):
+                if is_inbox_pairwise.sum() == 0:
+                    continue
+
+                src_masks_a = src_masks[..., max(-dy, 0):dH-dy, max(-dx, 0):dW-dx].flatten()
+                if dt == 0:
+                    # spatial paired pixels
+                    src_masks_b = src_masks[..., max(dy, 0):dH+dy, max(dx, 0):dW+dx].flatten()
+                else:
+                    # temporal paired pixels
+                    src_masks_b = src_masks_ctr_shift[..., max(dy, 0):dH+dy, max(dx, 0):dW+dx].flatten()
+                tgt_masks_matched.append(src_masks_a[is_inbox_pairwise])
+                ref_masks_matched.append(src_masks_b[is_inbox_pairwise])
+
+            if len(tgt_masks_matched) == 0:
+                continue
+
+            tgt_masks_matched, ref_masks_matched = torch.cat(tgt_masks_matched), torch.cat(ref_masks_matched)
+
+            # pairwise loss (keep boundary) on the paired pixels with similar lab color and feature correlation,
+            # which at least one pixel in the inner box
+            tgt_log_fg_prob = F.logsigmoid(tgt_masks_matched)
+            tgt_log_bg_prob = F.logsigmoid(-tgt_masks_matched)
+            ref_log_fg_prob = F.logsigmoid(ref_masks_matched)
+            ref_log_bg_prob = F.logsigmoid(-ref_masks_matched)
+
+            # the probability of making the same prediction = p_i * p_j + (1 - p_i) * (1 - p_j)
+            # we compute the probability in log space to avoid numerical instability
+            log_same_fg_prob = tgt_log_fg_prob + ref_log_fg_prob
+            log_same_bg_prob = tgt_log_bg_prob + ref_log_bg_prob
+
+            max_log = torch.max(log_same_fg_prob, log_same_bg_prob)
+            log_same_prob = torch.log(
+                torch.exp(log_same_fg_prob - max_log) +
+                torch.exp(log_same_bg_prob - max_log)
+            ) + max_log
+
+            losses.append(-log_same_prob.mean())
+
+        return sum(losses) / max(len(losses), 1) if len(losses) > 0 else pred_masks.new_zeros(1)
+
+    def loss_masks_pseudo(self, outputs, targets, indices, num_masks, l_layer):
+        """Compute pixel-wise mask loss with high-quality pseudo instance masks.
+        """
+        src_idx = self._get_src_permutation_idx(indices)
+        src_masks = outputs["pred_masks"][src_idx]  # NxTxHpxWp
+        tgt_masks_pseudo = torch.cat(
+            [t['masks_pseudo'][i] for t, (_, i) in zip(targets, indices)]
+        ).to(src_masks)  # NxTxHxW
+        tgt_mask_scores_pseudo = torch.cat(
+            [t['mask_pseudo_scores'][i] for t, (_, i) in zip(targets, indices)]
+        ).to(src_masks)  # N
+
+        is_high_conf = tgt_mask_scores_pseudo >= self.pseudo_mask_score_thresh
+        src_masks_high_conf = src_masks[is_high_conf]
+        tgt_masks_pseudo_high_conf = tgt_masks_pseudo[is_high_conf]
+        # No need to align the size between predicted masks and ground-truth masks
+        src_masks_high_conf = src_masks_high_conf.flatten(0, 1)[:, None]
+        tgt_masks_pseudo_high_conf = tgt_masks_pseudo_high_conf.flatten(0, 1)[:, None]
+
+        with torch.no_grad():
+            point_coords = get_uncertain_point_coords_with_randomness(
+                src_masks_high_conf,
+                lambda logits: calculate_uncertainty(logits),
+                self.num_points,
+                self.oversample_ratio,
+                self.importance_sample_ratio,
+            )
+            # get gt labels
+            point_labels = point_sample(
+                tgt_masks_pseudo_high_conf,
+                point_coords,
+                align_corners=False,
+            ).squeeze(1)
+
+        point_logits = point_sample(
+            src_masks_high_conf,
+            point_coords,
+            align_corners=False,
+        ).squeeze(1)
+
+        losses = {
+            "loss_mask": sigmoid_ce_loss_jit(point_logits, point_labels, num_masks),
+            "loss_dice": dice_loss_jit(point_logits, point_labels, num_masks),
+        }
+
+        del src_masks
+        del src_masks_high_conf
+        del tgt_masks_pseudo
+        del tgt_masks_pseudo_high_conf
+
+        return losses
+    
+    def _get_src_permutation_idx(self, indices):
+        # permute predictions following indices
+        batch_idx = torch.cat([torch.full_like(src, i) for i, (src, _) in enumerate(indices)])
+        src_idx = torch.cat([src for (src, _) in indices])
+        return batch_idx, src_idx
+
+    def _get_tgt_permutation_idx(self, indices):
+        # permute targets following indices
+        batch_idx = torch.cat([torch.full_like(tgt, i) for i, (_, tgt) in enumerate(indices)])
+        tgt_idx = torch.cat([tgt for (_, tgt) in indices])
+        return batch_idx, tgt_idx
+
+    def _get_spatial_temporal_pairwise_samples(self, targets, mask_features):
+        """Compute pairwise affinity by the color similarity and the patch feature correlation.
+        """
+        if isinstance(mask_features, list):
+            H, W = mask_features[-1].shape[-2:]
+            mask_features = [F.interpolate(f, (H, W), mode='bilinear', align_corners=False) for f in mask_features]
+            mask_features = rearrange(torch.stack(mask_features, dim=1),
+                                      '(b t) l c h w -> b t l c h w', b=len(targets))
+        else:
+            mask_features = mask_features.unsqueeze(2)  # b t 1 c h w
+
+        # mask features: BxTxCxHpxWp, 1/4 resolution of input image
+        bs, T, N_l = mask_features.shape[:3]
+        H, W = targets[0]["image_lab_color"].shape[-2:]
+        if max(H, W) > 480 or N_l > 1:
+            H, W = H // 2, W // 2
+
+        # [spatial_size+2×padding−dilation×(kernel_size−1)−1]/stride + 1
+        dH = (H + 2 * int(self.boxvis_pairwise_corr_kernel_size / 2) - self.boxvis_pairwise_corr_kernel_size) 
+        dH = int(dH / self.boxvis_pairwise_corr_stride) + 1
+        dW = (W + 2 * int(self.boxvis_pairwise_corr_kernel_size / 2) - self.boxvis_pairwise_corr_kernel_size)
+        dW = int(dW / self.boxvis_pairwise_corr_stride) + 1
+
+        grid_y, grid_x = torch.meshgrid(torch.arange(dH), torch.arange(dW))  # HxW
+        grid_indices = (grid_y * dW + grid_x).to(mask_features.device)  # HxW
+
+        for t, features in zip(targets, mask_features):
+            if t['masks'].nelement() == 0:
+                continue
+
+            tgt_masks = t['masks'].clone()  # NxTxHxW
+            tgt_masks = F.interpolate(tgt_masks, (H, W), mode='bilinear', align_corners=False).float()
+            tgt_masks = rearrange(self.unfold_pixel(tgt_masks),
+                                  'N (T K) (H W) -> N T H W K',
+                                  H=dH, W=dW, K=1).gt(0.5).any(dim=-1)
+
+            img_color = t["image_lab_color"]  # Tx3xHxW
+            img_color = F.interpolate(img_color, (H, W), mode='bilinear', align_corners=False)  # Tx3xHxW
+            img_color = rearrange(self.unfold_pixel(img_color),
+                                  'T (C K) (H W) -> T H W K C',
+                                  H=dH, W=dW, K=1, C=3)
+
+            if self.enable_patch_corr:
+                features = features.flatten(1, 2)
+                features = F.interpolate(features, (H, W),
+                                         mode='bilinear', align_corners=False)  # TxN_lCxHxW
+                features = rearrange(self.unfold_patch(features),
+                                     'T (C K) (H W) -> (T H W) K C',
+                                     H=dH, W=dW, K=self.boxvis_pairwise_corr_kernel_size ** 2)
+
+            tgt_boxes = t["boxes"]  # NxTx4
+            tgt_boxes_c = 0.5 * (tgt_boxes[..., :2] + tgt_boxes[..., 2:]) * \
+                          torch.as_tensor([dW, dH], device=tgt_boxes.device).reshape(1, 1, -1)
+            ctr_shift_idx = [idx % T for idx in range(1, T+1)]
+            dxy_ctrs_temp = (tgt_boxes_c - tgt_boxes_c[:, ctr_shift_idx]).round().long()  # Nx(T-1)x2
+            tgt_boxes_exist = ((tgt_boxes[..., 2:] - tgt_boxes[..., :2]) > 0).all(dim=-1)
+            tgt_boxes_exist = tgt_boxes_exist & tgt_boxes_exist[:, ctr_shift_idx]  # Nx(T-1)
+
+            N_objs = tgt_boxes.shape[0]
+            if self.enable_box_center_shifting:
+                # box-center guided shifting between the t and t+1 frames
+                indices_ctr_shift = torch.ones_like(tgt_masks).long() * -1
+                tgt_masks_ctr_shift = torch.zeros_like(tgt_masks).long() - 1
+                img_color_ctr_shift = torch.zeros_like(img_color)[None].repeat(N_objs, 1, 1, 1, 1, 1)
+                for obj_i in range(N_objs):
+                    for t_i in range(T):
+                        dx_c, dy_c = dxy_ctrs_temp[obj_i, t_i]
+                        if not tgt_boxes_exist[obj_i, t_i] or dx_c.abs() >= dW-2 or dy_c.abs() >= dH-2:
+                            continue
+
+                        sh1, eh1, sw1, ew1 = max(dy_c, 0), min(dH+dy_c, dH), max(dx_c, 0), min(dW+dx_c, dW)
+                        sh2, eh2, sw2, ew2 = max(-dy_c, 0), min(dH-dy_c, dH), max(-dx_c, 0), min(dW-dx_c, dW)
+                        assert eh1-sh1 == eh2-sh2 and ew1-sw1 == ew2-sw2, 'Check the shifted frame sizes!'
+
+                        indices_ctr_shift[obj_i, t_i, sh1:eh1, sw1:ew1] = grid_indices[sh2:eh2, sw2:ew2] + ctr_shift_idx[t_i] * dH * dW
+                        tgt_masks_ctr_shift[obj_i, t_i, sh1:eh1, sw1:ew1] = tgt_masks[obj_i, ctr_shift_idx[t_i], sh2:eh2, sw2:ew2]
+                        img_color_ctr_shift[obj_i, t_i, sh1:eh1, sw1:ew1] = img_color[ctr_shift_idx[t_i], sh2:eh2, sw2:ew2]
+            else:
+                indices_ctr_shift = grid_indices[None, None].repeat(N_objs, T, 1, 1) + \
+                                  (torch.as_tensor(ctr_shift_idx, device=grid_indices.device) * dH * dW).reshape(-1, 1, 1)
+                tgt_masks_ctr_shift = tgt_masks[:, ctr_shift_idx]
+                img_color_ctr_shift = img_color[None, ctr_shift_idx]  # 1xTxHxWxKxC
+
+            grid_indices_objs = grid_indices[None].repeat(T, 1, 1) + \
+                                (torch.arange(T) * dH * dW).reshape(-1, 1, 1).to(grid_indices.device)
+
+            is_inbox_pairwise_st = []
+            for (dt, dx, dy) in self.pixel_offsets:
+                tgt_masks_a = tgt_masks[:, :, max(-dy, 0):dH-dy, max(-dx, 0):dW-dx]
+                img_color_a = img_color[None, :, max(-dy, 0):dH-dy, max(-dx, 0):dW-dx]
+                if dt == 0:
+                    # spatial paired pixels
+                    tgt_masks_b = tgt_masks[:, :, max(dy, 0):dH+dy, max(dx, 0):dW+dx]
+                    img_color_b = img_color[None, :, max(dy, 0):dH+dy, max(dx, 0):dW+dx]
+                else:
+                    # temporal paired pixels
+                    tgt_masks_b = tgt_masks_ctr_shift[:, :, max(dy, 0):dH+dy, max(dx, 0):dW+dx]
+                    img_color_b = img_color_ctr_shift[:, :, max(dy, 0):dH+dy, max(dx, 0):dW+dx]
+
+                # Cond1: inbox, -1 in tgt_masks_b is the padding area after shifting
+                if dt == 0:
+                    # spatial paired pixels: at least one pixel is in the inner box
+                    is_inbox = (tgt_masks_a + tgt_masks_b).flatten(1) > 0  # NxT(Hp-1)(Wp-1)
+                else:
+                    # temporal paired pixels: both two pixels should be in the inner box
+                    is_inbox = (tgt_masks_a.float() + tgt_masks_b.float()).flatten(1) == 2
+
+                # Cond2: high Affinity => sim_color + path_corr
+                sim_color = torch.exp(-torch.norm(
+                    img_color_a - img_color_b,
+                    dim=-1) * 0.5).mean(dim=-1).flatten(1)  # NxT(Hp-1)(Wp-1)
+                if sim_color.shape[0] == 1:
+                    sim_color = sim_color.repeat(N_objs, 1)
+                sim_color = sim_color[is_inbox]
+
+                indices_a = grid_indices_objs[:, max(-dy, 0):dH-dy, max(-dx, 0):dW-dx:].flatten()
+                if self.enable_patch_corr:
+                    if dt == 0:
+                        indices_b = grid_indices_objs[:, max(dy, 0):dH+dy, max(dx, 0):dW+dx].flatten()
+                        feat_corr = torch.cat([
+                            torch.einsum('nkc,nkc->nk',
+                                         F.normalize(features[indices_a[is_inbox_obj]], dim=-1),
+                                         F.normalize(features[indices_b[is_inbox_obj]], dim=-1)
+                                         ).mean(dim=-1)
+                            for is_inbox_obj in is_inbox
+                        ])
+                    else:
+                        indices_ctr_shift_b = indices_ctr_shift[..., max(dy, 0):dH+dy, max(dx, 0):dW+dx].flatten(1)
+                        is_inbox = is_inbox & (indices_ctr_shift_b >= 0)
+                        feat_corr = torch.cat([
+                            torch.einsum('nkc,nkc->nk',
+                                         F.normalize(features[indices_a[is_inbox_obj]], dim=-1),
+                                         F.normalize(features[indices_b[is_inbox_obj]], dim=-1)
+                                         ).mean(dim=-1)
+                            for is_inbox_obj, indices_b in zip(is_inbox, indices_ctr_shift_b)
+                        ])
+                    thresh = self.boxvis_pairwise_color_thresh + 0.5 * self.boxvis_pairwise_corr_thresh
+                    is_pairwise = (sim_color + 0.5 * feat_corr) >= thresh
+
+                else:
+                    is_pairwise = sim_color >= self.boxvis_pairwise_color_thresh
+
+                is_inbox_pairwise = is_inbox.clone()
+                is_inbox_pairwise[is_inbox] = is_pairwise
+                is_inbox_pairwise_st.append(is_inbox_pairwise)
+
+            t['st_pair_spatial_size'] = (H, W)
+            t['st_pair_unfold_size'] = (dH, dW)
+            t['st_pair_indices_ctr_shift'] = indices_ctr_shift
+            t['st_pair_is_inbox_pairwise'] = is_inbox_pairwise_st  # n_o [NxT(Hp-1)(Wp-1)]
+
+    def get_loss(self, loss, outputs, targets, indices, num_masks, l_layer=9):
+        if self.boxvis_enabled:
+            loss_map = {
+                'labels': self.loss_labels_clip,
+                'masks': self.loss_masks_with_box_supervised,
+            }
+        else:
+            loss_map = {
+                'labels': self.loss_labels_clip,
+                'masks': self.loss_masks,
+                'reid': self.loss_reid,
+            }
+        assert loss in loss_map, f"do you really want to compute {loss} loss?"
+        return loss_map[loss](outputs, targets, indices, num_masks, l_layer)
+
+    def forward(self, outputs, targets):
+        """This performs the loss computation.
+        Parameters:
+             outputs: dict of tensors, see the output specification of the model for the format
+             targets: list of dicts, such that len(targets) == batch_size.
+                      The expected keys in each dict depends on the losses applied, see each loss' doc
+        """
+        self._iter += 1
+        self.pseudo_mask_score_thresh = 1 / (1 + math.exp(-2 * self._iter / self.max_iters))
+
+        # Compute the average number of target boxes across all nodes, for normalization purposes
+        num_masks = sum(len(t["labels"]) for t in targets)
+        num_masks = torch.as_tensor(
+            [num_masks], dtype=torch.float, device=next(iter(outputs.values())).device
+        )
+        if is_dist_avail_and_initialized():
+            torch.distributed.all_reduce(num_masks)
+        num_masks = torch.clamp(num_masks / get_world_size(), min=1).item()
+        num_masks = num_masks * self.num_frames
+
+        # store query embds to calculate inter-clip reid loss for stage3
+        num_layers = len(outputs["aux_outputs"]) + 1
+        if len(targets) == 1:
+            assert 'src_embds' not in targets[0] and len(targets) == 1, 'Only support batch size = 1'
+            targets[0]['src_embds'] = [[] for _ in range(num_layers)]  
+            targets[0]['tgt_ids'] = [[] for _ in range(num_layers)] 
+
+        # get pairwise samples in temporal dimension based on patch feature similarity
+        if self.boxvis_enabled and self.boxvis_pairwise_enable:
+            with torch.no_grad():
+                self._get_spatial_temporal_pairwise_samples(targets, outputs["mask_features"])
+
+        outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
+        # Retrieve the matching between the outputs of the last layer and the targets
+        indices = self.matcher(outputs_without_aux, targets, self.pseudo_mask_score_thresh)
+        losses = {}
+        for loss in self.losses:
+            losses.update(self.get_loss(loss, outputs, targets, indices, num_masks, l_layer=9))
+
+        # In case of auxiliary losses, we repeat this process with the output of each intermediate layer.
+        if "aux_outputs" in outputs:
+            for i, aux_outputs in enumerate(outputs["aux_outputs"]):
+                aux_indices = self.matcher(aux_outputs, targets, self.pseudo_mask_score_thresh)
+                for loss in self.losses:
+                    l_dict = self.get_loss(loss, aux_outputs, targets, aux_indices, num_masks, l_layer=i)
+                    l_dict = {k + f"_{i}": v for k, v in l_dict.items()}
+                    losses.update(l_dict)
+
+        return losses
+
+    def __repr__(self):
+        head = "Criterion " + self.__class__.__name__
+        body = [
+            "matcher: {}".format(self.matcher.__repr__(_repr_indent=8)),
+            "losses: {}".format(self.losses),
+            "weight_dict: {}".format(self.weight_dict),
+            "num_classes: {}".format(self.num_classes),
+            "eos_coef: {}".format(self.eos_coef),
+            "num_points: {}".format(self.num_points),
+            "oversample_ratio: {}".format(self.oversample_ratio),
+            "importance_sample_ratio: {}".format(self.importance_sample_ratio),
+        ]
+        _repr_indent = 4
+        lines = [head] + [" " * _repr_indent + line for line in body]
+        return "\n".join(lines)

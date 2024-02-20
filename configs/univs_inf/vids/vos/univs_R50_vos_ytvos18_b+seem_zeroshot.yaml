@@ -1,0 +1,11 @@
+_BASE_: univs_R50_vos_ytvos18_b+seem.yaml
+MODEL:
+  WEIGHTS: 'pretrained/univs/univs_prompt_R50_bs24_f1_sa1b+coco_2x_200queries_b+seem+casa.pth'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderSEEM"
+INPUT:
+  SAMPLING_FRAME_NUM: 1
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 720
+OUTPUT_DIR: output/inf/r50_b+seem/stage1/ytvos18/

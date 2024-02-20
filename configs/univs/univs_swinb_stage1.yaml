@@ -1,0 +1,60 @@
+_BASE_: Base.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  SWIN:
+    EMBED_DIM: 128
+    DEPTHS: [2, 2, 18, 2]
+    NUM_HEADS: [4, 8, 16, 32]
+    WINDOW_SIZE: 12
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    PRETRAIN_IMG_SIZE: 384
+  WEIGHTS: 'pretrained/univs/univs_prompt_swinb_bs16_f1_sa1b+coco_4x_200queries_c1+casa.pth'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniVS"
+    NUM_OBJECT_QUERIES: 200
+    CLASS_WEIGHT: 5.0
+    MASK_WEIGHT: 5.0
+    DICE_WEIGHT: 5.0
+    REID_WEIGHT: 0.25
+    CLASS_WEIGHT_MATCHER: 3.0
+    MASK_WEIGHT_MATCHER: 5.0
+    DICE_WEIGHT_MATCHER: 5.0
+    REID_WEIGHT_MATCHER: 0.25
+  UniVS:
+    NUM_POS_QUERIES: 30
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: True
+    PROMPT_AS_QUERIES: True
+    VISUAL_PROMPT_TO_IMAGE_ENABLE: True
+    TEXT_PROMPT_TO_IMAGE_ENABLE: True
+    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+    DISABLE_LEARNABLE_QUERIES_SA1B: False
+DATASETS:
+  DATASET_RATIO: 
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  TRAIN: 
+  - "lvis_v1_train_video"    # 100k (shared categories with burst)
+  - "coco_panoptic_train"
+  - "rvos_refcoco-mixed"
+  - "entityseg_panoptic_train"  # 30k
+  - "sa_1b_train_250k_1"
+INPUT:
+  SAMPLING_FRAME_NUM: 1
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 800
+SOLVER:
+  BASE_LR: 0.00005
+  IMS_PER_BATCH: 2
+  STEPS: (342000, )
+  MAX_ITER: 354000  # 2x: (324k, 354k) for bs=8; (162k, 177k) for bs=16, (108k, 118k) for bs=24
+OUTPUT_DIR: output/v2/univs_swinb_stage1/

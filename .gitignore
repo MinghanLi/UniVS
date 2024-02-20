@@ -1,0 +1,178 @@
+
+# output dir
+output
+# pretrained dir
+pretrained
+
+check_annotations.py
+*-frame
+*.sh
+
+*.png
+*.json
+*.diff
+*.jpg
+!/imgs/
+
+# compilation and distribution
+__pycache__
+_ext
+*.pyc
+*.pyd
+*.so
+*.dll
+*.egg-info/
+build/
+dist/
+wheels/
+
+# pytorch/python/numpy formats
+*.pth
+*.pkl
+*.npy
+*.ts
+model_ts*.txt
+
+# ipython/jupyter notebooks
+*.ipynb
+**/.ipynb_checkpoints/
+
+# Editor temporaries
+*.swn
+*.swo
+*.swp
+*~
+
+# editor settings
+.idea
+.vscode
+_darcs
+
+# project dirs
+/datasets/*
+!/datasets/*.*
+!/datasets/concept_emb
+/datasets/concept_emb/*.pth
+!/datasets/data_utils
+
+# davis evaluation
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+univs/evaluation/davis2017_evlaution/env/
+univs/evaluation/davis2017_evlaution/build/
+univs/evaluation/davis2017_evlaution/develop-eggs/
+univs/evaluation/davis2017_evlaution/dist/
+univs/evaluation/davis2017_evlaution/downloads/
+univs/evaluation/davis2017_evlaution/eggs/
+univs/evaluation/davis2017_evlaution/.eggs/
+univs/evaluation/davis2017_evlaution/lib/
+univs/evaluation/davis2017_evlaution/lib64/
+univs/evaluation/davis2017_evlaution/parts/
+univs/evaluation/davis2017_evlaution/sdist/
+univs/evaluation/davis2017_evlaution/var/
+univs/evaluation/davis2017_evlaution/wheels/
+univs/evaluation/davis2017_evlaution/*.egg-info/
+univs/evaluation/davis2017_evlaution/.installed.cfg
+univs/evaluation/davis2017_evlaution/*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+
+# Flask stuff:
+univs/evaluation/davis2017_evlaution/instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+univs/evaluation/davis2017_evlaution/target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# dotenv
+.env
+
+# virtualenv
+univs/evaluation/davis2017_evlaution/.venv
+univs/evaluation/davis2017_evlaution/venv/
+univs/evaluation/davis2017_evlaution/ENV/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+univs/evaluation/davis2017_evlaution/docs/site/
+univs/evaluation/davis2017_evlaution/site
+
+# mypy
+.mypy_cache/
+
+# pytest
+.pytest_cache
+
+# Pylint
+.pylintrc
+
+# PyCharm
+.idea/
+.DS_Store
+
+# Generated C code
+_mask.c
+
+
+
+
+

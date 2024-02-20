@@ -1,0 +1,22 @@
+_BASE_: univs_swinl_vps_c1+univs_entity.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  SWIN:
+    EMBED_DIM: 96
+    DEPTHS: [ 2, 2, 6, 2 ]
+    NUM_HEADS: [ 3, 6, 12, 24 ]
+    WINDOW_SIZE: 7
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    PRETRAIN_IMG_SIZE: 384
+  WEIGHTS: 'pretrained/univs/univs_prompt_swint_bs8_f4_video_2x_200queries_c1+univs+casa_prompt+sa_frozenbb.pth'
+DATASETS:
+  TEST: ("vipseg_panoptic_val", )
+INPUT:
+  SAMPLING_FRAME_NUM: 5
+  MIN_SIZE_TEST: 720
+TEST:
+  DETECTIONS_PER_IMAGE: 50
+OUTPUT_DIR: output/inf/swint_c1+univs/stage2/vps_entity/

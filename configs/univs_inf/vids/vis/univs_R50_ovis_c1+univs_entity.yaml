@@ -1,0 +1,14 @@
+_BASE_: univs_R50_yt21_c1+univs_entity.yaml
+MODEL:
+  BoxVIS:
+    TEST:
+      APPLY_CLS_THRES: 0.2
+DATASETS:
+  TEST: ("ovis_val", )
+INPUT:
+  SAMPLING_FRAME_NUM: 5
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 640
+TEST:
+  DETECTIONS_PER_IMAGE: 50
+OUTPUT_DIR: output/inf/r50_c1+univs/stage2/ovis/entity_val_480p/

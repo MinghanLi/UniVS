@@ -1,0 +1,21 @@
+_BASE_: Base.yaml
+MODEL:
+  WEIGHTS: 'pretrained/univs/univs_prompt_R50_bs24_f1_sa1b+coco_2x_200queries_d+uninext.pth'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  SEM_SEG_HEAD:
+    NAME: "MaskFormerHead"
+    # pixel decoder
+    PIXEL_DECODER_NAME: "MSDeformAttnPixelDecoderVL"
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUNINEXT"
+  UniVS:
+    TEXT_PROMPT_ENCODER: True
+DATASETS:
+  TEST: ("coco_2017_val_panoptic_with_sem_seg", )
+INPUT:
+  SAMPLING_FRAME_NUM: 1
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 800
+TEST:
+  DETECTIONS_PER_IMAGE: 100
+OUTPUT_DIR: output/inf/univs_r50_coco+sa1b_d+uninext+casa_coco/

@@ -1,0 +1,9 @@
+_BASE_: univs_swinb_yt21_c1+univs_entity.yaml
+DATASETS:
+  TEST: ("ovis_dev0.01", )
+INPUT:
+  SAMPLING_FRAME_NUM: 3
+  MIN_SIZE_TEST: 480
+TEST:
+  DETECTIONS_PER_IMAGE: 50
+OUTPUT_DIR: output/inf/swinb_c1+univs/stage2/ovis/entity/

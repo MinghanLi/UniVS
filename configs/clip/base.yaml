@@ -1,0 +1,3 @@
+INPUT_DIR: "./datasets/concept_emb/"
+OUTPUT_DIR: "./datasets/concept_emb/"
+CONCEPTS_FILE: "ytvis19_40.txt"   # a specific file name in the path 'datasets/concept_emb/'

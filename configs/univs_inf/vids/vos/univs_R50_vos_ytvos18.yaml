@@ -1,0 +1,32 @@
+_BASE_: Base.yaml
+MODEL:
+  WEIGHTS: 'pretrained/univs/univs_prompt_R50_bs16_f3_vis+vps_100k_200queries_a+casa.pth'
+  META_ARCHITECTURE: "BoxVIS_VideoMaskFormer"
+  SEM_SEG_HEAD:
+    NUM_CLASSES: 40
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUni"
+    NUM_OBJECT_QUERIES: 200
+    TEST:
+      SEMANTIC_ON: False
+      INSTANCE_ON: True
+      PANOPTIC_ON: False
+      OVERLAP_THRESHOLD: 0.8
+      OBJECT_MASK_THRESHOLD: 0.05
+      STABILITY_SCORE_THRESH: 0.
+  BoxVIS:
+    TEST:
+      NUM_FRAMES_WINDOW: 5
+      CLIP_STRIDE: 1
+      LSJ_AUG_ENABLED: True   # square input 1024*1024
+      ZERO_SHOT_INFERENCE: False
+      APPLY_CLS_THRES: 0.05
+DATASETS:
+  TEST: ("sot_ytbvos18_val", )
+INPUT:
+  SAMPLING_FRAME_NUM: 3
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 720
+TEST:
+  DETECTIONS_PER_IMAGE: 35
+OUTPUT_DIR: output/inf/r50_a/stage2/ytvos18/

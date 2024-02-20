@@ -1,0 +1,37 @@
+_BASE_: Base.yaml
+MODEL:
+  WEIGHTS: 'pretrained/univs/univs_prompt_R50_bs24_f1_sa1b+coco_2x_200queries_c1+casa.pth'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  UniVS:
+    NUM_POS_QUERIES: 30
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: True
+    PROMPT_AS_QUERIES: True
+    VISUAL_PROMPT_TO_IMAGE_ENABLE: True
+    TEXT_PROMPT_TO_IMAGE_ENABLE: True
+    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+    DISABLE_LEARNABLE_QUERIES_SA1B: False
+DATASETS:
+  DATASET_RATIO: 
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  TRAIN: 
+  - "lvis_v1_train_video"    # 100k (shared categories with burst)
+  - "coco_panoptic_train"
+  - "rvos_refcoco-mixed"
+  - "entityseg_panoptic_train"  # 30k
+  - "sa_1b_train_250k_1"        # 250k
+INPUT:
+  SAMPLING_FRAME_NUM: 1
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 800
+SOLVER:
+  IMS_PER_BATCH: 2
+  STEPS: (342000, )
+  MAX_ITER: 354000  # 0.5x for bs=24
+OUTPUT_DIR: output/v2/univs_r50_stage1/

@@ -1,0 +1,29 @@
+_BASE_: ../../univs/univs_swinl_stage2.yaml
+MODEL:
+  META_ARCHITECTURE: "UniVS_Prompt"
+  BACKBONE:
+    FREEZE_AT: 5
+  SEM_SEG_HEAD:
+    FROZEN_PIXEL_DECODER: False
+    FROZEN_MASK_CONVS: False
+    FROZEN_PREDICTOR: False
+DATASETS:
+  DATASET_RATIO: 
+  - 1.0
+  TRAIN: 
+  - "vipseg_panoptic_train"  # 85k
+  TEST: ("vspw_vss_video_dev", )
+INPUT:
+  SAMPLING_FRAME_NUM: 5
+  SAMPLING_FRAME_RANGE: 40
+  MIN_SIZE_TEST: 800
+  LSJ_AUG:
+    SQUARE_ENABLED: False
+SOLVER:
+  BASE_LR: 0.00005
+  IMS_PER_BATCH: 2
+  STEPS: (30000, )
+  MAX_ITER: 36000  # 2x: (324k, 354k) for bs=8; (162k, 177k) for bs=16, (108k, 118k) for bs=24
+TEST:
+  DETECTIONS_PER_IMAGE: 35
+OUTPUT_DIR: output/v2_ft_single_task/univs_swinl_stage3_vps/

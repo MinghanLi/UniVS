@@ -1,0 +1,10 @@
+_BASE_: univs_R50_vos_ytvos18_c1+univs.yaml
+MODEL:
+  WEIGHTS: 'pretrained/univs/univs_R50_bs24_video_1x.pth'
+DATASETS:
+  TEST: ("mots_mose_dev", )
+INPUT:
+  SAMPLING_FRAME_NUM: 2
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 720
+OUTPUT_DIR: output/inf/r50_c1+univs/stage2/vos_mose/

@@ -1,0 +1,118 @@
+MODEL:
+  BACKBONE:
+    FREEZE_AT: 0
+    NAME: "build_resnet_backbone"
+  WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
+  PIXEL_MEAN: [123.675, 116.280, 103.530]
+  PIXEL_STD: [58.395, 57.120, 57.375]
+  RESNETS:
+    DEPTH: 50
+    STEM_TYPE: "basic"  # not used
+    STEM_OUT_CHANNELS: 64
+    STRIDE_IN_1X1: False
+    OUT_FEATURES: ["res2", "res3", "res4", "res5"]
+    # NORM: "SyncBN"
+    RES5_MULTI_GRID: [1, 1, 1]  # not used
+  META_ARCHITECTURE: "UniVS_Prompt"
+  MASK_ON: True
+  SEM_SEG_HEAD:
+    NAME: "MaskFormerHead"
+    IGNORE_VALUE: 255
+    NUM_CLASSES: 133
+    LOSS_WEIGHT: 1.0
+    CONVS_DIM: 256
+    MASK_DIM: 256
+    NORM: "GN"
+    # pixel decoder
+    PIXEL_DECODER_NAME: "MSDeformAttnPixelDecoder"
+    IN_FEATURES: [ "res2", "res3", "res4", "res5" ]
+    DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES: [ "res3", "res4", "res5" ]
+    COMMON_STRIDE: 4
+    TRANSFORMER_ENC_LAYERS: 6
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniVS"
+    TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
+    DEEP_SUPERVISION: True
+    NO_OBJECT_WEIGHT: 0.1
+    CLASS_WEIGHT: 5.0
+    MASK_WEIGHT: 5.0
+    DICE_WEIGHT: 5.0
+    REID_WEIGHT: 0.5
+    CLASS_WEIGHT_MATCHER: 3.0
+    MASK_WEIGHT_MATCHER: 5.0
+    DICE_WEIGHT_MATCHER: 5.0
+    REID_WEIGHT_MATCHER: 0.5
+    HIDDEN_DIM: 256
+    NUM_OBJECT_QUERIES: 200  # use 200 queries in UniVS
+    NHEADS: 8
+    DROPOUT: 0.0
+    DIM_FEEDFORWARD: 2048
+    ENC_LAYERS: 0
+    PRE_NORM: False
+    ENFORCE_INPUT_PROJ: False
+    SIZE_DIVISIBILITY: 32
+    DEC_LAYERS: 10  # 9 decoder layers, add one for the loss on learnable query
+    TRAIN_NUM_POINTS: 12544
+    OVERSAMPLE_RATIO: 3.0
+    IMPORTANCE_SAMPLE_RATIO: 0.5
+    TEST:
+      SEMANTIC_ON: False
+      INSTANCE_ON: True
+      PANOPTIC_ON: False
+      OVERLAP_THRESHOLD: 0.8
+      OBJECT_MASK_THRESHOLD: 0.05
+      STABILITY_SCORE_THRESH: 0.0
+  UniVS:
+    NUM_POS_QUERIES: 30
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: True
+    PROMPT_AS_QUERIES: True
+    VISUAL_PROMPT_TO_IMAGE_ENABLE: True
+    TEXT_PROMPT_TO_IMAGE_ENABLE: True
+    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+    DISABLE_LEARNABLE_QUERIES_SA1B: False
+DATASETS:
+  DATASET_RATIO: 
+  - 1.0
+  TRAIN: 
+  - "coco_panoptic_train"
+  TEST: ("coco_2017_val_panoptic_with_sem_seg", )
+SOLVER:
+  IMS_PER_BATCH: 16
+  BASE_LR: 0.00005
+  STEPS: (30000,)
+  MAX_ITER: 40000
+  WARMUP_FACTOR: 1.0
+  WARMUP_ITERS: 10
+  WEIGHT_DECAY: 0.05
+  OPTIMIZER: "ADAMW"
+  BACKBONE_MULTIPLIER: 0.1
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_TYPE: "full_model"
+    CLIP_VALUE: 0.01
+    NORM_TYPE: 2.0
+  AMP:
+    ENABLED: True
+INPUT:
+  MIN_SIZE_TRAIN_SAMPLING: "choice_by_clip"
+  RANDOM_FLIP: "flip_by_clip"
+  CROP:
+    ENABLED: True
+    TYPE: "absolute_range"
+    SIZE: (600, 1024)
+  FORMAT: "RGB"
+  LSJ_AUG:
+    ENABLED: True
+    IMAGE_SIZE: 1024
+    MIN_SCALE: 0.25
+    MAX_SCALE: 4.0
+TEST:
+  EVAL_PERIOD: 0
+  DETECTIONS_PER_IMAGE: 100
+DATALOADER:
+  FILTER_EMPTY_ANNOTATIONS: False
+  NUM_WORKERS: 2
+VERSION: 2

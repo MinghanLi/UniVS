@@ -1,0 +1,4 @@
+_BASE_: univs_swinb_vos_ytvos18_c1+univs.yaml
+DATASETS:
+  TEST: ("mots_mose_val", )
+OUTPUT_DIR: output/inf/swinb_c1+univs/stage2/vos/mose/

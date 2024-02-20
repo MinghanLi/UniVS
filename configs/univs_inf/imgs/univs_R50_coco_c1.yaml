@@ -1,0 +1,25 @@
+_BASE_: univs_R50_coco.yaml
+MODEL:
+  WEIGHTS: 'pretrained/univs/univs_prompt_R50_bs24_f1_sa1b+coco_2x_200queries_c1+casa.pth'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUni"
+  UniVS:
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: False
+    PROMPT_AS_QUERIES: True
+    VISUAL_PROMPT_TO_IMAGE_ENABLE: False
+    TEXT_PROMPT_TO_IMAGE_ENABLE: False
+    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+DATASETS:
+  TEST: ("coco_2017_val_panoptic_with_sem_seg", )
+INPUT:
+  SAMPLING_FRAME_NUM: 1
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 800
+TEST:
+  EVAL_PERIOD: 0
+  DETECTIONS_PER_IMAGE: 100
+OUTPUT_DIR: output/inf/univs_r50_coco+sa1b_c1+casa_coco/

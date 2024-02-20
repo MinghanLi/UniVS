@@ -1,0 +1,22 @@
+_BASE_: univs_R50_yt21_c1+univs_entity.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  SWIN:
+    EMBED_DIM: 96
+    DEPTHS: [ 2, 2, 6, 2 ]
+    NUM_HEADS: [ 3, 6, 12, 24 ]
+    WINDOW_SIZE: 7
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    PRETRAIN_IMG_SIZE: 384
+  WEIGHTS: 'pretrained/univs/univs_prompt_swinb_bs8_f4_video_2x_200queries_c1+univs+casa_prompt+sa_frozenbb.pth'
+DATASETS:
+  TEST: ("ytvis_2021_dev", )
+INPUT:
+  SAMPLING_FRAME_NUM: 4
+  MIN_SIZE_TEST: 640
+TEST:
+  DETECTIONS_PER_IMAGE: 50
+OUTPUT_DIR: output/inf/swint_c1+univs/stage2/yt21/entity/

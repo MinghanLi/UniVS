@@ -1,0 +1,9 @@
+_BASE_: univs_swinl_vos_ytvos18_c1+univs.yaml
+MODEL:
+  WEIGHTS: 'pretrained/univs/univs_swinl_c1+univs_stage1.pth'
+INPUT:
+  SAMPLING_FRAME_NUM: 1
+  MIN_SIZE_TEST: 720
+TEST:
+  DETECTIONS_PER_IMAGE: 50
+OUTPUT_DIR: output/inf/swinl_c1+univs/stage1/ytvos18/

@@ -1,0 +1,31 @@
+_BASE_: ../../univs/univs_swinl_stage2.yaml
+MODEL:
+  META_ARCHITECTURE: "UniVS_Prompt"
+  BACKBONE:
+    FREEZE_AT: 5
+  SEM_SEG_HEAD:
+    FROZEN_PIXEL_DECODER: False
+    FROZEN_MASK_CONVS: False
+    FROZEN_PREDICTOR: False
+DATASETS:
+  DATASET_RATIO: 
+  # OD & IS
+  - 0.25  
+  - 1.0   
+  TRAIN: 
+  # Ref
+  - "rvos_refcoco-mixed"     # 5.5k images
+  - "rvos-refytb-train"      # 3.5k (3469 videos)
+  TEST: ("rvos-refdavis-val-0", )
+INPUT:
+  SAMPLING_FRAME_NUM: 5
+  SAMPLING_FRAME_RANGE: 40
+  MIN_SIZE_TEST: 800
+SOLVER:
+  BASE_LR: 0.00005
+  IMS_PER_BATCH: 2
+  STEPS: (10000, )
+  MAX_ITER: 12000  # 2x: (324k, 354k) for bs=8; (162k, 177k) for bs=16, (108k, 118k) for bs=24
+TEST:
+  DETECTIONS_PER_IMAGE: 35
+OUTPUT_DIR: output/v2_ft_single_task/univs_swinl_stage3_refvos/

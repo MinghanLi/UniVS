@@ -1,0 +1,43 @@
+_BASE_: Base.yaml
+MODEL:
+  WEIGHTS: 'pretrained/univs/univs_prompt_R50_bs16_f3_vis+vps_100k_200queries_c1+casa.pth'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  SEM_SEG_HEAD:
+    NUM_CLASSES: 40
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniPrompt"
+    NUM_OBJECT_QUERIES: 200
+    TEST:
+      SEMANTIC_ON: False
+      INSTANCE_ON: True
+      PANOPTIC_ON: False
+      OVERLAP_THRESHOLD: 0.8
+      OBJECT_MASK_THRESHOLD: 0.05
+      STABILITY_SCORE_THRESH: 0.
+  UniVS:
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: False
+    PROMPT_AS_QUERIES: True
+    VISUAL_PROMPT_TO_IMAGE_ENABLE: False
+    TEXT_PROMPT_TO_IMAGE_ENABLE: False
+    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+  BoxVIS:
+    TEST:
+      NUM_FRAMES: 3
+      NUM_FRAMES_WINDOW: 10
+      CLIP_STRIDE: 1
+      LSJ_AUG_ENABLED: True
+      ZERO_SHOT_INFERENCE: False
+      TRACKER_TYPE: 'minvis'
+      APPLY_CLS_THRES: 0.05
+DATASETS:
+  TEST: ("ytvis_2021_dev", )
+INPUT:
+  SAMPLING_FRAME_NUM: 3
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 480
+TEST:
+  DETECTIONS_PER_IMAGE: 35
+OUTPUT_DIR: output/inf/r50_c1/stage2/yt21/minvis/

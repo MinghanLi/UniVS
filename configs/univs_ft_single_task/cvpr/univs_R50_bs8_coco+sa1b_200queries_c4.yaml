@@ -1,0 +1,41 @@
+_BASE_: univs_R50_bs8_coco+sa1b_200queries_c1.yaml
+MODEL:
+  WEIGHTS: 'pretrained/m2f_panseg/model_final_94dc52.pth'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniPrompt"
+    NUM_OBJECT_QUERIES: 200
+    CLASS_WEIGHT: 5.0
+    MASK_WEIGHT: 3.0
+    DICE_WEIGHT: 3.0
+    REID_WEIGHT: 0.5
+    CLASS_WEIGHT_MATCHER: 2.0
+    MASK_WEIGHT_MATCHER: 5.0
+    DICE_WEIGHT_MATCHER: 5.0
+    REID_WEIGHT_MATCHER: 0.5
+  UniVS:
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: False
+    PROMPT_AS_QUERIES: True
+    VISUAL_PROMPT_TO_IMAGE_ENABLE: False
+    TEXT_PROMPT_TO_IMAGE_ENABLE: False
+    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'p2l-beta'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+    DISABLE_LEARNABLE_QUERIES_SA1B: True
+DATASETS:
+  DATASET_RATIO: 
+  - 1.0
+  - 1.0
+  TRAIN: 
+  - "coco_panoptic_train"
+  - "sa_1b_train_250k_1"
+INPUT:
+  SAMPLING_FRAME_NUM: 1
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 800
+SOLVER:
+  IMS_PER_BATCH: 2
+  STEPS: (108000, )
+  MAX_ITER: 118000  # 2x for bs=24
+OUTPUT_DIR: output/univs_prompt_R50_bs24_f1_sa1b+coco_2x_200queries_c4+casa_disable_ql_sa1b/

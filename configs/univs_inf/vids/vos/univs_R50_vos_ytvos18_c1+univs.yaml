@@ -1,0 +1,29 @@
+_BASE_: Base.yaml
+MODEL:
+  WEIGHTS: 'pretrained/univs/univs_prompt_R50_bs8_f4_video_1x_c1+univs+casa_psa_frozenbb+pixelenc_wcttnew_rdm_maskemb_unfrozenmask.pth'
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniVS"
+  BoxVIS:
+    TEST:
+      LSJ_AUG_ENABLED: True  
+      NUM_FRAMES_WINDOW: 5
+  UniVS:
+    VISUAL_PROMPT_PIXELS_PER_IMAGE: 256
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: False
+    PROMPT_AS_QUERIES: True
+    VISUAL_PROMPT_TO_IMAGE_ENABLE: True
+    TEXT_PROMPT_TO_IMAGE_ENABLE: True
+    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+    TEST:
+      NUM_PREV_FRAMES_MEMORY: 10
+      TEMPORAL_CONSISTENCY_THRESHOLD: 0.5
+      VIDEO_UNIFIED_INFERENCE_QUERIES: 'prompt+learn'
+DATASETS:
+  TEST: ("sot_ytbvos18_val", )
+INPUT:
+  SAMPLING_FRAME_NUM: 4
+  MIN_SIZE_TEST: 720
+OUTPUT_DIR: output/inf/r50_c1+univs/stage3/ytvos18/

@@ -1,0 +1,72 @@
+_BASE_: univs_R50_bs8_coco+sa1b+ref_200queries_c1.yaml
+MODEL:
+  BACKBONE:
+    FREEZE_AT: 5
+    NAME: "D2SwinTransformer"
+  SWIN:
+    EMBED_DIM: 192
+    DEPTHS: [ 2, 2, 18, 2 ]
+    NUM_HEADS: [ 6, 12, 24, 48 ]
+    WINDOW_SIZE: 12
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    PRETRAIN_IMG_SIZE: 384
+  WEIGHTS: 'pretrained/univs/univs_prompt_swinl_bs8_f3_video_2x_200queries_c1+univs+casa_prompt+sa_frozenbb.pth'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  SEM_SEG_HEAD:
+    FROZEN_PIXEL_DECODER: False  #  input_proj &transformer.encoder
+    FROZEN_MASK_CONVS: False
+    FROZEN_PREDICTOR: False
+  MASK_FORMER:
+    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniVS"
+    NUM_OBJECT_QUERIES: 200
+    CLASS_WEIGHT: 5.0
+    MASK_WEIGHT: 5.0
+    DICE_WEIGHT: 5.0
+    REID_WEIGHT: 0.5
+    CLASS_WEIGHT_MATCHER: 2.0
+    MASK_WEIGHT_MATCHER: 5.0
+    DICE_WEIGHT_MATCHER: 5.0
+    REID_WEIGHT_MATCHER: 0.5
+  UniVS:
+    NUM_POS_QUERIES: 10
+    VISUAL_PROMPT_PIXELS_PER_IMAGE: 32
+    VISUAL_PROMPT_ENCODER: True
+    TEXT_PROMPT_ENCODER: True
+    LANGUAGE_ENCODER_ENABLE: True
+    PROMPT_AS_QUERIES: True
+    VISUAL_PROMPT_TO_IMAGE_ENABLE: True
+    TEXT_PROMPT_TO_IMAGE_ENABLE: True
+    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+    DISABLE_LEARNABLE_QUERIES_SA1B: False
+  BoxVIS:
+    TEST:
+      NUM_FRAMES_WINDOW: 4
+      CLIP_STRIDE: 1
+      LSJ_AUG_ENABLED: True
+      ZERO_SHOT_INFERENCE: False
+      TRACKER_TYPE: 'minvis'
+      APPLY_CLS_THRES: 0.25
+DATASETS:
+  DATASET_RATIO: 
+  # Ref
+  - 0.5  # refcoco
+  - 0.5  # ref-ytvos
+  TRAIN: 
+  # Ref
+  - "rvos_refcoco-mixed"     # 55k images
+  - "rvos-refytb-train"      # 3.5k (3469 videos)
+  TEST: ("ytvis_2021_dev", )
+INPUT:
+  SAMPLING_FRAME_NUM: 3
+  SAMPLING_FRAME_RANGE: 20
+  MIN_SIZE_TEST: 720
+SOLVER:
+  IMS_PER_BATCH: 4
+  STEPS: (148000, 162000) # (147500, 170000)
+  MAX_ITER: 170000  # 3x for bs=16
+TEST:
+  DETECTIONS_PER_IMAGE: 25
+OUTPUT_DIR: output/univs_prompt_swinl_bs8_f3_referonly_2x_200queries_c1+univs+casa_prompt_sa_frozenbb+pixelenc_wolang2img/

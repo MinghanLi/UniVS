@@ -1,0 +1,21 @@
+_BASE_: univs_R50_pvos_c1+univs.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  SWIN:
+    EMBED_DIM: 192
+    DEPTHS: [ 2, 2, 18, 2 ]
+    NUM_HEADS: [ 6, 12, 24, 48 ]
+    WINDOW_SIZE: 12
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    PRETRAIN_IMG_SIZE: 384
+  WEIGHTS: 'pretrained/univs/univs_prompt_swinl_bs4_f7_video_1x_200queries_c1+univs+casa_prompt+sa_frozenbb+pixelenc_cttloss.pth'
+DATASETS:
+  TEST: ("pvos_viposeg_dev", )
+INPUT:
+  SAMPLING_FRAME_NUM: 7
+  SAMPLING_FRAME_RANGE: 10
+  MIN_SIZE_TEST: 720
+OUTPUT_DIR: output/inf/swinl_c1+univs/stage3_f7/pvos/viposeg_dev/
