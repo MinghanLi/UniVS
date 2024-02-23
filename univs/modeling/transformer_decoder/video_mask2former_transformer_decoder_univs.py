@@ -697,9 +697,9 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
             else:
                 raise ValueError
         
-        # merge multi-clip prompts for stage3
+        # merge prompts from previous clips for stage3 training
         if self.training and (len(targets) == 1) and "prompt_feats" in targets[0] and prompt_feats_dense is not None:
-            #print(targets[0]["prompt_feats"].shape, prompt_feats_dense.shape)
+            # print(targets[0]["prompt_feats"].shape, prompt_feats_dense.shape)
             prompt_feats_dense = torch.cat([targets[0]["prompt_feats"], prompt_feats_dense], dim=1)
             if targets[0]["prompt_pe"] is None or prompt_pe_dense is None:
                 prompt_pe_dense = None

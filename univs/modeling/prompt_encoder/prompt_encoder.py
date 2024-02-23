@@ -711,13 +711,12 @@ class VisualPromptSampler:
         prompt_pe_dense = prompt_pe_dense[pbm_gt_idxs]
         promt_feats_dense = prompt_feats_dense[pbm_gt_idxs]
         prompt_attn_masks = prompt_attn_masks[..., pbm_gt_idxs, :]
-        targets_per_video["prompt_obj_ids"] = gt_idxs.long()  # corresponding to ground-truth obj ids
 
         # for parallel in a batch
         prompt_pe_dense = prompt_pe_dense[:num_max_insts]   
         prompt_feats_dense = prompt_feats_dense[:num_max_insts]
         prompt_attn_masks = prompt_attn_masks[:, :, :num_max_insts]
-        targets_per_video["prompt_obj_ids"] = targets_per_video["prompt_obj_ids"][:num_max_insts]
+        targets_per_video["prompt_obj_ids"] =  gt_idxs.long()[:num_max_insts]  # corresponding to ground-truth obj ids
 
         # for parallel in a batch
         if prompt_feats_dense.shape[0] < num_max_insts:

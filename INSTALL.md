@@ -1,8 +1,8 @@
 ## Installation
 
 ### Requirements
-- Linux or macOS with Python ≥ 3.6
-- PyTorch ≥ 1.9 and [torchvision](https://github.com/pytorch/vision/) that matches the PyTorch installation.
+- Linux or macOS with Python ≥ 3.7
+- PyTorch == 1.10.3 and [torchvision](https://github.com/pytorch/vision/) that matches the PyTorch installation.
   Install them together at [pytorch.org](https://pytorch.org) to make sure of this. Note, please check
   PyTorch version matches that is required by Detectron2.
 - Detectron2: follow [Detectron2 installation instructions](https://detectron2.readthedocs.io/tutorials/install.html).
@@ -19,12 +19,6 @@ cd mask2former/modeling/pixel_decoder/ops
 sh make.sh
 ```
 
-#### Building on another system
-To build on a system that does not have a GPU device but provide the drivers:
-```bash
-TORCH_CUDA_ARCH_LIST='8.0' FORCE_CUDA=1 python setup.py build install
-```
-
 ### Example conda environment setup
 ```bash
 conda create --name boxvis python=3.9 -y
@@ -37,10 +31,13 @@ pip install -U opencv-python
 git clone git@github.com:facebookresearch/detectron2.git
 cd detectron2
 pip install -e .
+# alternatively 
+python -m pip install detectron2 -f \
+  https://dl.fbaipublicfiles.com/detectron2/wheels/cu113/torch1.10/index.html
 
 cd ..
-git clone git@github.com:MinghanLi/BoxVIS.git
-cd BoxVIS
+git clone git@github.com:MinghanLi/UniVS.git
+cd UniVS
 pip install -r requirements.txt
 cd mask2former/modeling/pixel_decoder/ops
 sh make.sh
