@@ -831,8 +831,8 @@ class VisualPromptSampler:
         gt_masks = targets_per_video['masks'][:, -num_frames:].to(device)  # num_gt_insts x T x H x W
         num_gt_insts, _, H_gt, W_gt = gt_masks.shape
 
-        update_frame_ids = torch.nonzero(gt_masks.gt(0.).sum(dim=(0,2,3)) > 0).reshape(-1)   
-        for key_fid in update_frame_ids:
+        update_frames = 1 if is_first_clip else num_frames-self.clip_stride  # Important!!! Do not change it!!!
+        for key_fid in range(update_frames):
             key_fid_original = frame_indices[key_fid]
             x_key = img_emb_per_video[key_fid]      # C x H x W
             x_pos_key = pos_emb_per_video[key_fid]  # C x H x W
@@ -891,7 +891,7 @@ class VisualPromptSampler:
                 targets_per_video["prompt_feats"] = prompt_feats_dense
                 targets_per_video["prompt_attn_masks"] = prompt_attn_masks
             else:
-                s_idx = - num_frames + key_fid
+                s_idx = -num_frames + key_fid
                 valid = gt_masks[:, key_fid].flatten(1).sum(1) > 0
                 targets_per_video["prompt_pe"][valid,:, s_idx:] = prompt_pe_dense[valid,:,key_fid:]
                 targets_per_video["prompt_feats"][valid,:, s_idx:] = prompt_feats_dense[valid,:,key_fid:]
@@ -948,7 +948,7 @@ class VisualPromptSampler:
             gt_boxes = gt_boxes[has_appeared]
             gt_masks = gt_masks[has_appeared]
 
-            key_fid_original = targets_per_video["frame_indices"][0] - (key_fid+1)
+            key_fid_original = targets_per_video["frame_indices"][0] - (self.clip_stride-key_fid)
             x_key = targets_per_video["img_emb_per_video"][key_fid]      # C x H x W
             x_pos_key = targets_per_video["pos_emb_per_video"][key_fid]  # C x H x W
 

@@ -248,7 +248,7 @@ class InferenceVideoVOS(nn.Module):
         start_idx_window, end_idx_window = 0, 0
         stride = self.clip_stride
         for i in range(0, len(images_tensor), stride):
-            if is_last or i + self.num_frames > video_len:
+            if is_last and i + self.num_frames > video_len:
                 break
             is_last = i + self.num_frames >= video_len
             targets[0]["frame_indices"] = torch.arange(i, min(i+self.num_frames, video_len))
