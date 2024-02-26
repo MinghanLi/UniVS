@@ -90,8 +90,6 @@ class UniVS_Prompt(nn.Module):
         overlap_threshold: float,
         stability_score_thresh: float,
         size_divisibility: int,
-        LSJ_aug_image_size: int,
-        LSJ_aug_enable_test: bool,
         sem_seg_postprocess_before_inference: bool,
         pixel_mean: Tuple[float],
         pixel_std: Tuple[float],
@@ -162,8 +160,6 @@ class UniVS_Prompt(nn.Module):
             # use backbone size_divisibility if not set
             size_divisibility = self.backbone.size_divisibility
         self.size_divisibility = size_divisibility
-        self.LSJ_aug_image_size = LSJ_aug_image_size
-        self.LSJ_aug_enable_test = LSJ_aug_enable_test
         self.register_buffer("pixel_mean", torch.Tensor(pixel_mean).view(-1, 1, 1), False)
         self.register_buffer("pixel_std", torch.Tensor(pixel_std).view(-1, 1, 1), False)
 
@@ -311,8 +307,6 @@ class UniVS_Prompt(nn.Module):
             "overlap_threshold": cfg.MODEL.MASK_FORMER.TEST.OVERLAP_THRESHOLD,
             "stability_score_thresh": cfg.MODEL.MASK_FORMER.TEST.STABILITY_SCORE_THRESH,
             "size_divisibility": cfg.MODEL.MASK_FORMER.SIZE_DIVISIBILITY,
-            "LSJ_aug_image_size": cfg.INPUT.LSJ_AUG.IMAGE_SIZE,
-            "LSJ_aug_enable_test": cfg.MODEL.BoxVIS.TEST.LSJ_AUG_ENABLED,
             "sem_seg_postprocess_before_inference": (
                 cfg.MODEL.MASK_FORMER.TEST.SEM_SEG_POSTPROCESSING_BEFORE_INFERENCE
             ),
@@ -364,13 +358,7 @@ class UniVS_Prompt(nn.Module):
         """
         if not self.training:
             return self.forward_inference(batched_inputs)
-
-        images = []
-        for video in batched_inputs:
-            for frame in video["image"]:
-                images.append(frame.to(self.device))
-        images_norm = [(x - self.pixel_mean) / self.pixel_std for x in images]
-
+        
         if self.boxvis_ema_enabled:
             # ---------------- prepare EMA for Teacher net ---------------------
             backbone_shadow, sem_seg_head_shadow = {}, {}
@@ -390,14 +378,22 @@ class UniVS_Prompt(nn.Module):
             for name, param in self.sem_seg_head_t.named_parameters():
                 if name in sem_seg_head_shadow:
                     param.data = w_shadow * sem_seg_head_shadow[name] + (1-w_shadow) * param.data
-
+                    
+        images = []
+        for video in batched_inputs:
+            for frame in video["image"]:
+                images.append(frame.to(self.device))
+        images_norm = [(x - self.pixel_mean) / self.pixel_std for x in images]
         images_norm = ImageList.from_tensors(images_norm, self.size_divisibility)
         images = ImageList.from_tensors(images, self.size_divisibility)
 
-        targets = self.prepare_targets.process(batched_inputs, images, self.device, self.text_prompt_encoder)
+        # image_size = images_norm.image_sizes[0]
+        # out_height = batched_inputs[0].get("height", image_size[0])  # raw image size before data augmentation
+        # out_width = batched_inputs[0].get("width", image_size[1])
+        # out_size = (out_height, out_width)
+        # print(image_size, images_norm.tensor.shape, out_size)
 
-        features_s = self.backbone(images_norm.tensor)
-        outputs_s = self.sem_seg_head(features_s, targets=targets)
+        targets = self.prepare_targets.process(batched_inputs, images, self.device, self.text_prompt_encoder)
 
         if self.boxvis_ema_enabled:
             # ------------------ Teacher Net -----------------------------
@@ -406,6 +402,8 @@ class UniVS_Prompt(nn.Module):
             # generate pseudo masks via teacher outputs
             targets = self.gen_pseudo_mask(outputs_t, targets)
 
+        features_s = self.backbone(images_norm.tensor)
+        outputs_s = self.sem_seg_head(features_s, targets=targets)
         losses = self.criterion(outputs_s, targets)
 
         for k in list(losses.keys()):

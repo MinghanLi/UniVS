@@ -51,7 +51,7 @@ def contrastive_loss(inputs, targets, pos_topk=5, topk=30):
     inputs = inputs.flatten(1)    # N, K
     targets = targets.flatten(1)  # N, K
     N, N_neg = inputs.shape
-    neg_topk = max(N * pos_topk, topk)
+    neg_topk = min(max(N * pos_topk, topk), 50)
     
     pos_inputs = []
     for i, t in enumerate(targets):
@@ -60,8 +60,8 @@ def contrastive_loss(inputs, targets, pos_topk=5, topk=30):
     pos_inputs = torch.stack(pos_inputs)  # N K_pos
     
     neg_indices = torch.randperm(N_neg)[:neg_topk]
-    inputs = inputs[:, neg_indices]  # N K_neg
-    targets = targets[:, neg_indices]  # N K_neg
+    inputs = inputs[:, neg_indices]       # N K_neg
+    targets = targets[:, neg_indices]     # N K_neg
     negpos_inputs = (inputs[:, :, None] - pos_inputs[:, None]) * torch.logical_not(targets)[:, :, None]  # N K_neg K_pos 
     negpos_inputs = negpos_inputs.clamp(max=10.).exp() * torch.logical_not(targets)[:, :, None]  # N K_neg K_pos
     
@@ -79,7 +79,7 @@ def contrastive_aux_loss(inputs, targets, pos_topk=3, topk=30):
     inputs = inputs.flatten(1)    # N, K
     targets = targets.flatten(1)  # N, K
     N, N_neg = inputs.shape
-    neg_topk = max(N * pos_topk, topk)
+    neg_topk = min(max(N * pos_topk, topk), 50)
 
     neg_indices = torch.randperm(N_neg)[:neg_topk]
     inputs = inputs[:, neg_indices].clamp(min=0)  # N K_neg
@@ -116,8 +116,6 @@ class UniVS_Prompt_LongVideo(nn.Module):
         stability_score_thresh: float,
         metadata,
         size_divisibility: int,
-        LSJ_aug_image_size: int,
-        LSJ_aug_enable_test: bool,
         sem_seg_postprocess_before_inference: bool,
         pixel_mean: Tuple[float],
         pixel_std: Tuple[float],
@@ -184,8 +182,6 @@ class UniVS_Prompt_LongVideo(nn.Module):
             # use backbone size_divisibility if not set
             size_divisibility = self.backbone.size_divisibility
         self.size_divisibility = size_divisibility
-        self.LSJ_aug_image_size = LSJ_aug_image_size
-        self.LSJ_aug_enable_test = LSJ_aug_enable_test
         self.register_buffer("pixel_mean", torch.Tensor(pixel_mean).view(-1, 1, 1), False)
         self.register_buffer("pixel_std", torch.Tensor(pixel_std).view(-1, 1, 1), False)
 
@@ -327,8 +323,6 @@ class UniVS_Prompt_LongVideo(nn.Module):
             "stability_score_thresh": cfg.MODEL.MASK_FORMER.TEST.STABILITY_SCORE_THRESH,
             "metadata": MetadataCatalog.get(cfg.DATASETS.TRAIN[0]),
             "size_divisibility": cfg.MODEL.MASK_FORMER.SIZE_DIVISIBILITY,
-            "LSJ_aug_image_size": cfg.INPUT.LSJ_AUG.IMAGE_SIZE,
-            "LSJ_aug_enable_test": cfg.MODEL.BoxVIS.TEST.LSJ_AUG_ENABLED,
             "sem_seg_postprocess_before_inference": (
                 cfg.MODEL.MASK_FORMER.TEST.SEM_SEG_POSTPROCESSING_BEFORE_INFERENCE
             ),

@@ -186,11 +186,10 @@ class PrepareTargets:
             valid_bool_frame = valid_bool_frame[valid_bool_clip]
 
             frame_indices = torch.as_tensor(targets_per_video["frame_indices"], device=device)  # num_frames
-
             if len(gt_ids_per_video) > 0:
                 min_id = max(gt_ids_per_video[valid_bool_frame].min(), 0)
                 gt_ids_per_video[valid_bool_frame] -= min_id  # obj id mapping
-            
+
             valid_bool_clips.append(valid_bool_clip)
             clip_gt_instances.append(
                 {
@@ -206,6 +205,16 @@ class PrepareTargets:
                     "has_stuff": targets_per_video["has_stuff"]
                 }
             )
+            
+            if is_train:
+                # Open the text file in write mode
+                with open('output/gt_masks_per_video.txt', 'a') as file:
+                    # Write a new line into the file
+                    text = ', '.join(
+                        [targets[0]["task"]] + [targets[0]["dataset_name"]]  + \
+                        [str(shape_) for shape_ in gt_masks_per_video.shape]
+                    )
+                    file.write(text + '\n') 
             del gt_masks_per_video
             # if targets_per_video["dataset_name"] in {'flickr'}
                 # clip_gt_instances[-1]["token_ids"] = [targets_per_frame.gt_token_ids for targets_per_frame in targets_per_video]
@@ -225,6 +234,15 @@ class PrepareTargets:
             self.preprocess_text_prompt(
                 text_prompt_encoder, targets, clip_gt_instances, valid_bool_clips, device, num_max_instances
             )
+        
+        # use part of GT instances to avoid out of memory errors
+        # eg. for detection task, vipseg has masks with shape [69, 2, 608, 1024] => Out of memory
+        for k, (gt_instances, targets_per_video) in enumerate(zip(clip_gt_instances, targets)):
+            if gt_instances["masks"].shape[0] > self.max_num_masks:
+                gt_instances["labels"] = gt_instances["labels"][:self.max_num_masks]
+                gt_instances["ids"] = gt_instances["ids"][:self.max_num_masks]
+                gt_instances["masks"] = gt_instances["masks"][:self.max_num_masks]
+                gt_instances["boxes"] = gt_instances["boxes"][:self.max_num_masks]
 
         return clip_gt_instances
     

@@ -43,8 +43,8 @@ class TextPromptEncoder:
         exp_word_feats, exp_sentence_feats = [], []
         for exp_tokenizer in exp_tokenizers:
             exp_feats = self.lang_encoder.encode_text(exp_tokenizer, only_eot=False)
-            exp_word_feats.append(exp_feats[0][0])  # 81x77x640 -> 77x640
-            exp_sentence_feats.append(exp_feats[1].mean(0))  # 81x640 -> 640
+            exp_word_feats.append(exp_feats[0][0])
+            exp_sentence_feats.append(exp_feats[1].mean(0))
         # exp_word_feats: num_exp x 77 x 640, exp_sentence_feats: num_exp x 640
         exp_word_feats = torch.stack(exp_word_feats)[:, :, None].repeat(1, 1, self.num_frames, 1)
         exp_sentence_feats = torch.stack(exp_sentence_feats)[:, None].repeat(1, self.num_frames, 1)
@@ -501,6 +501,7 @@ class VisualPromptSampler:
             hidden_dim=256,
             num_heads=8,
             num_frames=1,
+            num_prev_frames_memory=1,
             num_dense_points=32,
             position_embedding_sin3d_type="FixedT",
             clip_stride=1,
@@ -509,7 +510,6 @@ class VisualPromptSampler:
         self.num_frames = num_frames
         self.key_fid = int((num_frames - 1)/2)
         self.num_dense_points = num_dense_points  
-        self.clip_stride = clip_stride
 
         self.visual_prompt_encoder = VisualPromptEncoder(
             pretrain_img_size=pretrain_img_size,
@@ -533,7 +533,7 @@ class VisualPromptSampler:
         """
         if not training:
             return self.process_per_batch_inference(
-                img_emb_list, pos_emb_list, img_size_list, targets, prompt_type
+                img_emb_list, pos_emb_list, img_size_list, targets, prompt_type, use_all_prev_frames
             )
 
         img_emb = img_emb_list[self.prompt_feature_level_index]
@@ -574,19 +574,27 @@ class VisualPromptSampler:
             targets_per_video["prompt_obj_ids"] = torch.ones(num_max_insts, device=device) * -1
             return None, None, None,
 
+        # assign a prompt type for each object
+        flag_prompt_types = torch.ones(num_gt_insts, device=device) 
+        random_prompt_types = torch.rand(num_gt_insts, device=device)
+        flag_prompt_types[random_prompt_types <= 0.25] = 0  # is_point_prompts
+        flag_prompt_types[(random_prompt_types > 0.25) & (random_prompt_types <= 0.5)] = 1  # is_box_prompts
+        flag_prompt_types[random_prompt_types > 0.5] = 2  # is_mask_prompts
+
         if not use_all_prev_frames:
             # intra-clip prompt propogation from a key frame to reference frames
             return self.process_per_frame(
-                img_emb_per_video, pos_emb_per_video, targets_per_video
+                flag_prompt_types, img_emb_per_video, pos_emb_per_video, targets_per_video
             )
+
         else:
             num_key_frmaes = max(torch.randperm(self.num_frames)[0], int(self.num_frames/2)+1)
-            key_fid_list = (torch.randperm(self.num_frames)[:num_key_frmaes]).sort()[0]
+            key_fid_list = torch.randperm(self.num_frames)[:num_key_frmaes]
             # inter-clip prompt propogation from the previous frames to current frame
             prompt_pe_dense, prompt_feats_dense, prompt_attn_masks = [], [], []
             for key_fid in key_fid_list:
                 prompt_tuple = self.process_per_frame(
-                    img_emb_per_video, pos_emb_per_video, targets_per_video, key_fid
+                    flag_prompt_types, img_emb_per_video, pos_emb_per_video, targets_per_video, key_fid
                 )
                 if prompt_tuple[0] is not None:
                     prompt_pe_dense.append(prompt_tuple[0][:, :, key_fid])
@@ -594,7 +602,7 @@ class VisualPromptSampler:
                     prompt_attn_masks.append(prompt_tuple[2][key_fid])
 
             if len(prompt_pe_dense):
-                # inter-clip visual prompts: num_insts x T_key*R x T x C
+                # inter-clip prompts: num_insts x T_key*R x T x C
                 prompt_pe_dense = torch.cat(prompt_pe_dense, dim=1)[:,:,None].repeat(1,1,self.num_frames,1)
                 prompt_feats_dense = torch.cat(prompt_feats_dense, dim=1)[:,:,None].repeat(1,1,self.num_frames,1)
                 prompt_attn_masks = (torch.stack(prompt_attn_masks).float().sum(0) == len(prompt_attn_masks))[None].repeat(self.num_frames,1,1,1)
@@ -604,7 +612,7 @@ class VisualPromptSampler:
 
     @torch.no_grad()
     def process_per_frame(
-        self, img_emb_per_video, pos_emb_per_video, targets_per_video, key_fid=None
+        self, flag_prompt_types, img_emb_per_video, pos_emb_per_video, targets_per_video, key_fid=None
     ):
         """
         sparse prompts include points and similar images, and dense prompts include box and mask of objects.
@@ -635,13 +643,6 @@ class VisualPromptSampler:
         num_gt_insts = len(gt_masks) 
         num_max_insts = targets_per_video['num_max_instances'] if 'num_max_instances' in targets_per_video else num_gt_insts 
         H_gt, W_gt = gt_masks.shape[-2:]
-
-        # assign a prompt type for each object, including point, box and mask
-        flag_prompt_types = torch.ones(num_gt_insts, device=device) 
-        random_prompt_types = torch.rand(num_gt_insts, device=device)
-        flag_prompt_types[random_prompt_types <= 0.25] = 0  # is_point_prompts
-        flag_prompt_types[(random_prompt_types > 0.25) & (random_prompt_types <= 0.5)] = 1  # is_box_prompts
-        flag_prompt_types[random_prompt_types > 0.5] = 2  # is_mask_prompts
 
         is_point_prompts = flag_prompt_types == 0
         is_box_prompts = flag_prompt_types == 1
@@ -689,6 +690,7 @@ class VisualPromptSampler:
             pbm_gt_idxs.append(gt_idxs_point)
 
         if is_box_prompts.any():
+            # box prompts
             gt_idxs_box = gt_idxs[is_box_prompts]
             dense_boxes = gt_boxes[gt_idxs_box, key_fid]
             obj_prompt_tuple = self.visual_prompt_encoder.get_box_prompt(
@@ -702,21 +704,16 @@ class VisualPromptSampler:
 
         prompt_coords = torch.cat(pbm_prompt_tuples[0])
         prompt_coords = repeat(prompt_coords, 'Q C -> Q T C', T=self.num_frames)
-        prompt_pe_dense = torch.cat(pbm_prompt_tuples[1])     # num_gt_instsxRxTxC
-        prompt_feats_dense = torch.cat(pbm_prompt_tuples[2])  # num_gt_instsxRxTxC
-        prompt_attn_masks = torch.cat(pbm_prompt_tuples[3], dim=-2)  
-
-        # resort the order of visual prompts to the original order of ground-truth obj ids
-        pbm_gt_idxs = torch.cat(pbm_gt_idxs).sort()[1]
-        prompt_pe_dense = prompt_pe_dense[pbm_gt_idxs]
-        promt_feats_dense = prompt_feats_dense[pbm_gt_idxs]
-        prompt_attn_masks = prompt_attn_masks[..., pbm_gt_idxs, :]
+        prompt_pe_dense = torch.cat(pbm_prompt_tuples[1])  # num_gt_instsxRxTxC
+        prompt_feats_dense = torch.cat(pbm_prompt_tuples[2])
+        prompt_attn_masks = torch.cat(pbm_prompt_tuples[3], dim=-2)
+        targets_per_video["prompt_obj_ids"] = torch.cat(pbm_gt_idxs).long()  # corresponding to ground-truth obj ids
 
         # for parallel in a batch
         prompt_pe_dense = prompt_pe_dense[:num_max_insts]   
         prompt_feats_dense = prompt_feats_dense[:num_max_insts]
         prompt_attn_masks = prompt_attn_masks[:, :, :num_max_insts]
-        targets_per_video["prompt_obj_ids"] =  gt_idxs.long()[:num_max_insts]  # corresponding to ground-truth obj ids
+        targets_per_video["prompt_obj_ids"] = targets_per_video["prompt_obj_ids"][:num_max_insts]
 
         # for parallel in a batch
         if prompt_feats_dense.shape[0] < num_max_insts:
@@ -728,11 +725,12 @@ class VisualPromptSampler:
             targets_per_video["prompt_obj_ids"] = torch.cat(
                 [targets_per_video["prompt_obj_ids"], targets_per_video["prompt_obj_ids"][padding_obj_ids]]
             )
+        
         return prompt_pe_dense, prompt_feats_dense, prompt_attn_masks
     
     @torch.no_grad()
     def process_per_batch_inference(
-        self, img_emb_list, pos_emb_list, img_size_list, targets, prompt_type="masks"
+        self, img_emb_list, pos_emb_list, img_size_list, targets, prompt_type="masks", use_all_prev_frames=False
     ):
         """
          img_emb_list: [H_lW_lxNTxC], l=1,2,3,4, multi-scale features after pixel encoder
@@ -740,7 +738,8 @@ class VisualPromptSampler:
          img_size_list: [(H_0, W_0), ...], multi-scale feature sizes
          prompt_type: the type of prompt annotation, which should be in "points", "boxes", "masks"
         """
-        assert len(targets) == 1, 'Only support batch size = 1 now'
+        # TODO: Ablation study for prompt cross-attention layer
+        use_all_prev_frames = True
 
         img_emb = img_emb_list[self.prompt_feature_level_index]
         pos_emb = pos_emb_list[self.prompt_feature_level_index]
@@ -759,13 +758,13 @@ class VisualPromptSampler:
                 return None, None, None
 
             prompt_outs = self.process_per_video_inference(
-                img_emb_per_video, pos_emb_per_video, targets_per_video, prompt_type
+                img_emb_per_video, pos_emb_per_video, targets_per_video, prompt_type, use_all_prev_frames
             )
             prompt_pe_dense.append(prompt_outs[0])
             prompt_feats_dense.append(prompt_outs[1])  # num_gt_instsxRxTxC
             prompt_attn_masks.append(prompt_outs[2])
         
-        if len(prompt_feats_dense) == 0 or None in prompt_feats_dense:
+        if len(prompt_feats_dense) == 0:
             return None, None, None
 
         prompt_pe_dense = torch.stack(prompt_pe_dense, dim=-3).flatten(-3, -2)        # num_gt_instsxRxNTxC
@@ -781,7 +780,7 @@ class VisualPromptSampler:
     
     @torch.no_grad()
     def process_per_video_inference(
-        self, img_emb_per_video, pos_emb_per_video, targets_per_video, prompt_type="masks"
+        self, img_emb_per_video, pos_emb_per_video, targets_per_video, prompt_type="masks", use_all_prev_frames=False
     ):
         """
         sparse prompts include points and similar images, and dense prompts include box and mask of objects
@@ -804,9 +803,10 @@ class VisualPromptSampler:
         first_frame_idx = targets_per_video["first_frame_idx"]
         frame_indices = targets_per_video["frame_indices"]
         is_first_clip = first_frame_idx == 0
-
+        
         if not is_first_clip:
             self.zero_pad_prompt(targets_per_video)
+            
             self.process_per_video_inference_prev_frame(
                 targets_per_video, prompt_type="masks"
             )
@@ -815,8 +815,8 @@ class VisualPromptSampler:
         gt_masks = targets_per_video['masks'][:, -num_frames:].to(device)  # num_gt_insts x T x H x W
         num_gt_insts, _, H_gt, W_gt = gt_masks.shape
 
-        update_frame_ids = torch.nonzero(gt_masks.gt(0.).sum(dim=(0,2,3)) > 0).reshape(-1)        
-        for key_fid in update_frame_ids:
+        update_frames = 1 if is_first_clip else num_frames-1
+        for key_fid in range(update_frames):
             key_fid_original = frame_indices[key_fid]
             x_key = img_emb_per_video[key_fid]      # C x H x W
             x_pos_key = pos_emb_per_video[key_fid]  # C x H x W
@@ -870,26 +870,31 @@ class VisualPromptSampler:
             prompt_feats_dense = obj_prompt_tuple[2]
             prompt_attn_masks = obj_prompt_tuple[3]
             targets_per_video["prompt_obj_ids"] = targets_per_video["ids"]  # corresponding to ground-truth obj ids
-            if is_first_clip:
+            if is_first_clip or "prompt_feats" not in targets_per_video:
                 targets_per_video["prompt_obj_ids"] = targets_per_video["ids"]
                 targets_per_video["prompt_pe"] = prompt_pe_dense
                 targets_per_video["prompt_feats"] = prompt_feats_dense
                 targets_per_video["prompt_attn_masks"] = prompt_attn_masks
             else:
+                dt = 2 if key_fid == update_frames-1 else 1
                 s_idx = targets_per_video["prompt_feats"].shape[-2] - num_frames + key_fid
                 valid = gt_masks[:, key_fid].flatten(1).sum(1) > 0
-                targets_per_video["prompt_pe"][valid,:, s_idx:] = prompt_pe_dense[valid,:,key_fid:]
-                targets_per_video["prompt_feats"][valid,:, s_idx:] = prompt_feats_dense[valid,:,key_fid:]
-                targets_per_video["prompt_attn_masks"][s_idx:] = prompt_attn_masks[key_fid:]
+                if not use_all_prev_frames:
+                    targets_per_video["prompt_pe"][valid,:, s_idx:s_idx+dt] = \
+                        0.5 * (targets_per_video["prompt_pe"][valid,:, s_idx:s_idx+dt] + prompt_pe_dense[valid,:,key_fid:key_fid+dt])
+                    targets_per_video["prompt_feats"][valid,:, s_idx:s_idx+dt] = \
+                        0.5 * (targets_per_video["prompt_feats"][valid,:, s_idx:s_idx+dt] + prompt_feats_dense[valid,:,key_fid:key_fid+dt])
+                else:
+                    targets_per_video["prompt_pe"][valid,:, s_idx:s_idx+dt] = prompt_pe_dense[valid,:,key_fid:key_fid+dt]
+                    targets_per_video["prompt_feats"][valid,:, s_idx:s_idx+dt] = prompt_feats_dense[valid,:,key_fid:key_fid+dt]
+
+                targets_per_video["prompt_attn_masks"][s_idx:s_idx+dt] = prompt_attn_masks[key_fid:key_fid+dt]
         
-        if "prompt_pe" not in targets_per_video:
-            return None, None, None
-        else:
-            prompt_pe_dense = targets_per_video["prompt_pe"][:,:,-num_frames:] 
-            prompt_feats_dense = targets_per_video["prompt_feats"][:,:,-num_frames:] 
-            prompt_attn_masks = targets_per_video["prompt_attn_masks"][-num_frames:]
-        
-            return prompt_pe_dense, prompt_feats_dense, prompt_attn_masks
+        prompt_pe_dense = targets_per_video["prompt_pe"][:,:,-num_frames:] 
+        prompt_feats_dense = targets_per_video["prompt_feats"][:,:,-num_frames:] 
+        prompt_attn_masks = targets_per_video["prompt_attn_masks"][-num_frames:]
+       
+        return prompt_pe_dense, prompt_feats_dense, prompt_attn_masks
 
     @torch.no_grad()
     def process_per_video_inference_prev_frame(
@@ -918,17 +923,15 @@ class VisualPromptSampler:
         has_appeared = (targets_per_video["first_appear_frame_idxs"] <= prev_frame_idx) & \
                        (targets_per_video["first_appear_frame_idxs"] != -1)
         update_prev_frame = (self.num_frames == 1) or ("prompt_feats" not in targets_per_video)
-        if has_appeared.sum() == 0 and not update_prev_frame:
-            return 
-
-        for key_fid in range(self.clip_stride):
-            gt_boxes = targets_per_video["boxes"][:, -(num_frames+self.clip_stride)+key_fid].to(device)  # num_gt_insts x 4
-            gt_masks = targets_per_video['masks'][:, -(num_frames+self.clip_stride)+key_fid].to(device)  # num_gt_insts x H x W
+        if has_appeared.sum() > 0 and update_prev_frame:
+            gt_boxes = targets_per_video["boxes"][:, -num_frames-1].to(device)  # num_gt_insts x 4
+            gt_masks = targets_per_video['masks'][:, -num_frames-1].to(device)  # num_gt_insts x H x W
             H_gt, W_gt = gt_masks.shape[-2:]
 
             gt_boxes = gt_boxes[has_appeared]
             gt_masks = gt_masks[has_appeared]
 
+            key_fid = 0
             key_fid_original = targets_per_video["frame_indices"][0] - 1
             x_key = targets_per_video["img_emb_per_video"][key_fid]      # C x H x W
             x_pos_key = targets_per_video["pos_emb_per_video"][key_fid]  # C x H x W
@@ -981,15 +984,16 @@ class VisualPromptSampler:
 
             if "prompt_feats" not in targets_per_video:
                 _, R, T, C = prompt_pe_dense.shape
-                targets_per_video["prompt_pe"] =  torch.zeros([num_gt_insts, R, T+self.clip_stride, C], device=device)
-                targets_per_video["prompt_feats"] =  torch.zeros([num_gt_insts, R, T+self.clip_stride, C], device=device)
+                # torch.zeros([prompt_attn_masks.shape[0], prompt_attn_masks.shape[1], num_gt_insts, prompt_attn_masks.shape[-1]], device=device)
+                targets_per_video["prompt_pe"] =  torch.zeros([num_gt_insts, R, T+1, C], device=device)
+                targets_per_video["prompt_feats"] =  torch.zeros([num_gt_insts, R, T+1, C], device=device)
                 targets_per_video["prompt_attn_masks"] = torch.zeros(
-                    [prompt_attn_masks.shape[0]+self.clip_stride, prompt_attn_masks.shape[1], num_gt_insts, prompt_attn_masks.shape[-1]], device=device
+                    [prompt_attn_masks.shape[0]+1, prompt_attn_masks.shape[1], num_gt_insts, prompt_attn_masks.shape[-1]], device=device
                 ).bool()
 
-            targets_per_video["prompt_pe"][has_appeared,:,-(num_frames+self.clip_stride)+key_fid] = prompt_pe_dense[:,:,key_fid]
-            targets_per_video["prompt_feats"][has_appeared,:,-(num_frames+self.clip_stride)+key_fid] = prompt_feats_dense[:,:,key_fid]
-            targets_per_video["prompt_attn_masks"][-(num_frames+self.clip_stride)+key_fid, :, has_appeared] = prompt_attn_masks[key_fid]
+            targets_per_video["prompt_pe"][has_appeared,:,-num_frames+key_fid-1] = prompt_pe_dense[:,:,key_fid]
+            targets_per_video["prompt_feats"][has_appeared,:,-num_frames+key_fid-1] = prompt_feats_dense[:,:,key_fid]
+            targets_per_video["prompt_attn_masks"][-num_frames+key_fid-1, :, has_appeared] = prompt_attn_masks[key_fid]
 
     @torch.no_grad()
     def zero_pad_prompt(self, targets_per_video):
@@ -997,13 +1001,11 @@ class VisualPromptSampler:
             return 
 
         # for the newly frame, we set the mean of prompt feats in all previous frames as the initial prompt tokens
-        zero_pad_tensor = torch.zeros_like(targets_per_video["prompt_pe"][:,:,-self.clip_stride:])
+        zero_pad_tensor = torch.zeros_like(targets_per_video["prompt_pe"][:,:,-1:])
         targets_per_video["prompt_pe"] = torch.cat([targets_per_video["prompt_pe"], zero_pad_tensor], dim=2)
         targets_per_video["prompt_feats"] = torch.cat([targets_per_video["prompt_feats"], zero_pad_tensor], dim=2)
-        targets_per_video["prompt_attn_masks"] = torch.cat(
-            [targets_per_video["prompt_attn_masks"], targets_per_video["prompt_attn_masks"][-self.clip_stride:]]
-        )
-        targets_per_video["prompt_attn_masks"][-self.clip_stride:] = False
+        targets_per_video["prompt_attn_masks"] = torch.cat([targets_per_video["prompt_attn_masks"], targets_per_video["prompt_attn_masks"][-1:]])
+        targets_per_video["prompt_attn_masks"][-1] = False
 
 def generate_temporal_weights(num_frames, weights=None, enable_softmax=False):
     """
@@ -1019,5 +1021,3 @@ def generate_temporal_weights(num_frames, weights=None, enable_softmax=False):
         temp_w = temp_w.to(weights) * weights
 
     return temp_w / temp_w.sum(-1).unsqueeze(-1).clamp(min=1e-3)
-    
-    

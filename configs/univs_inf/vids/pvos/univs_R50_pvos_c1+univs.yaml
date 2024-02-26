@@ -2,8 +2,6 @@ _BASE_: Base.yaml
 MODEL:
   WEIGHTS: 'pretrained/univs/univs_prompt_R50_bs8_f4_video_1x_200queries_c1+univs+casa_prompt_sa_frozenbb+pixelenc_wcttnew_rdm_maskemb.pth'
   META_ARCHITECTURE: "UniVS_Prompt"
-  SEM_SEG_HEAD:
-    NUM_CLASSES: 125
   MASK_FORMER:
     TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniVS"
     NUM_OBJECT_QUERIES: 200
@@ -18,12 +16,6 @@ MODEL:
     TEXT_PROMPT_TO_IMAGE_ENABLE: True
     MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
     MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
-  BoxVIS:
-    TEST:
-      NUM_FRAMES_WINDOW: 5
-      CLIP_STRIDE: 1
-      LSJ_AUG_ENABLED: True
-      APPLY_CLS_THRES: 0.25
 DATASETS:
   TEST: ("pvos_viposeg_dev", )
 INPUT:

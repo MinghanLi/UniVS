@@ -84,7 +84,6 @@ class InferenceVideoVOS(nn.Module):
         output_dir: str='output/inf/vos/',
         temporal_consistency_threshold: float=0.25,
         video_unified_inference_queries: str='prompt',
-        num_prev_frames_memory: int=5,
     ):
         """
         Args:
@@ -142,7 +141,7 @@ class InferenceVideoVOS(nn.Module):
         self.clip_stride = clip_stride
         self.temporal_consistency_threshold = temporal_consistency_threshold
         self.video_unified_inference_queries = video_unified_inference_queries
-        self.num_prev_frames_memory = max(num_prev_frames_memory, num_frames)
+        self.num_prev_frames_memory = 10
 
         self.output_dir = output_dir
 
@@ -165,7 +164,7 @@ class InferenceVideoVOS(nn.Module):
             "metadata": MetadataCatalog.get(cfg.DATASETS.TEST[0]),
             "size_divisibility": cfg.MODEL.MASK_FORMER.SIZE_DIVISIBILITY,
             "LSJ_aug_image_size": cfg.INPUT.LSJ_AUG.IMAGE_SIZE,
-            "LSJ_aug_enable_test": cfg.INPUT.LSJ_AUG.SQUARE_ENABLED,
+            "LSJ_aug_enable_test": cfg.MODEL.BoxVIS.TEST.LSJ_AUG_ENABLED,
             "sem_seg_postprocess_before_inference": (
                 cfg.MODEL.MASK_FORMER.TEST.SEM_SEG_POSTPROCESSING_BEFORE_INFERENCE
             ),
@@ -192,7 +191,6 @@ class InferenceVideoVOS(nn.Module):
             "output_dir": cfg.OUTPUT_DIR,
             "temporal_consistency_threshold": cfg.MODEL.UniVS.TEST.TEMPORAL_CONSISTENCY_THRESHOLD,
             "video_unified_inference_queries": cfg.MODEL.UniVS.TEST.VIDEO_UNIFIED_INFERENCE_QUERIES,
-            "num_prev_frames_memory": cfg.MODEL.UniVS.TEST.NUM_PREV_FRAMES_MEMORY,
         }
 
     @property
@@ -246,9 +244,9 @@ class InferenceVideoVOS(nn.Module):
         
         is_last = False
         start_idx_window, end_idx_window = 0, 0
-        stride = self.clip_stride
+        stride = 1
         for i in range(0, len(images_tensor), stride):
-            if is_last or i + self.num_frames > video_len:
+            if is_last and i + self.num_frames > video_len:
                 break
             is_last = i + self.num_frames >= video_len
             targets[0]["frame_indices"] = torch.arange(i, min(i+self.num_frames, video_len))
@@ -275,7 +273,7 @@ class InferenceVideoVOS(nn.Module):
                 self.visualize_results(i, batched_inputs, targets, image_size, out_size, is_last, stride)
                 continue
 
-            if targets[0]['task'] == 'sot' or 'davis' in targets[0]['dataset_name']:
+            if targets[0]['task'] == 'sot'  or 'davis' in targets[0]['dataset_name']:
                 self.save_vos_results(i, targets, image_size, out_size, is_last, stride)
             elif targets[0]['task'] == 'grounding':
                 self.save_rvos_results(i, targets, image_size, out_size, is_last, stride)
@@ -323,14 +321,13 @@ class InferenceVideoVOS(nn.Module):
             semseg = torch.einsum("qc,qthw->cthw", pred_logits[:self.num_queries], pred_masks[:self.num_queries].sigmoid())
             sem_mask = semseg.argmax(0)
 
-        # STEP1: firstly appeared objects
         first_appear_frame_idxs = targets_per_video["first_appear_frame_idxs"]
         is_first_appear = (first_appear_frame_idxs >= first_frame_idx) & (first_appear_frame_idxs < first_frame_idx+num_frames)
         if is_first_appear.any():
             faf_idx_ = first_appear_frame_idxs[is_first_appear] - (first_frame_idx + num_frames)
             obj_idx_  = torch.nonzero(is_first_appear).reshape(-1)
 
-            use_prompt_only = True  # for first frame, we only use predicted masks by prompt queries
+            use_prompt_only = True
             if use_prompt_only or task == 'grounding' or \
                 (self.prompt_as_queries and self.video_unified_inference_queries in {'prompt', 'prompt+learn', 'learn+prompt'}):
                 # please enable LSJ_aug during inference (keep consistency postional embeddings with training)
@@ -410,14 +407,13 @@ class InferenceVideoVOS(nn.Module):
                 gt_mask_logits[obj_i_, faf_i_:] = cur_mask
                 gt_boxes[obj_i_, faf_i_:] = matched_pred_boxes[i_, faf_i_:]
         
-        # STEP2: appeared objects
         has_appeared = (first_appear_frame_idxs < first_frame_idx) & (first_appear_frame_idxs != -1)
         if has_appeared.any():
-            tgt_embds = gt_embds[has_appeared, -self.num_prev_frames_memory:]  # num_gt_appreaed x T_prev x C
+            tgt_embds = gt_embds[has_appeared, max(0, first_frame_idx-self.num_prev_frames_memory):]  # num_gt_appreaed x T_prev x C
             use_prompt = False
             if self.prompt_as_queries and self.video_unified_inference_queries in {'prompt', 'prompt+learn', 'learn+prompt'}:
                 use_prompt = True
-                sim_threshold = 0.75
+                sim_threshold = 0.5
                 # please enable LSJ_aug during inference (keep consistency postional embeddings with training)
                 indices_p = torch.nonzero(has_appeared).reshape(-1) + self.num_queries
                 is_consistency, matched_sim_p = check_consistency_with_prev_frames(
@@ -436,7 +432,7 @@ class InferenceVideoVOS(nn.Module):
             use_learn = False
             if self.video_unified_inference_queries in {'learn', 'prompt+learn', 'learn+prompt'}:
                 use_learn = True
-                sim_threshold = 0.75
+                sim_threshold = 0.65
                 # back-end re-identitfication between prompt and learnable queries, used in SEEM and UNINEXT
                 indices_l, matched_sim_l = match_from_learnable_embds(
                     tgt_embds, pred_embds[:self.num_queries], return_similarity=True, return_src_indices=False
@@ -509,7 +505,7 @@ class InferenceVideoVOS(nn.Module):
             nonblank_embds = (gt_embds[has_appeared, -num_frames:] != 0).any(-1)
             gt_embds[has_appeared, -num_frames:] = \
                 (gt_embds[has_appeared, -num_frames:] + matched_pred_embds) / (nonblank_embds[..., None] + 1.)
-
+        
         targets_per_video['masks'] = gt_mask_logits.gt(0.).float()
         targets_per_video['mask_logits'] = gt_mask_logits
         targets_per_video['boxes'] = gt_boxes
@@ -526,9 +522,8 @@ class InferenceVideoVOS(nn.Module):
             # Note: images without MEAN and STD normalization
             video_len = targets_per_video["video_len"]
             h_pad, w_pad = targets_per_video["inter_image_size"]
-            box_normalizer = torch.as_tensor(
-                [w_pad, h_pad, w_pad, h_pad], dtype=torch.float32, device=self.device
-            ).reshape(1, -1)
+            box_normalizer = torch.as_tensor([w_pad, h_pad, w_pad, h_pad],
+                                            dtype=torch.float32, device=self.device).reshape(1, -1)
 
             # init annotation for the first frame of the entire video
             if "ids" not in targets_per_video:   
@@ -564,8 +559,9 @@ class InferenceVideoVOS(nn.Module):
             else:
                 gt_embds_per_video = targets_per_video['embds'][:, -num_frames_newly:].mean(1).unsqueeze(1).repeat(1,num_frames_newly,1).clone()
                 # remain masks of the last self.num_frames + 1 images for memory efficiency
-                gt_masks_per_video = torch.cat([targets_per_video['masks'][:, -self.num_prev_frames_memory:], gt_masks_per_video], dim=1)  # N, num_frames, H, W
-                gt_mask_logits_per_video = torch.cat([targets_per_video['mask_logits'][:, -self.num_prev_frames_memory:], gt_mask_logits_per_video], dim=1)  # N, num_frames, H, W
+                s_idx = 0 if first_frame_idx == 0 else stride
+                gt_masks_per_video = torch.cat([targets_per_video['masks'][:, s_idx:], gt_masks_per_video], dim=1)  # N, num_frames+1, H, W
+                gt_mask_logits_per_video = torch.cat([targets_per_video['mask_logits'][:, s_idx:], gt_mask_logits_per_video], dim=1)  # N, num_frames+1, H, W
                 gt_boxes_per_video = torch.cat([targets_per_video['boxes'], gt_boxes_per_video], dim=1)             # N, num_frames_prev, 4
                 gt_embds_per_video = torch.cat([targets_per_video['embds'], gt_embds_per_video], dim=1)             # N, num_frames_prev, C
 
@@ -596,8 +592,8 @@ class InferenceVideoVOS(nn.Module):
             targets_per_video.update(
                 {
                     "labels": gt_classes_per_video, 
-                    "masks": gt_masks_per_video,  # N, num_frames, H, W
-                    "mask_logits": gt_mask_logits_per_video, # N, num_frames, H, W
+                    "masks": gt_masks_per_video,  # N, num_frames+stride, H, W
+                    "mask_logits": gt_mask_logits_per_video, # N, num_frames+stride, H, W
                     "boxes": gt_boxes_per_video,  # N, num_frames_prev, 4
                     "embds": gt_embds_per_video,  # N, num_frames_prev, C
                     "first_appear_frame_idxs": first_appear_frame_idxs,
@@ -617,14 +613,9 @@ class InferenceVideoVOS(nn.Module):
             os.makedirs(save_dir, exist_ok=True)
         
         ids = torch.as_tensor(targets_per_video["ids"], device=self.device)
-        if ids.min() == 0:
-            ids += 1  # grounding tasks
         pred_masks = targets_per_video['mask_logits']
-        num_frames = min(self.num_frames, video_len-first_frame_idx)
         if not is_last:
-            pred_masks = pred_masks[:, -num_frames:min(-num_frames+stride, -1)] # NTHW
-        else:
-            pred_masks = pred_masks[:, -num_frames:]
+            pred_masks = pred_masks[:, :stride] # NTHW
 
         pred_masks = pred_masks[:, :, :image_size[0], :image_size[1]]
         if image_size != out_size:
@@ -666,9 +657,7 @@ class InferenceVideoVOS(nn.Module):
 
         pred_masks = targets_per_video['mask_logits']
         if not is_last:
-            pred_masks = pred_masks[:, -num_frames:min(-num_frames+stride, -1)] # NTHW
-        else:
-            pred_masks = pred_masks[:, -num_frames:]
+            pred_masks = pred_masks[:, :stride] # NTHW
         
         pred_masks = pred_masks[:, :, :image_size[0], :image_size[1]]
         ids = targets_per_video["ids"]
@@ -711,9 +700,7 @@ class InferenceVideoVOS(nn.Module):
 
         pred_masks = targets_per_video['masks']
         if not is_last:
-            pred_masks = pred_masks[:, -num_frames:min(-num_frames+stride, -1)] # NTHW
-        else:
-            pred_masks = pred_masks[:, -num_frames:]
+            pred_masks = pred_masks[:, :stride] # NTHW
         
         pred_masks = pred_masks[:, :, :image_size[0], :image_size[1]]
         ids = targets_per_video["ids"]

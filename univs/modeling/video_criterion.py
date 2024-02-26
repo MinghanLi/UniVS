@@ -520,7 +520,7 @@ class VideoSetCriterion(nn.Module):
         # store query embds to calculate inter-clip reid loss for stage3
         if len(targets) == 1:
             assert len(targets) == 1, 'Only support bacth size = 1'
-            targets[0]['src_embds'][l_layer].append(src_embds)
+            targets[0]['src_embds'][l_layer].append(src_embds.clone())
             targets[0]['tgt_ids'][l_layer].append(tgt_ids)
 
         return loss
@@ -611,7 +611,7 @@ class VideoSetCriterion(nn.Module):
         # store query embds to calculate inter-clip reid loss for stage3
         if len(targets) == 1 and not (task == "detection" and targets[0]["prompt_type"] == "text"):
             assert len(targets) == 1, 'Only support bacth size = 1'
-            targets[0]['src_embds'][l_layer].append(pred_embds_prompt)
+            targets[0]['src_embds'][l_layer].append(pred_embds_prompt.clone())
             targets[0]['tgt_ids'][l_layer].append(tgt_ids_p)
 
         return {"loss_reid_l2p": loss_focal, "loss_reid_l2p_aux": loss_aux}
@@ -850,157 +850,6 @@ class VideoSetCriterion(nn.Module):
         tgt_idx = torch.cat([tgt for (_, tgt) in indices])
         return batch_idx, tgt_idx
 
-    def _get_spatial_temporal_pairwise_samples(self, targets, mask_features):
-        """Compute pairwise affinity by the color similarity and the patch feature correlation.
-        """
-        if isinstance(mask_features, list):
-            H, W = mask_features[-1].shape[-2:]
-            mask_features = [F.interpolate(f, (H, W), mode='bilinear', align_corners=False) for f in mask_features]
-            mask_features = rearrange(torch.stack(mask_features, dim=1),
-                                      '(b t) l c h w -> b t l c h w', b=len(targets))
-        else:
-            mask_features = mask_features.unsqueeze(2)  # b t 1 c h w
-
-        # mask features: BxTxCxHpxWp, 1/4 resolution of input image
-        bs, T, N_l = mask_features.shape[:3]
-        H, W = targets[0]["image_lab_color"].shape[-2:]
-        if max(H, W) > 480 or N_l > 1:
-            H, W = H // 2, W // 2
-
-        # [spatial_size+2×padding−dilation×(kernel_size−1)−1]/stride + 1
-        dH = (H + 2 * int(self.boxvis_pairwise_corr_kernel_size / 2) - self.boxvis_pairwise_corr_kernel_size) 
-        dH = int(dH / self.boxvis_pairwise_corr_stride) + 1
-        dW = (W + 2 * int(self.boxvis_pairwise_corr_kernel_size / 2) - self.boxvis_pairwise_corr_kernel_size)
-        dW = int(dW / self.boxvis_pairwise_corr_stride) + 1
-
-        grid_y, grid_x = torch.meshgrid(torch.arange(dH), torch.arange(dW))  # HxW
-        grid_indices = (grid_y * dW + grid_x).to(mask_features.device)  # HxW
-
-        for t, features in zip(targets, mask_features):
-            if t['masks'].nelement() == 0:
-                continue
-
-            tgt_masks = t['masks'].clone()  # NxTxHxW
-            tgt_masks = F.interpolate(tgt_masks, (H, W), mode='bilinear', align_corners=False).float()
-            tgt_masks = rearrange(self.unfold_pixel(tgt_masks),
-                                  'N (T K) (H W) -> N T H W K',
-                                  H=dH, W=dW, K=1).gt(0.5).any(dim=-1)
-
-            img_color = t["image_lab_color"]  # Tx3xHxW
-            img_color = F.interpolate(img_color, (H, W), mode='bilinear', align_corners=False)  # Tx3xHxW
-            img_color = rearrange(self.unfold_pixel(img_color),
-                                  'T (C K) (H W) -> T H W K C',
-                                  H=dH, W=dW, K=1, C=3)
-
-            if self.enable_patch_corr:
-                features = features.flatten(1, 2)
-                features = F.interpolate(features, (H, W),
-                                         mode='bilinear', align_corners=False)  # TxN_lCxHxW
-                features = rearrange(self.unfold_patch(features),
-                                     'T (C K) (H W) -> (T H W) K C',
-                                     H=dH, W=dW, K=self.boxvis_pairwise_corr_kernel_size ** 2)
-
-            tgt_boxes = t["boxes"]  # NxTx4
-            tgt_boxes_c = 0.5 * (tgt_boxes[..., :2] + tgt_boxes[..., 2:]) * \
-                          torch.as_tensor([dW, dH], device=tgt_boxes.device).reshape(1, 1, -1)
-            ctr_shift_idx = [idx % T for idx in range(1, T+1)]
-            dxy_ctrs_temp = (tgt_boxes_c - tgt_boxes_c[:, ctr_shift_idx]).round().long()  # Nx(T-1)x2
-            tgt_boxes_exist = ((tgt_boxes[..., 2:] - tgt_boxes[..., :2]) > 0).all(dim=-1)
-            tgt_boxes_exist = tgt_boxes_exist & tgt_boxes_exist[:, ctr_shift_idx]  # Nx(T-1)
-
-            N_objs = tgt_boxes.shape[0]
-            if self.enable_box_center_shifting:
-                # box-center guided shifting between the t and t+1 frames
-                indices_ctr_shift = torch.ones_like(tgt_masks).long() * -1
-                tgt_masks_ctr_shift = torch.zeros_like(tgt_masks).long() - 1
-                img_color_ctr_shift = torch.zeros_like(img_color)[None].repeat(N_objs, 1, 1, 1, 1, 1)
-                for obj_i in range(N_objs):
-                    for t_i in range(T):
-                        dx_c, dy_c = dxy_ctrs_temp[obj_i, t_i]
-                        if not tgt_boxes_exist[obj_i, t_i] or dx_c.abs() >= dW-2 or dy_c.abs() >= dH-2:
-                            continue
-
-                        sh1, eh1, sw1, ew1 = max(dy_c, 0), min(dH+dy_c, dH), max(dx_c, 0), min(dW+dx_c, dW)
-                        sh2, eh2, sw2, ew2 = max(-dy_c, 0), min(dH-dy_c, dH), max(-dx_c, 0), min(dW-dx_c, dW)
-                        assert eh1-sh1 == eh2-sh2 and ew1-sw1 == ew2-sw2, 'Check the shifted frame sizes!'
-
-                        indices_ctr_shift[obj_i, t_i, sh1:eh1, sw1:ew1] = grid_indices[sh2:eh2, sw2:ew2] + ctr_shift_idx[t_i] * dH * dW
-                        tgt_masks_ctr_shift[obj_i, t_i, sh1:eh1, sw1:ew1] = tgt_masks[obj_i, ctr_shift_idx[t_i], sh2:eh2, sw2:ew2]
-                        img_color_ctr_shift[obj_i, t_i, sh1:eh1, sw1:ew1] = img_color[ctr_shift_idx[t_i], sh2:eh2, sw2:ew2]
-            else:
-                indices_ctr_shift = grid_indices[None, None].repeat(N_objs, T, 1, 1) + \
-                                  (torch.as_tensor(ctr_shift_idx, device=grid_indices.device) * dH * dW).reshape(-1, 1, 1)
-                tgt_masks_ctr_shift = tgt_masks[:, ctr_shift_idx]
-                img_color_ctr_shift = img_color[None, ctr_shift_idx]  # 1xTxHxWxKxC
-
-            grid_indices_objs = grid_indices[None].repeat(T, 1, 1) + \
-                                (torch.arange(T) * dH * dW).reshape(-1, 1, 1).to(grid_indices.device)
-
-            is_inbox_pairwise_st = []
-            for (dt, dx, dy) in self.pixel_offsets:
-                tgt_masks_a = tgt_masks[:, :, max(-dy, 0):dH-dy, max(-dx, 0):dW-dx]
-                img_color_a = img_color[None, :, max(-dy, 0):dH-dy, max(-dx, 0):dW-dx]
-                if dt == 0:
-                    # spatial paired pixels
-                    tgt_masks_b = tgt_masks[:, :, max(dy, 0):dH+dy, max(dx, 0):dW+dx]
-                    img_color_b = img_color[None, :, max(dy, 0):dH+dy, max(dx, 0):dW+dx]
-                else:
-                    # temporal paired pixels
-                    tgt_masks_b = tgt_masks_ctr_shift[:, :, max(dy, 0):dH+dy, max(dx, 0):dW+dx]
-                    img_color_b = img_color_ctr_shift[:, :, max(dy, 0):dH+dy, max(dx, 0):dW+dx]
-
-                # Cond1: inbox, -1 in tgt_masks_b is the padding area after shifting
-                if dt == 0:
-                    # spatial paired pixels: at least one pixel is in the inner box
-                    is_inbox = (tgt_masks_a + tgt_masks_b).flatten(1) > 0  # NxT(Hp-1)(Wp-1)
-                else:
-                    # temporal paired pixels: both two pixels should be in the inner box
-                    is_inbox = (tgt_masks_a.float() + tgt_masks_b.float()).flatten(1) == 2
-
-                # Cond2: high Affinity => sim_color + path_corr
-                sim_color = torch.exp(-torch.norm(
-                    img_color_a - img_color_b,
-                    dim=-1) * 0.5).mean(dim=-1).flatten(1)  # NxT(Hp-1)(Wp-1)
-                if sim_color.shape[0] == 1:
-                    sim_color = sim_color.repeat(N_objs, 1)
-                sim_color = sim_color[is_inbox]
-
-                indices_a = grid_indices_objs[:, max(-dy, 0):dH-dy, max(-dx, 0):dW-dx:].flatten()
-                if self.enable_patch_corr:
-                    if dt == 0:
-                        indices_b = grid_indices_objs[:, max(dy, 0):dH+dy, max(dx, 0):dW+dx].flatten()
-                        feat_corr = torch.cat([
-                            torch.einsum('nkc,nkc->nk',
-                                         F.normalize(features[indices_a[is_inbox_obj]], dim=-1),
-                                         F.normalize(features[indices_b[is_inbox_obj]], dim=-1)
-                                         ).mean(dim=-1)
-                            for is_inbox_obj in is_inbox
-                        ])
-                    else:
-                        indices_ctr_shift_b = indices_ctr_shift[..., max(dy, 0):dH+dy, max(dx, 0):dW+dx].flatten(1)
-                        is_inbox = is_inbox & (indices_ctr_shift_b >= 0)
-                        feat_corr = torch.cat([
-                            torch.einsum('nkc,nkc->nk',
-                                         F.normalize(features[indices_a[is_inbox_obj]], dim=-1),
-                                         F.normalize(features[indices_b[is_inbox_obj]], dim=-1)
-                                         ).mean(dim=-1)
-                            for is_inbox_obj, indices_b in zip(is_inbox, indices_ctr_shift_b)
-                        ])
-                    thresh = self.boxvis_pairwise_color_thresh + 0.5 * self.boxvis_pairwise_corr_thresh
-                    is_pairwise = (sim_color + 0.5 * feat_corr) >= thresh
-
-                else:
-                    is_pairwise = sim_color >= self.boxvis_pairwise_color_thresh
-
-                is_inbox_pairwise = is_inbox.clone()
-                is_inbox_pairwise[is_inbox] = is_pairwise
-                is_inbox_pairwise_st.append(is_inbox_pairwise)
-
-            t['st_pair_spatial_size'] = (H, W)
-            t['st_pair_unfold_size'] = (dH, dW)
-            t['st_pair_indices_ctr_shift'] = indices_ctr_shift
-            t['st_pair_is_inbox_pairwise'] = is_inbox_pairwise_st  # n_o [NxT(Hp-1)(Wp-1)]
-
     def get_loss(self, loss, outputs, targets, indices, num_masks, l_layer=9):
         if self.boxvis_enabled:
             loss_map = {
@@ -1021,7 +870,7 @@ class VideoSetCriterion(nn.Module):
         Parameters:
              outputs: dict of tensors, see the output specification of the model for the format
              targets: list of dicts, such that len(targets) == batch_size.
-                      The expected keys in each dict depends on the losses applied, see each loss' doc
+                      The expected keys in each dict depend on the losses applied, see each loss' doc
         """
         self._iter += 1
         self.pseudo_mask_score_thresh = 1 / (1 + math.exp(-2 * self._iter / self.max_iters))
@@ -1042,11 +891,6 @@ class VideoSetCriterion(nn.Module):
             assert 'src_embds' not in targets[0] and len(targets) == 1, 'Only support batch size = 1'
             targets[0]['src_embds'] = [[] for _ in range(num_layers)]  
             targets[0]['tgt_ids'] = [[] for _ in range(num_layers)] 
-
-        # get pairwise samples in temporal dimension based on patch feature similarity
-        if self.boxvis_enabled and self.boxvis_pairwise_enable:
-            with torch.no_grad():
-                self._get_spatial_temporal_pairwise_samples(targets, outputs["mask_features"])
 
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
         # Retrieve the matching between the outputs of the last layer and the targets

@@ -4,6 +4,9 @@ output
 # pretrained dir
 pretrained
 
+# tmp dir
+tmp
+
 check_annotations.py
 *-frame
 *.sh
