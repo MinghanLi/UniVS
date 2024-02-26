@@ -33,7 +33,9 @@ sh tools/run/univs_r50_stage3.sh
 ```
 
 ### 🌟 Unified Inference for videos
-Download trained weights from [Model Zoo](Model_zoo.md), and save it into the path `pretrained/stage{1,2,3}/`. We support multiple ways to evaluate UniVS:
+**Hightlights**: In order to facilitate the evaluation of video segmentation tasks under **the Detectron2** framework, we wrote the evaluation metrics of the six existing video segmentation tasks into the Detectron2 **Evaluators**. Now, you can evaluate six video segmentation tasks directly in our code just like COCO, and you no longer need to manually adapt any evaluation indicators by yourself. Please refer to `univs/reference` and `univs/inference` for specific codes.
+
+Download trained weights from [Model Zoo](Model_zoo.md), and save it into the path `pretrained/stage{1,2,3}/`. We support multiple ways to evaluate UniVS on VIS, VSS, VPS, VOS, PVOS and RefVOS tasks:
 ```
 # test all six tasks using ResNet50 backbone (one-model)
 $ sh tools/test/test_r50.sh
@@ -56,10 +58,10 @@ If you use UniVS in your research or wish to refer to the baseline results publi
 
 ```BibTeX
 @misc{li2023boxvis,
-      title={BoxVIS: Video Instance Segmentation with Box Annotations}, 
-      author={Minghan Li, Shuai Li and Lei Zhang},
+      title={UniVS: Unified and Universal Video Segmentation with Prompts as Queries}, 
+      author={Minghan Li, Shuai Li, Xindong Zhang, and Lei Zhang},
       year={2024},
-      eprint={2303.14618},
+      eprint={-},
       archivePrefix={arXiv},
       primaryClass={cs.CV}
 }
