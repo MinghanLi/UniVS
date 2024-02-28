@@ -54,8 +54,8 @@ INPUT:
 SOLVER:
   BASE_LR: 0.000025
   IMS_PER_BATCH: 4
-  STEPS: (162000, )
-  MAX_ITER: 177000  # 2x: (324k, 354k) for bs=8; (162k, 177k) for bs=16, (108k, 118k) for bs=24
+  STEPS: (324000, )
+  MAX_ITER: 354000  # 2x: (324k, 354k) for bs=8; (162k, 177k) for bs=16, (108k, 118k) for bs=24
 TEST:
   DETECTIONS_PER_IMAGE: 35
 OUTPUT_DIR: output/v2/univs_r50_stage3/

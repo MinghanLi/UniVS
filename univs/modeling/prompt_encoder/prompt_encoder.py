@@ -575,7 +575,7 @@ class VisualPromptSampler:
             num_max_insts = targets_per_video['num_max_instances'] if 'num_max_instances' in targets_per_video else num_gt_insts
             targets_per_video["prompt_obj_ids"] = torch.ones(num_max_insts, device=device) * -1
             return None, None, None
-
+        
         if not use_all_prev_frames:
             # intra-clip prompt propogation from a key frame to reference frames
             return self.process_per_frame(
@@ -702,8 +702,6 @@ class VisualPromptSampler:
 
             pbm_gt_idxs.append(gt_idxs_box)
 
-        prompt_coords = torch.cat(pbm_prompt_tuples[0])
-        prompt_coords = repeat(prompt_coords, 'Q C -> Q T C', T=self.num_frames)
         prompt_pe_dense = torch.cat(pbm_prompt_tuples[1])     # num_gt_instsxRxTxC
         prompt_feats_dense = torch.cat(pbm_prompt_tuples[2])  # num_gt_instsxRxTxC
         prompt_attn_masks = torch.cat(pbm_prompt_tuples[3], dim=-2)  
@@ -744,6 +742,7 @@ class VisualPromptSampler:
          use_all_prev_frames: using objects from all previous frames as the visual prompts (for stage3)
         """
         assert len(targets) == 1, 'Only support batch size = 1 now'
+        use_all_prev_frames = False
 
         img_emb = img_emb_list[self.prompt_feature_level_index]
         pos_emb = pos_emb_list[self.prompt_feature_level_index]
@@ -763,7 +762,7 @@ class VisualPromptSampler:
                 return None, None, None
 
             prompt_outs = self.process_per_video_inference(
-                img_emb_per_video, pos_emb_per_video, targets_per_video, prompt_type
+                img_emb_per_video, pos_emb_per_video, targets_per_video, prompt_type, use_all_prev_frames
             )
             prompt_pe_dense.append(prompt_outs[0])
             prompt_feats_dense.append(prompt_outs[1])  # num_gt_instsxRxTxC
@@ -831,7 +830,8 @@ class VisualPromptSampler:
         gt_masks = targets_per_video['masks'][:, -num_frames:].to(device)  # num_gt_insts x T x H x W
         num_gt_insts, _, H_gt, W_gt = gt_masks.shape
 
-        update_frames = 1 if is_first_clip else num_frames-self.clip_stride  # Important!!! Do not change it!!!
+        update_frames = 1 - int(targets_per_video["task"] == "grounding")\
+             if is_first_clip else num_frames-self.clip_stride  # Important!!! Do not change it!!!
         for key_fid in range(update_frames):
             key_fid_original = frame_indices[key_fid]
             x_key = img_emb_per_video[key_fid]      # C x H x W

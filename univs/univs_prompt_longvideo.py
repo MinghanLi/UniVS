@@ -127,7 +127,6 @@ class UniVS_Prompt_LongVideo(nn.Module):
         gen_pseudo_mask: nn.Module,
         boxvis_enabled: bool,
         boxvis_ema_enabled: bool,
-        boxvis_bvisd_enabled: bool,
         data_name: str,
         # inference
         video_unified_inference_enable: bool,
@@ -154,8 +153,6 @@ class UniVS_Prompt_LongVideo(nn.Module):
             test_topk_per_image: int, instance segmentation parameter, keep topk instances per image
             boxvis_enabled: if True, use only box-level annotation; otherwise pixel-wise annotations
             boxvis_ema_enabled: if True, use Teacher Net to produce high-quality pseudo masks
-            boxvis_bvisd_enabled: if True, use box-supervised VIS dataset (BVISD), including
-                pseudo video clip from COCO, videos from YTVIS21 and OVIS.
         """
         super().__init__()
 
@@ -203,7 +200,6 @@ class UniVS_Prompt_LongVideo(nn.Module):
 
         self.boxvis_enabled = boxvis_enabled
         self.boxvis_ema_enabled = boxvis_ema_enabled
-        self.boxvis_bvisd_enabled = boxvis_bvisd_enabled
         self.data_name = data_name
         self.tracker_type = tracker_type  # if 'ovis' in data_name and use swin large backbone => "mdqe"
 
@@ -253,17 +249,14 @@ class UniVS_Prompt_LongVideo(nn.Module):
         reid_weight = cfg.MODEL.MASK_FORMER.REID_WEIGHT 
         proj_weight = dice_weight
         pair_weight = 1.
-        if cfg.MODEL.BoxVIS.BoxVIS_ENABLED:
-            dice_weight, mask_weight = 0.5*dice_weight, 0.5*mask_weight
-            weight_dict = {"loss_ce": class_weight, "loss_mask": mask_weight, "loss_dice": dice_weight,
-                           "loss_mask_proj": proj_weight, "loss_mask_pair": pair_weight}
-        else:
-            weight_dict = {"loss_ce": class_weight, "loss_mask": mask_weight, "loss_dice": dice_weight, 
-                           "loss_reid": reid_weight, "loss_reid_aux": reid_weight, 
-                           "loss_reid_l2p": reid_weight, "loss_reid_l2p_aux": reid_weight,
-                           "loss_reid_interclip": reid_weight, "loss_reid_interclip_aux": reid_weight,
-                           "loss_l2v_attn_weight": 1.0,
-                           }
+        
+        weight_dict = {
+            "loss_ce": class_weight, "loss_mask": mask_weight, "loss_dice": dice_weight, 
+            "loss_reid": 0.5*reid_weight, "loss_reid_aux": 0.5*reid_weight, 
+            "loss_reid_l2p": 0.5*reid_weight, "loss_reid_l2p_aux": 0.5*reid_weight,
+            "loss_reid_interclip": reid_weight, "loss_reid_interclip_aux": reid_weight,
+            "loss_l2v_attn_weight": 1.0,
+        }
 
         class_weight_matcher = cfg.MODEL.MASK_FORMER.CLASS_WEIGHT_MATCHER
         dice_weight_matcher = cfg.MODEL.MASK_FORMER.DICE_WEIGHT_MATCHER
@@ -277,8 +270,6 @@ class UniVS_Prompt_LongVideo(nn.Module):
             cost_proj=proj_weight,
             cost_pair=pair_weight,
             num_points=cfg.MODEL.MASK_FORMER.TRAIN_NUM_POINTS,
-            boxvis_enabled=cfg.MODEL.BoxVIS.BoxVIS_ENABLED,
-            boxvis_ema_enabled=cfg.MODEL.BoxVIS.EMA_ENABLED,
         )
 
         if deep_supervision:
@@ -336,7 +327,6 @@ class UniVS_Prompt_LongVideo(nn.Module):
             "gen_pseudo_mask": gen_pseudo_mask,
             'boxvis_enabled': cfg.MODEL.BoxVIS.BoxVIS_ENABLED,
             "boxvis_ema_enabled": cfg.MODEL.BoxVIS.EMA_ENABLED,
-            "boxvis_bvisd_enabled": cfg.MODEL.BoxVIS.BVISD_ENABLED,
             "data_name": cfg.DATASETS.TEST[0],
             # inference
             "video_unified_inference_enable": cfg.MODEL.UniVS.TEST.VIDEO_UNIFIED_INFERENCE_ENABLE,
@@ -411,6 +401,9 @@ class UniVS_Prompt_LongVideo(nn.Module):
         is_last = False
         stride = max(self.num_frames - 1, 1)
         for i in range(0, video_len, stride):
+            if is_last & (i + self.num_frames >= video_len):
+                continue
+
             if i + self.num_frames >= video_len:
                 is_last = True
 
@@ -436,7 +429,6 @@ class UniVS_Prompt_LongVideo(nn.Module):
                 losses[k].append(v)
             
             losses_interclip = self.interclip_reid_loss(is_last, targets, targets_entire_video)
-            
             with torch.no_grad():
                 if not is_last and (targets[0]['prompt_type'] == 'visual' or targets[0]['task'] == 'grounding'):
                     self.prepare_prompt_memory_pool(i, multi_scale_features, targets, targets_entire_video)
@@ -451,7 +443,7 @@ class UniVS_Prompt_LongVideo(nn.Module):
                 # remove this loss if not specified in `weight_dict`
                 print(f"Loss {k} not in weight_dict, remove it.")
                 losses.pop(k)
-
+        
         return losses
     
     def interclip_reid_loss(self, is_last, targets, targets_entire_video):

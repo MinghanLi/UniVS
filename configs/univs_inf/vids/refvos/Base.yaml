@@ -19,15 +19,14 @@ MODEL:
     TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoder"
     TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
   UniVS:
-    VISUAL_PROMPT_PIXELS_PER_IMAGE: 128
+    VISUAL_PROMPT_PIXELS_PER_IMAGE: 32
     MASKDEC_SELF_ATTN_MASK_TYPE: 'sep-blocked'  # Important!!! 
     TEST:
-      VIDEO_UNIFIED_INFERENCE_QUERIES: 'prompt'
+      VIDEO_UNIFIED_INFERENCE_QUERIES: 'prompt+learn'
   BoxVIS:
     TEST:
       NUM_FRAMES_WINDOW: 5
       CLIP_STRIDE: 1
-      LSJ_AUG_ENABLED: True
       APPLY_CLS_THRES: 0.05
 DATASETS:
   TEST: ("rvos-refdavis-val-0", "rvos-refdavis-val-1", "rvos-refdavis-val-2", "rvos-refdavis-val-3")

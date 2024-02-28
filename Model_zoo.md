@@ -38,38 +38,8 @@ UniVS achieves superior performance on 10 benchmarks, using the same model with 
 
 If you want to evaluate UniVS on different stages, please download them to `pretrained/stage{1,2,3}/` dirs respectively.
 
-### Stage 1: image-level joint training
-
-<table>
-  <tr>
-    <th>Backbone</th>
-    <th>YAML</th>
-    <th>Model</th>
-  </tr>
-  <tr>
-    <td>ResNet-50</td>
-    <td>univs_r50_stage1</td>
-    <td><a href="?">model</a></td>
-  </tr>
-  <tr>
-    <td>Swin-Tiny</td>
-    <td>univs_swint_stage1</td>
-    <td><a href="?">-</a></td>
-  </tr>
-  <tr>
-    <td>Swin-Base</td>
-    <td>univs_swinb_stage1</td>
-    <td><a href="">-</a></td>
-  </tr>
-  <tr>
-    <td>Swin-Large</td>
-    <td>univs_swinl_stage1</td>
-    <td><a href="">-</a></td>
-  </tr>
-</table>
-
 ### Stage 2: Video-level Joint Training
-
+Note that the input image must have a shape of 1024 x 1024.
 <table>
   <tr>
     <th>Backbone</th>
@@ -99,7 +69,8 @@ If you want to evaluate UniVS on different stages, please download them to `pret
 </table>
 
 ### Stage 3: Long Video-level Joint Training
-All numbers reported in the paper uses the following models.
+All numbers reported in the paper uses the following models. This stage supports input images of all aspect ratios, and the results perform better when the short side is between 512 and 720.
+
 <table>
   <tr>
     <th>Backbone</th>

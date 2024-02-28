@@ -423,6 +423,7 @@ class InferenceVideoVOS(nn.Module):
                 is_consistency, matched_sim_p = check_consistency_with_prev_frames(
                     tgt_embds, pred_embds[indices_p], sim_threshold=sim_threshold, return_similarity=True
                 )
+                
                 matched_masks_p = pred_masks[indices_p]
                 matched_mask_quality_scores_p = mask_quality_scores[indices_p]
                 matched_pred_embds_p = pred_embds[indices_p]

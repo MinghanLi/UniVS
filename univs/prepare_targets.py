@@ -299,6 +299,8 @@ class PrepareTargets:
                     exp_obj_ids = torch.ones(num_max_instances, dtype=torch.int64, device=device) * -1
                     len_word_expressions = [0] * num_max_instances
                     gt_instances["exp_obj_ids"] = exp_obj_ids
+                if not is_train:
+                    print(gt_instances["expressions"])
 
                 len_word_expressions = len_word_expressions[:num_max_instances]
                 exp_word_feats = exp_word_feats[:num_max_instances]

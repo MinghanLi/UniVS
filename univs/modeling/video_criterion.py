@@ -563,7 +563,8 @@ class VideoSetCriterion(nn.Module):
             tgt_ids_p = torch.cat([t['prompt_gt_labels'] for t in targets]).to(device)  # BQ_p
             tgt_ids_p = tgt_ids_p.unsqueeze(-1).repeat(1,self.num_frames).flatten()     # BQ_pT
             keep_l = tgt_ids_l >= 1
-            keep_p = tgt_ids_p >= 1
+            keep_p = torch.cat([t['prompt_obj_ids'] for t in targets]) >= 1
+            keep_p = keep_p.unsqueeze(-1).repeat(1,self.num_frames).flatten().to(device)  # BQ_pT
 
         else:
             tgt_ids_l = torch.cat([t['ids'][tgt_i] for t, (_, tgt_i) in zip(targets, indices)]).to(device)  # N_lxT

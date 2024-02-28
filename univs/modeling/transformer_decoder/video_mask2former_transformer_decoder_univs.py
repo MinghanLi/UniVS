@@ -217,7 +217,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
                 )
         
         # inference parameters
-        self.num_prev_frames_memory = max(num_prev_frames_memory, num_frames+1)
+        self.num_prev_frames_memory = max(num_prev_frames_memory, num_frames)
         self.enabled_prev_frames_memory = enabled_prev_frames_memory
         self.enabled_prev_visual_prompts_for_grounding = enabled_prev_visual_prompts_for_grounding
 
@@ -600,8 +600,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         l2v_attn_weights_list = None
         if tasks_batch[0] == 'sot' or targets[0]["prompt_type"] == 'visual' or prompt_type == 'visual':
             prompt_tuple = self.visual_prompt_sampler.process_per_batch(
-                src, pos, size_list, targets, self.training, 
-                use_all_prev_frames=(use_all_prev_frames or self.enabled_prev_frames_memory)
+                src, pos, size_list, targets, self.training, use_all_prev_frames=use_all_prev_frames 
             )
             prompt_pe_dense, prompt_feats_dense = prompt_tuple[:2]
             if prompt_feats_dense is None:
@@ -682,7 +681,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
                 # num_exp*L x NT x C -> num_exp x T*(1+77) x N x 1 x C -> num_exp x T*(1+77) x NT x C
                 prompt_feats_batch = rearrange(
                     prompt_feats_batch, '(K L) (N T) C -> K T L N 1 C', K=num_exps, L=len_sentence+1, T=num_frames
-                )[:,:,:36]  # not supoort long text yet
+                )[:,:,:32]  # not supoort long text yet
                 prompt_feats_dense = prompt_feats_batch.flatten(1,2).repeat(1,1,1,num_frames,1).flatten(2,3) # num_exp x T*(1+77) x NT x C
                 
                 # only use the sentence token output from the CLIP text encoder
@@ -692,8 +691,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
 
                 if not self.training and 'masks' in targets[0] and self.enabled_prev_visual_prompts_for_grounding:
                     prompt_feats_dense_vis, prompt_pe_dense_vis = self.visual_prompt_sampler.process_per_batch(
-                        src, pos, size_list, targets, self.training, 
-                        use_all_prev_frames=(use_all_prev_frames or self.enabled_prev_frames_memory)
+                        src, pos, size_list, targets, self.training, use_all_prev_frames=use_all_prev_frames
                     )[:2]
                     if prompt_feats_dense_vis is not None:
                         # num_exp x (T_prev*R + R) x T x C 
@@ -706,6 +704,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         
         # merge prompts from previous clips for stage3 training
         if self.training and (len(targets) == 1) and "prompt_feats" in targets[0] and prompt_feats_dense is not None:
+            # num_insts x (T_prev*R + R) x T x C 
             prompt_feats_dense = torch.cat([targets[0]["prompt_feats"], prompt_feats_dense], dim=1)
             if targets[0]["prompt_pe"] is None or prompt_pe_dense is None:
                 prompt_pe_dense = None
@@ -757,15 +756,22 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         num_gt_insts, _, e_idx = targets_per_video["prompt_feats"].shape[:3]  # not include the last frame (blank)
         first_appear_frame_idxs = targets_per_video["first_appear_frame_idxs"].clone()
         first_appear_frame_idxs[first_appear_frame_idxs >= e_idx-1] = -1
-        # num_inst x R_fisrt x C -> num_inst x R_fisrt x T x C
+        # num_inst x R x C
         prompt_feats_first = targets_per_video["prompt_feats"][range(num_gt_insts),:, first_appear_frame_idxs]
-        prompt_feats_first = prompt_feats_first.unsqueeze(2).repeat(1,1,num_frames,1)
-        # print(prompt_feats_first.shape, prompt_feats_dense.shape)
-        prompt_feats_dense = torch.cat([prompt_feats_first, prompt_feats_dense], dim=1)
-        # num_inst x R_fisrt x C -> num_inst x R_fisrt x T x C
+        # num_inst x T_prev*R x C
+        prompt_feats_prev = targets_per_video["prompt_feats"][:,:, -self.num_prev_frames_memory:]
+        prompt_feats_prev = prompt_feats_prev.transpose(1,2).flatten(1,2)
+        prompt_feats_dense = torch.cat([prompt_feats_first, prompt_feats_prev], dim=1)
+        # num_inst x R x C
         prompt_pe_first = targets_per_video["prompt_pe"][range(num_gt_insts),:, first_appear_frame_idxs]
-        prompt_pe_first = prompt_pe_first.unsqueeze(2).repeat(1,1,num_frames,1)
-        prompt_pe_dense = torch.cat([prompt_pe_first, prompt_pe_dense], dim=1)
+        # num_inst x T_prev*R x C
+        prompt_pe_prev = targets_per_video["prompt_pe"][:,:, -self.num_prev_frames_memory:]
+        prompt_pe_prev = prompt_pe_prev.transpose(1,2).flatten(1,2)
+        prompt_pe_dense = torch.cat([prompt_pe_first, prompt_pe_prev], dim=1)
+
+        # num_inst x (T_prev+1)*R x T x C
+        prompt_feats_dense = prompt_feats_dense.unsqueeze(2).repeat(1,1,num_frames,1)
+        prompt_pe_dense = prompt_pe_dense.unsqueeze(2).repeat(1,1,num_frames,1)
 
         return prompt_pe_dense, prompt_feats_dense
     
