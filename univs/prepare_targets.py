@@ -206,15 +206,6 @@ class PrepareTargets:
                 }
             )
             
-            if is_train:
-                # Open the text file in write mode
-                with open('output/gt_masks_per_video.txt', 'a') as file:
-                    # Write a new line into the file
-                    text = ', '.join(
-                        [targets[0]["task"]] + [targets[0]["dataset_name"]]  + \
-                        [str(shape_) for shape_ in gt_masks_per_video.shape]
-                    )
-                    file.write(text + '\n') 
             del gt_masks_per_video
             # if targets_per_video["dataset_name"] in {'flickr'}
                 # clip_gt_instances[-1]["token_ids"] = [targets_per_frame.gt_token_ids for targets_per_frame in targets_per_video]

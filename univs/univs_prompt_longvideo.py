@@ -254,7 +254,7 @@ class UniVS_Prompt_LongVideo(nn.Module):
             "loss_ce": class_weight, "loss_mask": mask_weight, "loss_dice": dice_weight, 
             "loss_reid": 0.5*reid_weight, "loss_reid_aux": 0.5*reid_weight, 
             "loss_reid_l2p": 0.5*reid_weight, "loss_reid_l2p_aux": 0.5*reid_weight,
-            "loss_reid_interclip": reid_weight, "loss_reid_interclip_aux": reid_weight,
+            "loss_reid_interclip": 0.5*reid_weight, "loss_reid_interclip_aux": 0.5*reid_weight,
             "loss_l2v_attn_weight": 1.0,
         }
 
