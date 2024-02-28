@@ -11,7 +11,9 @@ We propose a novel unified VS architecture, namely **UniVS**, by using prompts a
 </div><br/>
 
 ## 📌 Updates 📌
-* **🔥`Feb-26-2024`:** We released the paper in [ArXiv]().
+* **🔥 `Hightlights`:** To facilitate the evaluation of video segmentation tasks under **the Detectron2** framework, we wrote the evaluation metrics of the six existing video segmentation tasks into the Detectron2 **Evaluators**, including VIS, VSS, VPS, VOS, PVOS, and RefVOS tasks. Now, you can evaluate six video segmentation tasks directly in our code just like COCO, and you no longer need to manually adapt any evaluation indicators by yourself. Please refer
+
+* **🔥 `Feb-28-2024`:** We released the paper in [ArXiv](). Pretrained models will be released soon.
 
 
 ## 🛠️ Installation 🛠️ 
@@ -33,7 +35,6 @@ sh tools/run/univs_r50_stage3.sh
 ```
 
 ### 🌟 Unified Inference for videos
-**Hightlights**: In order to facilitate the evaluation of video segmentation tasks under **the Detectron2** framework, we wrote the evaluation metrics of the six existing video segmentation tasks into the Detectron2 **Evaluators**. Now, you can evaluate six video segmentation tasks directly in our code just like COCO, and you no longer need to manually adapt any evaluation indicators by yourself. Please refer to `univs/reference` and `univs/inference` for specific codes.
 
 Download trained weights from [Model Zoo](Model_zoo.md), and save it into the path `pretrained/stage{1,2,3}/`. We support multiple ways to evaluate UniVS on VIS, VSS, VPS, VOS, PVOS and RefVOS tasks:
 ```
@@ -57,7 +58,7 @@ UniVS shows a commendable balance between perfor0mance and universality on 10 ch
 If you use UniVS in your research or wish to refer to the baseline results published in the Model Zoo, please use the following BibTeX entry.
 
 ```BibTeX
-@misc{li2023boxvis,
+@misc{li2024univs,
       title={UniVS: Unified and Universal Video Segmentation with Prompts as Queries}, 
       author={Minghan Li, Shuai Li, Xindong Zhang, and Lei Zhang},
       year={2024},
