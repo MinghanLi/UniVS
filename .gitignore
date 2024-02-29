@@ -59,9 +59,9 @@ _darcs
 !/datasets/data_utils
 
 # tool dirs
-tools/run_ft_single_task
-tools/run_tpami
-tools/test_ft_single_task
+!/tools/run/*.sh
+!/tools/test/*.sh
+!/tools/test/individual_task/*.sh
 
 # davis evaluation
 # Byte-compiled / optimized / DLL files

@@ -37,7 +37,7 @@ sh tools/run/univs_r50_stage3.sh
 
 ### 🌟 Unified Inference for videos
 
-Download trained weights from [Model Zoo](Model_zoo.md), and save it into the path `pretrained/stage{1,2,3}/`. We support multiple ways to evaluate UniVS on VIS, VSS, VPS, VOS, PVOS and RefVOS tasks:
+Download trained weights from [Model Zoo](Model_zoo.md), and save it into the path `output/stage{1,2,3}/`. We support multiple ways to evaluate UniVS on VIS, VSS, VPS, VOS, PVOS and RefVOS tasks:
 ```
 # test all six tasks using ResNet50 backbone (one-model)
 $ sh tools/test/test_r50.sh
