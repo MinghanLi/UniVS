@@ -36,10 +36,10 @@ If you want to train UniVS, please download them in `pretrained/m2f_panseg/` dir
 ## 2. UniVS Models
 UniVS achieves superior performance on 10 benchmarks, using the same model with the same model parameters. UniVS has three training stages: image-level joint training, video-level joint training, and long video-level joint training. We provide all the checkpoints of all stages for models with different backbones. 
 
-If you want to evaluate UniVS on different stages, please download them to `pretrained/stage{1,2,3}/` dirs respectively.
+If you want to evaluate UniVS on different stages, please download them to `output/stage{1,2,3}/` dirs respectively.
 
 ### Stage 2: Video-level Joint Training
-Note that the input image must have a shape of 1024 x 1024.
+Note that the input image for Swin-Tiny/Base/Large backbones must have a shape of 1024 x 1024.
 <table>
   <tr>
     <th>Backbone</th>
@@ -49,27 +49,27 @@ Note that the input image must have a shape of 1024 x 1024.
   <tr>
     <td>ResNet-50</td>
     <td>univs_r50_stage2</td>
-    <td><a href="?">model</a></td>
+    <td><a href="https://drive.google.com/file/d/1IX3HKIkZJKmA58VJiF9Xh0fJPYXLQ1Nc/view?usp=sharing">model</a></td>
   </tr>
   <tr>
     <td>Swin-Tiny</td>
     <td>univs_swint_stage2</td>
-    <td><a href="?">model</a></td>
+    <td><a href="https://drive.google.com/file/d/1A48BoH1mlLYYcRuJFajoR_2iFscgnncU/view?usp=sharing">model</a></td>
   </tr>
   <tr>
     <td>Swin-Base</td>
     <td>univs_swinb_stage2</td>
-    <td><a href="">model</a></td>
+    <td><a href="https://drive.google.com/file/d/196YHDC01ghO34UL5RGFCqurPngR5EIOa/view?usp=sharing">model</a></td>
   </tr>
   <tr>
     <td>Swin-Large</td>
     <td>univs_swinl_stage2</td>
-    <td><a href="">model</a></td>
+    <td><a href="https://drive.google.com/file/d/1aIANl9LpzT3bsd90Kna8Zr08v5mvyfdz/view?usp=sharing">model</a></td>
   </tr>
 </table>
 
-### Stage 3: Long Video-level Joint Training
-All numbers reported in the paper uses the following models. This stage supports input images of all aspect ratios, and the results perform better when the short side is between 512 and 720.
+### Stage 3: Long Video-level Joint Training 
+All numbers reported in the paper uses the following models. This stage supports input images of all aspect ratios, and the results perform better when the short side is between 512 and 720. The trained models will be released soon.
 
 <table>
   <tr>

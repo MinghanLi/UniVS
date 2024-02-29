@@ -1,6 +1,6 @@
-## Installation
+# Installation
 
-### Requirements
+## Requirements
 - Linux or macOS with Python ≥ 3.7
 - PyTorch == 1.10.3 and [torchvision](https://github.com/pytorch/vision/) that matches the PyTorch installation.
   Install them together at [pytorch.org](https://pytorch.org) to make sure of this. Note, please check
@@ -9,17 +9,16 @@
 - OpenCV is optional but needed by demo and visualization
 - `pip install -r requirements.txt`
 
-### CUDA kernel for MSDeformAttn
-After preparing the required environment, run the following command to compile CUDA kernel for MSDeformAttn:
+- After preparing the required environment, run the following command to compile CUDA kernel for MSDeformAttn:
 
-`CUDA_HOME` must be defined and points to the directory of the installed CUDA toolkit.
+  `CUDA_HOME` must be defined and points to the directory of the installed CUDA toolkit.
 
-```bash
-cd mask2former/modeling/pixel_decoder/ops
-sh make.sh
-```
+  ```bash
+  cd mask2former/modeling/pixel_decoder/ops
+  sh make.sh
+  ```
 
-### Example conda environment setup
+## Example conda environment setup
 ```bash
 conda create --name boxvis python=3.9 -y
 conda activate boxvis
@@ -39,6 +38,7 @@ cd ..
 git clone git@github.com:MinghanLi/UniVS.git
 cd UniVS
 pip install -r requirements.txt
+# compile MSDeformAttn
 cd mask2former/modeling/pixel_decoder/ops
 sh make.sh
 ```

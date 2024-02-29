@@ -24,7 +24,7 @@ DATASETS:
   - "lvis_v1_train_video"    # 100k (shared categories with burst)
   - "coco_panoptic_train"
   - "rvos_refcoco-mixed"
-  - "entityseg_panoptic_train"  # 30k
+  - "entityseg_panoptic_train"  # 30k, not used it in cvpr version
   - "sa_1b_train_250k_1"        # 250k
 INPUT:
   SAMPLING_FRAME_NUM: 1
