@@ -1,6 +1,6 @@
 # [UniVS: Unified and Universal Video Segmentation with Prompts as Queries (CVPR2024)](https://arxiv.org/abs/2402.18115)
 
-[Minghan LI<sup>1,2,*</sup>](https://scholar.google.com/citations?user=LhdBgMAAAAAJ), [Shuai LI<sup>1,2,*</sup>](https://scholar.google.com/citations?hl=en&user=Bd73ldQAAAAJ), [Xindong Zhang<sup>2</sup>](https://scholar.google.com/citations?hl=en&user=q76RnqIAAAAJ) and [Lei ZHANG<sup>1,2,\dagger</sup>](https://www4.comp.polyu.edu.hk/~cslzhang/)
+[Minghan LI<sup>1,2,*</sup>](https://scholar.google.com/citations?user=LhdBgMAAAAAJ), [Shuai LI<sup>1,2,*</sup>](https://scholar.google.com/citations?hl=en&user=Bd73ldQAAAAJ), [Xindong ZHANG<sup>2</sup>](https://scholar.google.com/citations?hl=en&user=q76RnqIAAAAJ) and [Lei ZHANG<sup>1,2,$\dagger$</sup>](https://www4.comp.polyu.edu.hk/~cslzhang/)
 
 <sup>1</sup>Hong Kong Polytechnic University, <sup>2</sup>OPPO Research Institute
 
