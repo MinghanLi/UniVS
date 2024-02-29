@@ -60,7 +60,9 @@ _darcs
 
 # tool dirs
 !/tools/run/*.sh
+/tools/run/*_stage3.sh
 !/tools/test/*.sh
+/tools/test/*_stage3.sh
 !/tools/test/individual_task/*.sh
 
 # davis evaluation
