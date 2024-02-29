@@ -58,6 +58,11 @@ _darcs
 /datasets/concept_emb/*.pth
 !/datasets/data_utils
 
+# tool dirs
+tools/run_ft_single_task
+tools/run_tpami
+tools/test_ft_single_task
+
 # davis evaluation
 # Byte-compiled / optimized / DLL files
 __pycache__/

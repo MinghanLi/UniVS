@@ -1,6 +1,6 @@
 _BASE_: Base.yaml
 MODEL:
-  WEIGHTS: 'pretrained/univs/univs_prompt_R50_bs24_f1_sa1b+coco_2x_200queries_c1+casa.pth'
+  WEIGHTS: 'pretrained/m2f_panseg/model_final_94dc52.pkl'
   META_ARCHITECTURE: "UniVS_Prompt"
   UniVS:
     NUM_POS_QUERIES: 30

@@ -11,7 +11,7 @@ MODEL:
     DROP_PATH_RATE: 0.3
     PATCH_NORM: True
     PRETRAIN_IMG_SIZE: 384
-  WEIGHTS: 'pretrained/univs/swinl/v1/stage2/univs_prompt_swinl_bs8_f4_video_0.5x_200queries_c1+univs+casa_psa_frozenbb_ftrefer+burst.pth'
+  WEIGHTS: 'pretrained/m2f_panseg/model_final_f07440.pkl'
   META_ARCHITECTURE: "UniVS_Prompt"
   SEM_SEG_HEAD:
     FROZEN_PIXEL_DECODER: False

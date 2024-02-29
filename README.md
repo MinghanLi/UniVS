@@ -1,19 +1,20 @@
-# [UniVS](?): Unified and Universal Video Segmentation with Prompts as Queries
+# [UniVS: Unified and Universal Video Segmentation with Prompts as Queries](https://arxiv.org/abs/2402.18115)
 
 [Minghan LI](https://scholar.google.com/citations?user=LhdBgMAAAAAJ), [Shuai LI](https://scholar.google.com/citations?hl=en&user=Bd73ldQAAAAJ), [Xindong Zhang](https://scholar.google.com/citations?hl=en&user=q76RnqIAAAAJ) and [Lei ZHANG](https://www4.comp.polyu.edu.hk/~cslzhang/)
 
-[[📝 arXiv paper]](?) [[🎥 Video demo in project page]](https://sites.google.com/view/unified-video-seg-univs)
+[[📝 arXiv paper]](https://arxiv.org/abs/2402.18115) [[🎥 Video demo in project page]](https://sites.google.com/view/unified-video-seg-univs)
 
-We propose a novel unified VS architecture, namely **UniVS**, by using prompts as queries. For each target of interest, UniVS averages the prompt features stored in the memory pool as its initial query, which is fed to a target-wise prompt cross-attention (ProCA) layer to integrate comprehensive prompt features. On the other hand, by taking the predicted masks of entities as their visual prompts, UniVS can convert different VS tasks into the task of prompt-guided target segmentation, eliminating the heuristic inter-frame matching. 
+We propose a novel unified VS architecture, namely **UniVS**, by using prompts as queries. For each target of interest, UniVS averages the prompt features stored in the memory pool as its initial query, which is fed to a target-wise prompt cross-attention (ProCA) layer to integrate comprehensive prompt features. On the other hand, by taking the predicted masks of entities as their visual prompts, UniVS can convert different VS tasks into the task of prompt-guided target segmentation, eliminating the heuristic inter-frame matching. More video demo on our project page: https://sites.google.com/view/unified-video-seg-univs
 
 <div align="center">
   <img src="imgs/vs_tasks.jpg" width="100%" height="100%"/>
 </div><br/>
 
 ## 📌 Updates 📌
+
 * **🔥 `Hightlights`:** To facilitate the evaluation of video segmentation tasks under **the Detectron2** framework, we wrote the evaluation metrics of the six existing video segmentation tasks into the Detectron2 **Evaluators**, including VIS, VSS, VPS, VOS, PVOS, and RefVOS tasks. Now, you can evaluate VS tasks directly in our code just like COCO, and no longer need to manually adapt any evaluation indicators by yourself. Please refer to `univs/inference` and `univs/evaluation` for specific codes. If you encounter any issues when using our code, please push them to the GitHub issue. We will reply to you as soon as possible.
 
-* **🔥 `Feb-28-2024`:** We released the paper in [ArXiv](). Pretrained models will be released soon.
+* **🔥 `Feb-28-2024`:** Our paper has been accepted by CVPR2024. We released the paper in [ArXiv](https://arxiv.org/abs/2402.18115). 
 
 
 ## 🛠️ Installation 🛠️ 
@@ -62,7 +63,7 @@ If you use UniVS in your research or wish to refer to the baseline results publi
       title={UniVS: Unified and Universal Video Segmentation with Prompts as Queries}, 
       author={Minghan Li, Shuai Li, Xindong Zhang, and Lei Zhang},
       year={2024},
-      eprint={-},
+      eprint={2402.18115},
       archivePrefix={arXiv},
       primaryClass={cs.CV}
 }
