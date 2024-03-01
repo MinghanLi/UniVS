@@ -2,7 +2,7 @@
 # 1. Prepare Category Embeddings for UniVS
 a) Extract all category names that existed in the following datasets, please refer to `datasets/concept_emb/combined_datasets.txt` and `datasets/concept_emb/combined_datasets_category_info.py`
 
-b) Extract concept embeddings of category names from CLIP Text Encoder. For your convenience, you can directly download the converted file from [Google drive](https://drive.google.com/file/d/1Wmw6n_u7NB3lARjXp6oUe9VsGa332zi8/view?usp=sharing). 
+b) Extract concept embeddings of category names from CLIP Text Encoder. For your convenience, you can directly download the converted file from [Google drive](https://drive.google.com/file/d/1Wmw6n_u7NB3lARjXp6oUe9VsGa332zi8/view?usp=sharing) and put it in the dir `'datasets/concept_emb/'`.
 
 c) Alternatively, you can run the code to generate in your server
 ```

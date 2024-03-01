@@ -42,7 +42,7 @@ pip install -r requirements.txt
 cd mask2former/modeling/pixel_decoder/ops
 sh make.sh
 
-# installation davis2017_evaluation
+# install davis2017_evaluation
 cd univs/evaluation/davis2017-evaluation
 # Install it - Python 3.6 or higher required
 python setup.py install

@@ -33,10 +33,25 @@ If you want to train UniVS, please download them in `pretrained/m2f_panseg/` dir
   </tr>
 </table>
 
-## 2. UniVS Models
+## 2. Prepare CLIP Text Encoder & Category Embeddings
+### 2.1 Download pretrained model of CLIP Text Encoder from [Google drive](https://drive.google.com/file/d/1jzjiZHRag63KSXZq3XpLXj5FFDRLL9ZX/view?usp=sharing) and put it in the dir `'pretrained/regionclip/regionclip/'`
+
+
+### 2.2 Prepare Category Embeddings for UniVS
+a) Extract all category names that existed in the following datasets, please refer to `datasets/concept_emb/combined_datasets.txt` and `datasets/concept_emb/combined_datasets_category_info.py`
+
+b) Extract concept embeddings of category names from CLIP Text Encoder. For your convenience, you can directly download the converted file from [Google drive](https://drive.google.com/file/d/1Wmw6n_u7NB3lARjXp6oUe9VsGa332zi8/view?usp=sharing) and put it in the dir `'datasets/concept_emb/'` .
+
+c) Alternatively, you can run the code to generate in your server
+```
+$ cd UniVS
+$ sh tools/clip_concept_extraction/extract_concept_emb.sh
+```
+
+## 3. UniVS Models
 UniVS achieves superior performance on 10 benchmarks, using the same model with the same model parameters. UniVS has three training stages: image-level joint training, video-level joint training, and long video-level joint training. We provide all the checkpoints of all stages for models with different backbones. 
 
-If you want to evaluate UniVS on different stages, please download them to `output/stage{1,2,3}/` dirs respectively.
+If you want to evaluate UniVS on different stages, please download them to `'output/stage{1,2,3}/'` dirs respectively.
 
 ### Stage 2: Video-level Joint Training
 Note that the input image for Swin-Tiny/Base/Large backbones must have a shape of 1024 x 1024.
