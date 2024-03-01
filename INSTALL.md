@@ -20,8 +20,8 @@
 
 ## Example conda environment setup
 ```bash
-conda create --name boxvis python=3.9 -y
-conda activate boxvis
+conda create --name univs python=3.9 -y
+conda activate univs
 conda install pytorch==1.10.1 torchvision==0.11.2 torchaudio==0.10.1 cudatoolkit=11.3 -c pytorch -c conda-forge
 
 pip install -U opencv-python
