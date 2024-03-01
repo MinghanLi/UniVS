@@ -237,7 +237,6 @@ class UniVS_Prompt(nn.Module):
         mask_weight = cfg.MODEL.MASK_FORMER.MASK_WEIGHT
         reid_weight = cfg.MODEL.MASK_FORMER.REID_WEIGHT 
         proj_weight = dice_weight
-        pair_weight = 1.
         if cfg.MODEL.BoxVIS.BoxVIS_ENABLED:
             dice_weight, mask_weight = 0.5*dice_weight, 0.5*mask_weight
             weight_dict = {"loss_ce": class_weight, "loss_mask": mask_weight, "loss_dice": dice_weight,
@@ -259,7 +258,6 @@ class UniVS_Prompt(nn.Module):
             cost_mask=mask_weight_matcher,
             cost_dice=dice_weight_matcher,
             cost_proj=proj_weight,
-            cost_pair=pair_weight,
             num_points=cfg.MODEL.MASK_FORMER.TRAIN_NUM_POINTS,
             boxvis_enabled=cfg.MODEL.BoxVIS.BoxVIS_ENABLED,
             boxvis_ema_enabled=cfg.MODEL.BoxVIS.EMA_ENABLED,

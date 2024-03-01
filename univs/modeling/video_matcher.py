@@ -205,105 +205,7 @@ class VideoHungarianMatcherUni(nn.Module):
         ]
 
     @torch.no_grad()
-    def memory_efficient_box_supervised_forward(self, outputs, targets, dyn_pseudo_mask_score_thresh):
-        bs, cQ, t, s_h, s_w = outputs["pred_masks"].shape
-
-        indices = []
-        for b in range(bs):
-            b_out_prob = outputs["pred_logits"][b]  # cQ x k
-            tgt_ids = targets[b]["labels"] - 1
-
-            out_mask = outputs["pred_masks"][b]  # cQ x T x H_pred x W_pred
-            # gt masks are already padded when preparing target
-            tgt_mask = targets[b]["masks"].to(out_mask)  # Nins x T x H_tgt x W_tgt
-
-            if tgt_mask.shape[0] == 0:
-                indices.append(([], []))
-                continue
-
-            # scores reflect the quality of predicted masks
-            out_mask_soft = out_mask.sigmoid()
-            out_mask_hard = out_mask_soft > 0.5
-            numerator = (out_mask_soft.flatten(1) * out_mask_hard.flatten(1)).sum(1)
-            denominator = out_mask_hard.flatten(1).sum(1)
-            mask_scores = numerator / (denominator + 1e-6)  # cQ
-
-            dataset_name = targets[b]["dataset_name"]
-            if dataset_name in combined_datasets_category_info:
-                # Compute the classification cost. Contrary to the loss, we don't use the NLL,
-                # but approximate it in 1 - proba[target class].
-                # The 1 is a constant that doesn't change the matching, it can be ommitted.
-                num_classes, start_idx = combined_datasets_category_info[dataset_name]
-                b_out_prob = (b_out_prob[:, start_idx:start_idx+num_classes].sigmoid() * 20).softmax(-1)  # [num_queries, num_classes]
-                cost_class = -b_out_prob[:, tgt_ids] * mask_scores.reshape(-1, 1)  # cQ x Nins
-            else: 
-                cost_class = mask_scores.reshape(-1, 1)
-
-            # --------------------- project term --------------------------
-            with autocast(enabled=False):
-                tgt_mask = F.interpolate(tgt_mask, (s_h, s_w),
-                                         mode='bilinear', align_corners=False).gt(0.5)
-
-                mask_losses_y = batch_dice_coefficient_loss_jit(
-                    out_mask.max(dim=-2, keepdim=True)[0],
-                    tgt_mask.max(dim=-2, keepdim=True)[0].to(out_mask)
-                )
-                mask_losses_x = batch_dice_coefficient_loss_jit(
-                    out_mask.max(dim=-1, keepdim=True)[0],
-                    tgt_mask.max(dim=-1, keepdim=True)[0].to(out_mask)
-                )
-                cost_proj = mask_losses_x + mask_losses_y  # cQxNins
-            C = (
-                    self.cost_proj * cost_proj
-                    + self.cost_class * cost_class
-            )
-
-            if self.boxvis_ema_enabled and "masks_pseudo" in targets[b]:
-                # pseudo mask supervision loss
-                is_small_obj = (tgt_mask.flatten(1).sum(-1) / (t*s_h*s_w)) <= 0.05  # Nins
-                # gt masks are already padded when preparing target
-                tgt_mask_pseudo = targets[b]['masks_pseudo'].to(out_mask)  # cQxTxHxW
-                tgt_mask_pseudo_score = targets[b]['mask_pseudo_scores'].to(out_mask)
-
-                # all masks share the same set of points for efficient matching!
-                point_coords = torch.rand(1, self.num_points, 2, device=out_mask.device)
-                # get gt labels
-                tgt_mask_pseudo = point_sample(
-                    tgt_mask_pseudo,
-                    point_coords.repeat(tgt_mask.shape[0], 1, 1),
-                    align_corners=False,
-                ).flatten(1)
-
-                out_mask = point_sample(
-                    out_mask,
-                    point_coords.repeat(out_mask.shape[0], 1, 1),
-                    align_corners=False,
-                ).flatten(1)
-
-                with autocast(enabled=False):
-                    out_mask = out_mask.float()
-                    tgt_mask_pseudo = tgt_mask_pseudo.float()
-                    # Compute the focal loss between masks
-                    cost_mask = batch_sigmoid_ce_loss_jit(out_mask, tgt_mask_pseudo)
-                    low_conf = (tgt_mask_pseudo_score < min(dyn_pseudo_mask_score_thresh, 0.8)) | is_small_obj
-                    cost_mask[:, low_conf] = 0.
-
-                    # Compute the dice loss between masks
-                    cost_dice = batch_dice_loss_jit(out_mask, tgt_mask_pseudo)
-                    cost_dice[:, low_conf] = 0
-
-                C = C + self.cost_dice * cost_dice + self.cost_mask * cost_mask
-
-            C = C.reshape(cQ, -1).cpu()
-            indices.append(linear_sum_assignment(C))
-
-        return [
-            (torch.as_tensor(i, dtype=torch.int64), torch.as_tensor(j, dtype=torch.int64))
-            for i, j in indices
-        ]
-
-    @torch.no_grad()
-    def forward(self, outputs, targets, dyn_pseudo_mask_score_thresh=0.5):
+    def forward(self, outputs, targets):
         """Performs the matching
 
         Params:
@@ -317,8 +219,6 @@ class VideoHungarianMatcherUni(nn.Module):
                            objects in the target) containing the class labels
                  "masks": Tensor of dim [num_target_boxes, H_gt, W_gt] containing the target masks
 
-            dyn_pseudo_mask_score_thresh: dynamic threshold to select high-quality pseudo masks on box-supervised VIS
-
         Returns:
             A list of size batch_size, containing tuples of (index_i, index_j) where:
                 - index_i is the indices of the selected predictions (in order)
@@ -326,10 +226,8 @@ class VideoHungarianMatcherUni(nn.Module):
             For each batch element, it holds:
                 len(index_i) = len(index_j) = min(num_queries, num_target_boxes)
         """
-        if self.boxvis_enabled:
-            return self.memory_efficient_box_supervised_forward(outputs, targets, dyn_pseudo_mask_score_thresh)
-        else:
-            return self.memory_efficient_forward(outputs, targets)
+ 
+        return self.memory_efficient_forward(outputs, targets)
 
     def __repr__(self, _repr_indent=4):
         head = "Matcher " + self.__class__.__name__

@@ -306,11 +306,8 @@ class VideoSetCriterion(nn.Module):
 
     def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses, num_frames, 
                  num_points, oversample_ratio, importance_sample_ratio, 
-                 use_ctt_loss=True, max_num_masks: int=50, is_coco=True,
-                 boxvis_enabled=False,  boxvis_pairwise_enable=False, boxvis_pairwise_num_stpair=7,
-                 boxvis_pairwise_dilation=4, boxvis_pairwise_color_thresh=0.3,
-                 boxvis_pairwise_corr_kernel_size=3, boxvis_pairwise_corr_stride=2, boxvis_pairwise_corr_thresh=0.9,
-                 boxvis_ema_enabled=False, boxvis_pseudo_mask_score_thresh=0.5, max_iters=10000,
+                 use_ctt_loss=True, max_num_masks: int=50, 
+                 boxvis_enabled=False, boxvis_ema_enabled=False, 
                  ):
         """Create the criterion.
         Parameters:
@@ -329,10 +326,6 @@ class VideoSetCriterion(nn.Module):
         self.eos_coef = eos_coef
         self.losses = losses
         self.num_frames = num_frames
-        empty_weight = torch.ones(self.num_classes + 1)
-        empty_weight[-1] = self.eos_coef
-        self.register_buffer("empty_weight", empty_weight)
-
         self.use_ctt_loss = use_ctt_loss
 
         # pointwise mask loss parameters
@@ -340,56 +333,10 @@ class VideoSetCriterion(nn.Module):
         self.oversample_ratio = oversample_ratio
         self.importance_sample_ratio = importance_sample_ratio
         self.max_num_masks = max_num_masks
-        self.is_coco = is_coco
 
         # box-supervised video instance segmentation
         self.boxvis_enabled = boxvis_enabled
-        self.boxvis_pairwise_enable = boxvis_pairwise_enable
-        self.boxvis_pairwise_dilation = boxvis_pairwise_dilation
-        self.boxvis_pairwise_color_thresh = boxvis_pairwise_color_thresh
-        self.boxvis_pairwise_corr_kernel_size = boxvis_pairwise_corr_kernel_size
-        self.boxvis_pairwise_corr_stride = boxvis_pairwise_corr_stride
-        self.boxvis_pairwise_corr_thresh = boxvis_pairwise_corr_thresh
-        self.register_buffer("_iter", torch.zeros([1]))
-
-        # Teacher net to produce pseudo masks
         self.boxvis_ema_enabled = boxvis_ema_enabled
-        self.pseudo_mask_score_thresh = boxvis_pseudo_mask_score_thresh
-        self.max_iters = max_iters
-
-        # spatial-temporal pairwise loss
-        self.unfold_patch = nn.Unfold(kernel_size=(boxvis_pairwise_corr_kernel_size, boxvis_pairwise_corr_kernel_size),
-                                      padding=boxvis_pairwise_corr_kernel_size//2, stride=boxvis_pairwise_corr_stride)
-        self.unfold_pixel = nn.Unfold(kernel_size=(1, 1), padding=0, stride=boxvis_pairwise_corr_stride)
-        d = max(boxvis_pairwise_dilation // boxvis_pairwise_corr_stride, 1)
-        if boxvis_pairwise_num_stpair == 2:
-            self.enable_patch_corr = False
-            self.enable_box_center_shifting = False
-            self.pixel_offsets = torch.as_tensor([[0, d, 0], [0, 0, d]]).reshape(-1, 3)
-        elif boxvis_pairwise_num_stpair == 4:
-            self.enable_patch_corr = True
-            self.enable_box_center_shifting = False
-            self.pixel_offsets = torch.as_tensor([[0, d, 0], [0, 0, d], [0, -d, d], [0, d, d]]).reshape(-1, 3)
-        elif boxvis_pairwise_num_stpair == 5:
-            self.enable_patch_corr = True
-            self.enable_box_center_shifting = True
-            self.pixel_offsets = torch.as_tensor([[0, d, 0], [0, 0, d],
-                                                  [1, 0, 0], [1, d, 0], [1, 0, d]]).reshape(-1, 3)
-        elif boxvis_pairwise_num_stpair == 7:
-            self.enable_patch_corr = False
-            self.enable_box_center_shifting = True
-            self.pixel_offsets = torch.as_tensor([[0, d, 0], [0, 0, d],
-                                                  [1, 0, 0], [1, d, 0], [1, 0, d], [1, -d, 0], [1, 0, -d]]
-                                                 ).reshape(-1, 3)
-
-        elif boxvis_pairwise_num_stpair == 9:
-            self.enable_patch_corr = True
-            self.enable_box_center_shifting = True
-            self.pixel_offsets = torch.as_tensor([[0, d, 0], [0, 0, d], [0, -d, d], [0, d, d],
-                                                  [1, 0, 0], [1, d, 0], [1, 0, d], [1, -d, 0], [1, 0, -d]]
-                                                 ).reshape(-1, 3)
-        else:
-            raise ValueError
     
     def loss_labels_clip(self, outputs, targets, indices, num_masks, l_layer):
         loss = []
@@ -666,7 +613,7 @@ class VideoSetCriterion(nn.Module):
         return losses
 
     def loss_masks_with_box_supervised(self, outputs, targets, indices, num_masks, l_layer):
-        """Compute the losses related to the masks with only box annotations: the projection loss and the pairwise loss.
+        """Compute the losses related to the masks with only box annotations: the projection loss.
         If enabling Teacher Net with EMA, the pseudo mask supervision includes the focal loss and the dice loss.
         targets dicts must contain the key "masks" containing a tensor of dim [nb_target_boxes, T, h, w]
         """
@@ -676,16 +623,12 @@ class VideoSetCriterion(nn.Module):
         tgt_h, tgt_w = target_masks.shape[-2:]
 
         # the predicted masks are inaccurate in the initial iterations
-        if self.is_coco or max(tgt_h, tgt_w) > 480:
-            h_, w_ = int(tgt_h/2), int(tgt_w/2)
-            with torch.no_grad():
-                target_masks = F.interpolate(target_masks, (h_, w_),
-                                             mode='nearest', align_corners=False)
-                src_masks = F.interpolate(src_masks, (h_, w_),
-                                          mode='bilinear', align_corners=False)
-        else:
-            # upsampling for videos in VIS videos with low resolution input
-            src_masks = F.interpolate(src_masks, (tgt_h, tgt_w), mode='bilinear', align_corners=False)
+        h_, w_ = int(tgt_h/2), int(tgt_w/2)
+        with torch.no_grad():
+            target_masks = F.interpolate(target_masks, (h_, w_),
+                                            mode='nearest', align_corners=False)
+            src_masks = F.interpolate(src_masks, (h_, w_),
+                                        mode='bilinear', align_corners=False)
 
         # ----------------------- points out of bounding box / project term --------------------------
         # max simply selects the greatest value to back-prop, so max is the identity operation for that one element
@@ -702,140 +645,6 @@ class VideoSetCriterion(nn.Module):
         )
         loss_proj = mask_losses_x + mask_losses_y
         losses = {'loss_mask_proj': loss_proj}
-
-        if self.boxvis_pairwise_enable:
-            losses['loss_mask_pair'] = self.spatial_temporal_pairwise_loss(outputs, targets, indices)
-
-        if self.boxvis_ema_enabled:
-            losses.update(self.loss_masks_pseudo(outputs, targets, indices, num_masks))
-
-        return losses
-
-    def spatial_temporal_pairwise_loss(self, outputs, targets, indices):
-        """Compute the pairwise mask loss without pixel-wise annotation: spatial-temporal pairwise loss.
-        """
-        pred_masks = outputs["pred_masks"]  # bsxQxTxHpxWp
-
-        losses = []
-        for (src_idx, tgt_idx), src_masks, t in zip(indices, pred_masks, targets):
-            if t['masks'].nelement() == 0:
-                continue
-
-            H, W = t['st_pair_spatial_size']
-            dH, dW = t['st_pair_unfold_size']
-            indices_ctr_shift = t['st_pair_indices_ctr_shift'].flatten(1)  # NxTHW
-            is_inbox_pairwise_st = t['st_pair_is_inbox_pairwise']  # n_o [NxTHW]
-
-            src_masks = src_masks[src_idx]  # NxTxHxW
-            indices_ctr_shift = indices_ctr_shift[tgt_idx]  # NxTHW
-            is_inbox_pairwise_st = [x[tgt_idx].flatten() for x in is_inbox_pairwise_st]
-
-            # upsampling for videos in VIS videos with low resolution input
-            src_masks = F.interpolate(src_masks, (H, W), mode='bilinear', align_corners=False)
-            # the mean mask of all pixels in its centered patch
-            src_masks = rearrange(self.unfold_pixel(src_masks),
-                                  'N (T K) (H W) -> N T H W K',
-                                  H=dH, W=dW, K=1).mean(dim=-1)  # NxTxHpxWp
-
-            # box-center guided shifting between the t and t+1 frames
-            src_masks_ctr_shift = torch.zeros_like(src_masks.flatten(1))  # NxTHW
-            for obj_i, indices_ctr_shift_i in enumerate(indices_ctr_shift):
-                keep_next = indices_ctr_shift_i >= 0
-                indices_next = indices_ctr_shift_i[keep_next]
-                src_masks_ctr_shift[obj_i, keep_next] = src_masks[obj_i].flatten()[indices_next]
-            src_masks_ctr_shift = rearrange(src_masks_ctr_shift, 'N (T H W) -> N T H W', H=dH, W=dW)
-
-            tgt_masks_matched, ref_masks_matched = [], []
-            for (dt, dx, dy), is_inbox_pairwise in zip(self.pixel_offsets, is_inbox_pairwise_st):
-                if is_inbox_pairwise.sum() == 0:
-                    continue
-
-                src_masks_a = src_masks[..., max(-dy, 0):dH-dy, max(-dx, 0):dW-dx].flatten()
-                if dt == 0:
-                    # spatial paired pixels
-                    src_masks_b = src_masks[..., max(dy, 0):dH+dy, max(dx, 0):dW+dx].flatten()
-                else:
-                    # temporal paired pixels
-                    src_masks_b = src_masks_ctr_shift[..., max(dy, 0):dH+dy, max(dx, 0):dW+dx].flatten()
-                tgt_masks_matched.append(src_masks_a[is_inbox_pairwise])
-                ref_masks_matched.append(src_masks_b[is_inbox_pairwise])
-
-            if len(tgt_masks_matched) == 0:
-                continue
-
-            tgt_masks_matched, ref_masks_matched = torch.cat(tgt_masks_matched), torch.cat(ref_masks_matched)
-
-            # pairwise loss (keep boundary) on the paired pixels with similar lab color and feature correlation,
-            # which at least one pixel in the inner box
-            tgt_log_fg_prob = F.logsigmoid(tgt_masks_matched)
-            tgt_log_bg_prob = F.logsigmoid(-tgt_masks_matched)
-            ref_log_fg_prob = F.logsigmoid(ref_masks_matched)
-            ref_log_bg_prob = F.logsigmoid(-ref_masks_matched)
-
-            # the probability of making the same prediction = p_i * p_j + (1 - p_i) * (1 - p_j)
-            # we compute the probability in log space to avoid numerical instability
-            log_same_fg_prob = tgt_log_fg_prob + ref_log_fg_prob
-            log_same_bg_prob = tgt_log_bg_prob + ref_log_bg_prob
-
-            max_log = torch.max(log_same_fg_prob, log_same_bg_prob)
-            log_same_prob = torch.log(
-                torch.exp(log_same_fg_prob - max_log) +
-                torch.exp(log_same_bg_prob - max_log)
-            ) + max_log
-
-            losses.append(-log_same_prob.mean())
-
-        return sum(losses) / max(len(losses), 1) if len(losses) > 0 else pred_masks.new_zeros(1)
-
-    def loss_masks_pseudo(self, outputs, targets, indices, num_masks, l_layer):
-        """Compute pixel-wise mask loss with high-quality pseudo instance masks.
-        """
-        src_idx = self._get_src_permutation_idx(indices)
-        src_masks = outputs["pred_masks"][src_idx]  # NxTxHpxWp
-        tgt_masks_pseudo = torch.cat(
-            [t['masks_pseudo'][i] for t, (_, i) in zip(targets, indices)]
-        ).to(src_masks)  # NxTxHxW
-        tgt_mask_scores_pseudo = torch.cat(
-            [t['mask_pseudo_scores'][i] for t, (_, i) in zip(targets, indices)]
-        ).to(src_masks)  # N
-
-        is_high_conf = tgt_mask_scores_pseudo >= self.pseudo_mask_score_thresh
-        src_masks_high_conf = src_masks[is_high_conf]
-        tgt_masks_pseudo_high_conf = tgt_masks_pseudo[is_high_conf]
-        # No need to align the size between predicted masks and ground-truth masks
-        src_masks_high_conf = src_masks_high_conf.flatten(0, 1)[:, None]
-        tgt_masks_pseudo_high_conf = tgt_masks_pseudo_high_conf.flatten(0, 1)[:, None]
-
-        with torch.no_grad():
-            point_coords = get_uncertain_point_coords_with_randomness(
-                src_masks_high_conf,
-                lambda logits: calculate_uncertainty(logits),
-                self.num_points,
-                self.oversample_ratio,
-                self.importance_sample_ratio,
-            )
-            # get gt labels
-            point_labels = point_sample(
-                tgt_masks_pseudo_high_conf,
-                point_coords,
-                align_corners=False,
-            ).squeeze(1)
-
-        point_logits = point_sample(
-            src_masks_high_conf,
-            point_coords,
-            align_corners=False,
-        ).squeeze(1)
-
-        losses = {
-            "loss_mask": sigmoid_ce_loss_jit(point_logits, point_labels, num_masks),
-            "loss_dice": dice_loss_jit(point_logits, point_labels, num_masks),
-        }
-
-        del src_masks
-        del src_masks_high_conf
-        del tgt_masks_pseudo
-        del tgt_masks_pseudo_high_conf
 
         return losses
     
@@ -873,9 +682,6 @@ class VideoSetCriterion(nn.Module):
              targets: list of dicts, such that len(targets) == batch_size.
                       The expected keys in each dict depend on the losses applied, see each loss' doc
         """
-        self._iter += 1
-        self.pseudo_mask_score_thresh = 1 / (1 + math.exp(-2 * self._iter / self.max_iters))
-
         # Compute the average number of target boxes across all nodes, for normalization purposes
         num_masks = sum(len(t["labels"]) for t in targets)
         num_masks = torch.as_tensor(
@@ -895,7 +701,7 @@ class VideoSetCriterion(nn.Module):
 
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
         # Retrieve the matching between the outputs of the last layer and the targets
-        indices = self.matcher(outputs_without_aux, targets, self.pseudo_mask_score_thresh)
+        indices = self.matcher(outputs_without_aux, targets)
         losses = {}
         for loss in self.losses:
             losses.update(self.get_loss(loss, outputs, targets, indices, num_masks, l_layer=9))
@@ -903,7 +709,7 @@ class VideoSetCriterion(nn.Module):
         # In case of auxiliary losses, we repeat this process with the output of each intermediate layer.
         if "aux_outputs" in outputs:
             for i, aux_outputs in enumerate(outputs["aux_outputs"]):
-                aux_indices = self.matcher(aux_outputs, targets, self.pseudo_mask_score_thresh)
+                aux_indices = self.matcher(aux_outputs, targets)
                 for loss in self.losses:
                     l_dict = self.get_loss(loss, aux_outputs, targets, aux_indices, num_masks, l_layer=i)
                     l_dict = {k + f"_{i}": v for k, v in l_dict.items()}

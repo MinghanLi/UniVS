@@ -264,7 +264,7 @@ class VideoSetCriterionPrompt(nn.Module):
     """
 
     def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses, num_frames,
-                 num_points, oversample_ratio, importance_sample_ratio, use_ctt_loss=True, is_coco=True,
+                 num_points, oversample_ratio, importance_sample_ratio, use_ctt_loss=True
                  ):
         """Create the criterion.
         Parameters:
@@ -281,17 +281,12 @@ class VideoSetCriterionPrompt(nn.Module):
         self.eos_coef = eos_coef
         self.losses = losses
         self.num_frames = num_frames
-        empty_weight = torch.ones(self.num_classes + 1)
-        empty_weight[-1] = self.eos_coef
-        self.register_buffer("empty_weight", empty_weight)
-
         self.use_ctt_loss = use_ctt_loss
 
         # pointwise mask loss parameters
         self.num_points = num_points
         self.oversample_ratio = oversample_ratio
         self.importance_sample_ratio = importance_sample_ratio
-        self.is_coco = is_coco
 
     def loss_labels_clip(self, outputs, targets, num_masks, l_layer):
         loss = []
@@ -615,9 +610,6 @@ class VideoSetCriterionPrompt(nn.Module):
              targets: list of dicts, such that len(targets) == batch_size.
                       The expected keys in each dict depends on the losses applied, see each loss' doc
         """
-        
-        self.pseudo_mask_score_thresh = 0.8  # 1 / (1 + math.exp(-2 * self._iter / self.max_iters))
-
         # Compute the average number of target boxes across all nodes, for normalization purposes
         num_masks = sum(len(t["labels"]) for t in targets)
         num_masks = torch.as_tensor(

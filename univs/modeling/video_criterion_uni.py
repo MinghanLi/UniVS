@@ -65,19 +65,9 @@ class VideoSetCriterionUni(nn.Module):
             oversample_ratio=cfg.MODEL.MASK_FORMER.OVERSAMPLE_RATIO,
             importance_sample_ratio=cfg.MODEL.MASK_FORMER.IMPORTANCE_SAMPLE_RATIO,
             max_num_masks=cfg.MODEL.UniVS.NUM_POS_QUERIES,
-            is_coco=cfg.DATASETS.TEST[0].startswith("coco"),
             # boxvis parameters
             boxvis_enabled=cfg.MODEL.BoxVIS.BoxVIS_ENABLED,
-            boxvis_pairwise_enable=cfg.MODEL.BoxVIS.PAIRWISE_ENABLED,
-            boxvis_pairwise_num_stpair=cfg.MODEL.BoxVIS.PAIRWISE_STPAIR_NUM,
-            boxvis_pairwise_dilation=cfg.MODEL.BoxVIS.PAIRWISE_DILATION,
-            boxvis_pairwise_color_thresh=cfg.MODEL.BoxVIS.PAIRWISE_COLOR_THRESH,
-            boxvis_pairwise_corr_kernel_size=cfg.MODEL.BoxVIS.PAIRWISE_PATCH_KERNEL_SIZE,
-            boxvis_pairwise_corr_stride=cfg.MODEL.BoxVIS.PAIRWISE_PATCH_STRIDE,
-            boxvis_pairwise_corr_thresh=cfg.MODEL.BoxVIS.PAIRWISE_PATCH_THRESH,
             boxvis_ema_enabled=cfg.MODEL.BoxVIS.EMA_ENABLED,
-            boxvis_pseudo_mask_score_thresh=cfg.MODEL.BoxVIS.PSEUDO_MASK_SCORE_THRESH,
-            max_iters=cfg.SOLVER.MAX_ITER,
         )
 
         if self.prompt_as_queries:
@@ -92,7 +82,6 @@ class VideoSetCriterionUni(nn.Module):
                 num_points=cfg.MODEL.MASK_FORMER.TRAIN_NUM_POINTS,
                 oversample_ratio=cfg.MODEL.MASK_FORMER.OVERSAMPLE_RATIO,
                 importance_sample_ratio=cfg.MODEL.MASK_FORMER.IMPORTANCE_SAMPLE_RATIO,
-                is_coco=cfg.DATASETS.TEST[0].startswith("coco"),
             )
 
     def forward(self, outputs, targets):
