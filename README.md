@@ -12,6 +12,25 @@ We propose a novel unified VS architecture, namely **UniVS**, by using prompts a
   <img src="imgs/vs_tasks.jpg" width="100%" height="100%"/>
 </div><br/>
 
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/video-panoptic-segmentation-on-vipseg)](https://paperswithcode.com/sota/video-panoptic-segmentation-on-vipseg?p=univs-unified-and-universal-video)
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/video-semantic-segmentation-on-vspw)](https://paperswithcode.com/sota/video-semantic-segmentation-on-vspw?p=univs-unified-and-universal-video)
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/video-instance-segmentation-on-youtube-vis-2)](https://paperswithcode.com/sota/video-instance-segmentation-on-youtube-vis-2?p=univs-unified-and-universal-video)
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/video-object-segmentation-on-youtube-vos-1)](https://paperswithcode.com/sota/video-object-segmentation-on-youtube-vos-1?p=univs-unified-and-universal-video)
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/video-object-segmentation-on-davis-2017-val)](https://paperswithcode.com/sota/video-object-segmentation-on-davis-2017-val?p=univs-unified-and-universal-video)
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/referring-expression-segmentation-on-davis)](https://paperswithcode.com/sota/referring-expression-segmentation-on-davis?p=univs-unified-and-universal-video)
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/video-instance-segmentation-on-youtube-vis-1)](https://paperswithcode.com/sota/video-instance-segmentation-on-youtube-vis-1?p=univs-unified-and-universal-video)
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/video-instance-segmentation-on-ovis-1)](https://paperswithcode.com/sota/video-instance-segmentation-on-ovis-1?p=univs-unified-and-universal-video)
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/referring-expression-segmentation-on-refer-1)](https://paperswithcode.com/sota/referring-expression-segmentation-on-refer-1?p=univs-unified-and-universal-video)
+
 ## 📌 Updates 📌
 
 * **🔥 `[Hightlights]`:** To facilitate the evaluation of video segmentation tasks under **the Detectron2** framework, we wrote the evaluation metrics of the six existing video segmentation tasks into the Detectron2 **Evaluators**, including VIS, VSS, VPS, VOS, PVOS, and RefVOS tasks. Now, you can evaluate VS tasks directly in our code just like COCO, and no longer need to manually adapt any evaluation indicators by yourself. Please refer to `univs/inference` and `univs/evaluation` for specific codes. If you encounter any issues when using our code, please push them to the GitHub issues. We will reply to you as soon as possible.
