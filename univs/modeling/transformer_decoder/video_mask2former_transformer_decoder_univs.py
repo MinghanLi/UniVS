@@ -547,7 +547,6 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         # If a BoolTensor is provided, positions with ``True`` are not allowed to attend while ``False`` values will be unchanged.
         attn_mask = (attn_mask.sigmoid().unsqueeze(1).repeat(1, self.num_heads, 1, 1).flatten(0, 1) < 0.5).bool()
         attn_mask = attn_mask.detach()
-
         return outputs_class, outputs_mask, attn_mask, outputs_reid
     
     def prompt_image_attention_mask(self, attn_mask, attn_mask_target_size, num_frames, targets):
