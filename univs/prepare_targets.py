@@ -189,7 +189,9 @@ class PrepareTargets:
             if len(gt_ids_per_video) > 0:
                 min_id = max(gt_ids_per_video[valid_bool_frame].min(), 0)
                 gt_ids_per_video[valid_bool_frame] -= min_id  # obj id mapping
-
+            
+            assert not (gt_classes_per_video == 0).any(), 'Class labels should start from 1 instead of 0!!'
+                
             valid_bool_clips.append(valid_bool_clip)
             clip_gt_instances.append(
                 {

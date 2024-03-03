@@ -3,7 +3,7 @@
 def _get_burst_meta():
     thing_ids = [k["id"] for k in BURST_CATEGORIES]
     assert len(thing_ids) == 482, len(thing_ids)
-    # Mapping from the incontiguous category id to an id in [0, 481]
+    # Mapping from the incontiguous category id to an id in [1, 482]
     thing_dataset_id_to_contiguous_id = {k: i for i, k in enumerate(thing_ids)}
     thing_classes = [k["name"] for k in BURST_CATEGORIES]
 

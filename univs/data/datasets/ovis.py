@@ -40,7 +40,7 @@ def _get_ovis_instances_meta():
     thing_ids = [k["id"] for k in OVIS_CATEGORIES if k["isthing"] == 1]
     thing_colors = [k["color"] for k in OVIS_CATEGORIES if k["isthing"] == 1]
     assert len(thing_ids) == 25, len(thing_ids)
-    # Mapping from the incontiguous YTVIS category id to an id in [0, 39]
+    # Mapping from the incontiguous YTVIS category id to an id in [1, 25]
     thing_dataset_id_to_contiguous_id = {k: i for i, k in enumerate(thing_ids)}
     thing_classes = [k["name"] for k in OVIS_CATEGORIES if k["isthing"] == 1]
     ret = {
