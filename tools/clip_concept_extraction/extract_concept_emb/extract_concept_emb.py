@@ -11,7 +11,7 @@ import torch
 
 file = Path(__file__).resolve()
 parent = str(file.parent)
-parent_new = '/'.join(parent.split('/')[:parent.split('/').index('UniVS-cvpr')+1])
+parent_new = '/'.join(parent.split('/')[:parent.split('/').index('UniVS')+1])
 
 sys.path.append(parent_new)
 file = Path(__file__).resolve()
