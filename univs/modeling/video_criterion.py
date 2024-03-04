@@ -412,15 +412,15 @@ class VideoSetCriterion(nn.Module):
         if outputs["pred_embds"].nelement() == 0:
             if "pred_embds_prompt" in outputs:
                 return {
-                    "loss_reid": outputs["pred_embds"].sum().detach(),
-                    "loss_reid_aux": outputs["pred_embds"].sum().detach(),
-                    "loss_reid_l2p": outputs["pred_embds"].sum().detach(),
-                    "loss_reid_l2p_aux": outputs["pred_embds"].sum().detach()
+                    "loss_reid": outputs["pred_embds"][:0].sum().detach(),
+                    "loss_reid_aux": outputs["pred_embds"][:0].sum().detach(),
+                    "loss_reid_l2p": outputs["pred_embds"][:0].sum().detach(),
+                    "loss_reid_l2p_aux": outputs["pred_embds"][:0].sum().detach()
                 }
             else:
                 return {
-                    "loss_reid": outputs["pred_embds"].sum().detach(),
-                    "loss_reid_aux": outputs["pred_embds"].sum().detach()
+                    "loss_reid": outputs["pred_embds"][:0].sum().detach(),
+                    "loss_reid_aux": outputs["pred_embds"][:0].sum().detach()
                 }
     
         bs = len(targets)
@@ -485,8 +485,8 @@ class VideoSetCriterion(nn.Module):
 
         if outputs["pred_embds_prompt"].nelement() == 0:
             return {
-                "loss_reid_l2p": outputs["pred_embds"].sum().detach(),
-                "loss_reid_l2p_aux": outputs["pred_embds"].sum().detach(),
+                "loss_reid_l2p": outputs["pred_embds_prompt"][:0].sum().detach(),
+                "loss_reid_l2p_aux": outputs["pred_embds_prompt"][:0].sum().detach(),
             }
         
         bs = len(targets)
