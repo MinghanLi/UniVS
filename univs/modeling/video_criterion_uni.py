@@ -37,8 +37,6 @@ class VideoSetCriterionUni(nn.Module):
             weight_dict: dict containing as key the names of the losses and as values their relative weight
             eos_coef: relative classification weight applied to the no-object category
             losses: list of all the losses to be applied. See get_loss for list of available losses
-            boxvis_enabled: It controls the annotation types: pixel-wise or box-level annotations for VIS task
-            boxvis_ema_enabled: It controls whether to use Teacher Net to produce pseudo instance masks for VIS task
         """
         super().__init__()
         self.num_classes = num_classes
@@ -67,7 +65,6 @@ class VideoSetCriterionUni(nn.Module):
             max_num_masks=cfg.MODEL.UniVS.NUM_POS_QUERIES,
             # boxvis parameters
             boxvis_enabled=cfg.MODEL.BoxVIS.BoxVIS_ENABLED,
-            boxvis_ema_enabled=cfg.MODEL.BoxVIS.EMA_ENABLED,
         )
 
         if self.prompt_as_queries:

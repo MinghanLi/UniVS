@@ -145,6 +145,7 @@ class InferenceVideoVOS(nn.Module):
         self.num_prev_frames_memory = max(num_prev_frames_memory, num_frames)
 
         self.output_dir = output_dir
+        self.use_semseg_pvos = True
 
         self.visualize_results_only_enable = False
         self.visualize_query_emb_enable = False
@@ -316,11 +317,11 @@ class InferenceVideoVOS(nn.Module):
         
         pred_masks = F.interpolate(pred_masks, (h_gt, w_gt), mode='bilinear', align_corners=False)
         mask_quality_scores = calculate_mask_quality_scores(pred_masks[..., :image_size[0], :image_size[1]])
-        if 'viposeg' in targets_per_video['dataset_name']:
+        if 'viposeg' in targets_per_video['dataset_name'] and self.use_semseg_pvos:
             num_classes, start_idx = combined_datasets_category_info['vipseg']
             pred_logits = pred_logits[..., start_idx:start_idx+num_classes]
-            pred_logits = pred_logits * mask_quality_scores.view(-1, 1)
-            semseg = torch.einsum("qc,qthw->cthw", pred_logits[:self.num_queries], pred_masks[:self.num_queries].sigmoid())
+            pred_logits_quality = pred_logits * mask_quality_scores.view(-1, 1)
+            semseg = torch.einsum("qc,qthw->cthw", pred_logits_quality[:self.num_queries], pred_masks[:self.num_queries].sigmoid())
             sem_mask = semseg.argmax(0)
 
         # STEP1: firstly appeared objects
@@ -330,17 +331,16 @@ class InferenceVideoVOS(nn.Module):
             faf_idx_ = first_appear_frame_idxs[is_first_appear] - (first_frame_idx + num_frames)
             obj_idx_  = torch.nonzero(is_first_appear).reshape(-1)
 
-            use_prompt_only = True  # for first frame, we only use predicted masks by prompt queries
-            if use_prompt_only or task == 'grounding' or \
-                (self.prompt_as_queries and self.video_unified_inference_queries in {'prompt', 'prompt+learn', 'learn+prompt'}):
+            use_prompt_only = True if task == "sot" else False # for first frame, we only use predicted masks by prompt queries
+            if use_prompt_only or (self.prompt_as_queries and self.video_unified_inference_queries in {'prompt', 'prompt+learn', 'learn+prompt'}):
                 # please enable LSJ_aug during inference (keep consistency postional embeddings with training)
                 indices_p = obj_idx_ + self.num_queries
 
             gt_masks_first = gt_masks[obj_idx_, faf_idx_]
             gt_boxes_first = gt_boxes[obj_idx_, faf_idx_]
-            if not use_prompt_only and task == 'sot' \
-                and (self.video_unified_inference_queries in {'learn', 'prompt+learn', 'learn+prompt'}):
+            if not use_prompt_only and self.video_unified_inference_queries in {'learn', 'prompt+learn', 'learn+prompt'}:
                 # back-end re-identitfication between prompt and learnable queries, used in SEEM and UNINEXT
+                # Box IoU to select topk candidates, Mask IoU to find the matched one
                 biou_scores = video_box_iou(gt_boxes_first[:, None].repeat(1,num_frames,1), pred_boxes)[0]  # num_gt_first_occur x Q x T 
                 biou_scores = biou_scores[range(is_first_appear.sum()), :, faf_idx_]  # num_gt_first_occur x Q
                 num_topk = 5 
@@ -350,7 +350,7 @@ class InferenceVideoVOS(nn.Module):
                 miou_scores = batched_pair_mask_iou(gt_masks_first.unsqueeze(1).repeat(1,num_topk,1,1), pred_masks_topk)  
                 indices_l = topk_idxs[range(is_first_appear.sum()), miou_scores.argmax(-1)]
             
-            if use_prompt_only or task == 'grounding' or self.video_unified_inference_queries == 'prompt':
+            if use_prompt_only or (self.prompt_as_queries and self.video_unified_inference_queries == 'prompt'):
                 # In first frame, only support prompts as queries for referring segmentation task
                 matched_masks = pred_masks[indices_p]
                 matched_mask_quality_scores = mask_quality_scores[indices_p]
@@ -403,7 +403,7 @@ class InferenceVideoVOS(nn.Module):
                 # use semseg results to help stuff entities
                 cur_label = int(gt_labels[obj_i_])
                 cur_mask = matched_masks[i_, faf_i_:]
-                if 'viposeg' in targets_per_video['dataset_name']:
+                if 'viposeg' in targets_per_video['dataset_name'] and self.use_semseg_pvos:
                     if cur_label + 1 in self.metadata.stuff_dataset_id_to_contiguous_id:
                         cur_mask[sem_mask[faf_i_:] == cur_label] = 10.
                 gt_masks[obj_i_, faf_i_:] = cur_mask.gt(0.)
@@ -437,17 +437,27 @@ class InferenceVideoVOS(nn.Module):
             use_learn = False
             if self.video_unified_inference_queries in {'learn', 'prompt+learn', 'learn+prompt'}:
                 use_learn = True
-                sim_threshold = 0.65
+                use_norm = 'viposeg' not in targets_per_video['dataset_name']
+                sim_threshold = 0.65 if use_norm else 0.5
                 # back-end re-identitfication between prompt and learnable queries, used in SEEM and UNINEXT
                 indices_l, matched_sim_l = match_from_learnable_embds(
-                    tgt_embds, pred_embds[:self.num_queries], return_similarity=True, return_src_indices=False
+                    tgt_embds, pred_embds[:self.num_queries], 
+                    return_similarity=True, return_src_indices=False, use_norm=use_norm
                 )  # num_gt_appreaed
                 matched_masks_l = pred_masks[indices_l]
                 matched_mask_quality_scores_l = mask_quality_scores[indices_l]
                 matched_pred_embds_l = pred_embds[indices_l]
                 matched_pred_boxes_l = pred_boxes[indices_l]
+                matched_logits_l = pred_logits[indices_l]
 
-                is_consistency = matched_sim_l > sim_threshold
+                is_consistency = matched_sim_l >= sim_threshold
+                # if 'viposeg' in targets_per_video['dataset_name']:
+                    # pred_labels = matched_logits_l.argmax(-1)
+                    # for i_l, cur_label in enumerate(pred_labels):
+                        # # a stuff object may include multiple regions (e.g. wall), 
+                        # # the 1-to-1 assignment may miss some regions
+                        # if cur_label + 1 in self.metadata.stuff_dataset_id_to_contiguous_id:
+                        #     is_consistency[i_l] = 0
                 matched_masks_l[~is_consistency] = 0
                 matched_mask_quality_scores_l[~is_consistency] = 0
                 matched_pred_embds_l[~is_consistency] = 0
@@ -485,7 +495,7 @@ class InferenceVideoVOS(nn.Module):
                 original_area = (matched_masks > 0).flatten(1).sum(1).clamp(min=1)
 
                 matched_masks_sigmoid = matched_masks.sigmoid()
-                if 'viposeg' in targets_per_video['dataset_name']:
+                if 'viposeg' in targets_per_video['dataset_name'] and self.use_semseg_pvos:
                     for i, label in enumerate(gt_labels[has_appeared]):
                         if int(label) + 1 in self.metadata.stuff_dataset_id_to_contiguous_id:
                             matched_masks_sigmoid[i][sem_mask==label] = 1

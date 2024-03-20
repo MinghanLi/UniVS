@@ -26,7 +26,7 @@ def add_univs_config(cfg):
 
     # Pseudo Data Use
     cfg.INPUT.PSEUDO = CN()
-    cfg.INPUT.PSEUDO.AUGMENTATIONS = ['rotation', 'brightness']
+    cfg.INPUT.PSEUDO.AUGMENTATIONS = ['rotation'] # ['rotation', 'brightness']
     cfg.INPUT.PSEUDO.MIN_SIZE_TRAIN = (512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
     cfg.INPUT.PSEUDO.MAX_SIZE_TRAIN = 768
     cfg.INPUT.PSEUDO.MIN_SIZE_TRAIN_SAMPLING = "choice_by_clip"
@@ -67,6 +67,23 @@ def add_univs_config(cfg):
     cfg.MODEL.SEM_SEG_HEAD.FROZEN_MASK_CONVS = False     # one 3*3 conv and two 1*1 convs
     cfg.MODEL.SEM_SEG_HEAD.FROZEN_PREDICTOR = False
 
+    # pixel decoder
+    cfg.MODEL.SEM_SEG_HEAD.NAME = "MaskFormerHead"
+    cfg.MODEL.SEM_SEG_HEAD.IGNORE_VALUE = 255
+    cfg.MODEL.SEM_SEG_HEAD.NUM_CLASSES = 133
+    cfg.MODEL.SEM_SEG_HEAD.LOSS_WEIGHT = 1.0
+    cfg.MODEL.SEM_SEG_HEAD.CONVS_DIM = 256
+    # pixel decoder config
+    cfg.MODEL.SEM_SEG_HEAD.MASK_DIM = 256
+    cfg.MODEL.SEM_SEG_HEAD.NORM = "GN"
+    # pixel decoder
+    cfg.MODEL.SEM_SEG_HEAD.PIXEL_DECODER_NAME = "MSDeformAttnPixelDecoder"
+    cfg.MODEL.SEM_SEG_HEAD.IN_FEATURES = [ "res2", "res3", "res4", "res5" ]
+    cfg.MODEL.SEM_SEG_HEAD.DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES = [ "res3", "res4", "res5" ]
+    cfg.MODEL.SEM_SEG_HEAD.COMMON_STRIDE = 4
+    # adding transformer in pixel decoder
+    cfg.MODEL.SEM_SEG_HEAD.TRANSFORMER_ENC_LAYERS = 6
+
     # Mask2Former
     cfg.MODEL.MASK_FORMER.REID_WEIGHT = 0.25
     cfg.MODEL.MASK_FORMER.TEST.STABILITY_SCORE_THRESH = 0.0 # from SAM
@@ -75,22 +92,8 @@ def add_univs_config(cfg):
     # BoxVIS
     cfg.MODEL.BoxVIS = CN()
     cfg.MODEL.BoxVIS.BoxVIS_ENABLED = False
-    cfg.MODEL.BoxVIS.BOTTOM_PIXELS_REMOVED = 10
-    cfg.MODEL.BoxVIS.PAIRWISE_ENABLED = False
-    cfg.MODEL.BoxVIS.PAIRWISE_STPAIR_NUM = 7  # 2 sptial neighbours and 5 temporal neighbours
-    cfg.MODEL.BoxVIS.PAIRWISE_SIZE = 3
-    cfg.MODEL.BoxVIS.PAIRWISE_DILATION = 4
-    cfg.MODEL.BoxVIS.PAIRWISE_COLOR_THRESH = 0.3  # 0.3 => (dR+dG+dB) < 2, 0.15 => (dR+dG+dB) < 4
-    cfg.MODEL.BoxVIS.PAIRWISE_PATCH_KERNEL_SIZE = 3
-    cfg.MODEL.BoxVIS.PAIRWISE_PATCH_STRIDE = 2
-    cfg.MODEL.BoxVIS.PAIRWISE_PATCH_THRESH = 0.9
-
-    # Teacher Net
     cfg.MODEL.BoxVIS.EMA_ENABLED = False
     cfg.MODEL.BoxVIS.PSEUDO_MASK_SCORE_THRESH = 0.5
-
-    # BVISD dataset
-    cfg.MODEL.BoxVIS.BVISD_ENABLED = False
 
     # Inference
     cfg.MODEL.BoxVIS.TEST = CN()
@@ -104,10 +107,11 @@ def add_univs_config(cfg):
 
     # clip-by-clip tracking with overlapped frames
     cfg.MODEL.BoxVIS.TEST.NUM_FRAMES = 3
-    cfg.MODEL.BoxVIS.TEST.NUM_FRAMES_WINDOW = 30
+    cfg.MODEL.BoxVIS.TEST.NUM_FRAMES_WINDOW = 5
     cfg.MODEL.BoxVIS.TEST.NUM_MAX_INST = 50
     cfg.MODEL.BoxVIS.TEST.CLIP_STRIDE = 1
 
+    # UniVS
     cfg.MODEL.UniVS = CN()
     cfg.MODEL.UniVS.PROMPT_TYPE = "category"
     cfg.MODEL.UniVS.CLIP_CLASS_EMBED_PATH = 'datasets/concept_emb/combined_datasets_cls_emb_rn50x4.pth'
@@ -115,12 +119,12 @@ def add_univs_config(cfg):
     cfg.MODEL.UniVS.USE_CONTRASTIVE_LOSS = True
     
     # arch. parameters
-    cfg.MODEL.UniVS.VISUAL_PROMPT_ENCODER = False
-    cfg.MODEL.UniVS.TEXT_PROMPT_ENCODER = False
-    cfg.MODEL.UniVS.LANGUAGE_ENCODER_ENABLE = False
-    cfg.MODEL.UniVS.PROMPT_AS_QUERIES = False
-    cfg.MODEL.UniVS.VISUAL_PROMPT_TO_IMAGE_ENABLE = False
-    cfg.MODEL.UniVS.TEXT_PROMPT_TO_IMAGE_ENABLE = False
+    cfg.MODEL.UniVS.VISUAL_PROMPT_ENCODER = True
+    cfg.MODEL.UniVS.TEXT_PROMPT_ENCODER = True
+    cfg.MODEL.UniVS.LANGUAGE_ENCODER_ENABLE = True
+    cfg.MODEL.UniVS.PROMPT_AS_QUERIES = True
+    cfg.MODEL.UniVS.VISUAL_PROMPT_TO_IMAGE_ENABLE = True
+    cfg.MODEL.UniVS.TEXT_PROMPT_TO_IMAGE_ENABLE = True
     cfg.MODEL.UniVS.MASKDEC_ATTN_ORDER = 'casa'  # 'casa' or 'saca'
     cfg.MODEL.UniVS.MASKDEC_SELF_ATTN_MASK_TYPE = 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
     cfg.MODEL.UniVS.DISABLE_LEARNABLE_QUERIES_SA1B = False
@@ -135,12 +139,9 @@ def add_univs_config(cfg):
     cfg.MODEL.UniVS.TEST.DISABLE_SEMANTIC_QUERIES = False
     cfg.MODEL.UniVS.TEST.BOX_NMS_THRESH = 0.75                    # from SAM
     cfg.MODEL.UniVS.TEST.TEMPORAL_CONSISTENCY_THRESHOLD = 0.05
+    cfg.MODEL.UniVS.TEST.CLIP_STRIDE = 1
     cfg.MODEL.UniVS.TEST.DETECT_NEWLY_OBJECT_THRESHOLD = 0.05
     cfg.MODEL.UniVS.TEST.DETECT_NEWLY_INTERVAL_FRAMES = 1
     cfg.MODEL.UniVS.TEST.NUM_PREV_FRAMES_MEMORY = 5 
-    cfg.MODEL.UniVS.TEST.ENABLED_PREV_FRAMES_MEMORY = True # Fasel for stage2 but Ture for stage3
+    cfg.MODEL.UniVS.TEST.ENABLED_PREV_FRAMES_MEMORY = True # False for stage2 but Ture for stage3
     cfg.MODEL.UniVS.TEST.ENABLED_PREV_VISUAL_PROMPTS_FOR_GROUNDING = False
-
-
-
-

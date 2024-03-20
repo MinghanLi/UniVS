@@ -158,6 +158,7 @@ ADE20K_150_CATEGORIES = [
     {"color": [92, 0, 255], "id": 150, "isthing": 1, "name": "flag"},
 ]
 
+isthing = [cate["isthing"]for cate in ADE20K_150_CATEGORIES]
 ADE20k_COLORS = [k["color"] for k in ADE20K_150_CATEGORIES]
 
 

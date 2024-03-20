@@ -5,22 +5,10 @@ MODEL:
   MASK_FORMER:
     TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniVS"
     NUM_OBJECT_QUERIES: 200
-  UniVS:
-    VISUAL_PROMPT_ENCODER: True
-    TEXT_PROMPT_ENCODER: True
-    LANGUAGE_ENCODER_ENABLE: True
-    PROMPT_AS_QUERIES: True
-    VISUAL_PROMPT_TO_IMAGE_ENABLE: True
-    TEXT_PROMPT_TO_IMAGE_ENABLE: True
-    MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
-    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep-blocked'  # Important!!! 
-    TEST:
-      VIDEO_UNIFIED_INFERENCE_QUERIES: 'prompt'
   BoxVIS:
     TEST:
       NUM_FRAMES_WINDOW: 5
       CLIP_STRIDE: 1
-      LSJ_AUG_ENABLED: True
       APPLY_CLS_THRES: 0.05
 DATASETS:
   TEST: ("rvos-refdavis-val-0", "rvos-refdavis-val-1", "rvos-refdavis-val-2", "rvos-refdavis-val-3")

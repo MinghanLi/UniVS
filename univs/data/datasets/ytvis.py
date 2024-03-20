@@ -175,6 +175,11 @@ def load_ytvis_json(json_file, image_root, dataset_name=None, extra_annotation_k
         # entityseg in [0, #categories-1], coco_panoptic not in [1, #categories]
         if not (min(cat_ids) == 1 and max(cat_ids) == len(cat_ids)):
             if "burst" in dataset_name:
+                logger.warning(
+                    f"""
+                    Category ids in {dataset_name} annotations are not in [1, #categories]! We'll apply the mapping from burst to lvis v1.
+                    """
+                )
                 id_map = _map_burst_to_lvis_v1_dict
             elif "coco" not in dataset_name or "coco_panoptic" in dataset_name:
                 logger.warning(

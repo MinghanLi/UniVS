@@ -22,6 +22,8 @@ MODEL:
     TEXT_PROMPT_TO_IMAGE_ENABLE: False
     MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
     MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
+    TEST:
+      VIDEO_UNIFIED_INFERENCE_ENABLE: False
   BoxVIS:
     TEST:
       NUM_FRAMES_WINDOW: 5

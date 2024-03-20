@@ -33,7 +33,7 @@ from univs import (
     Clips, 
     FastOverTracker_DET,
     )
-from univs.data.datasets import OPENVOC_CATEGORIES, _get_vspw_vss_metadata, _get_vipseg_panoptic_metadata_val
+from univs.data.datasets import _get_vspw_vss_metadata, _get_vipseg_panoptic_metadata_val
 from univs.utils.comm import convert_mask_to_box, calculate_mask_quality_scores, video_box_iou, batched_mask_iou
 from univs.prepare_targets import PrepareTargets
 
@@ -158,6 +158,7 @@ class InferenceVideoEntity(nn.Module):
         elif video_unified_inference_entities == 'entity_vps':
             self.metadata = MetadataCatalog.get('vipseg_panoptic_val')
 
+        self.use_quasi_track = True
         self.temporal_consistency_threshold = temporal_consistency_threshold
         self.detect_newly_object_threshold = detect_newly_object_threshold
         self.detect_newly_interval_frames = detect_newly_interval_frames
@@ -333,54 +334,53 @@ class InferenceVideoEntity(nn.Module):
                     continue
                 out_learn[k] = v[:self.num_queries]
                 out_prompt[k] = v[self.num_queries:]
+            del out
 
             if 'vss' in sub_task:
                 processed_results.append(
                     self.save_results_vss(i, out_learn, interim_size, image_size, out_size, is_last, stride)
                 )
 
+            elif 'vis' in sub_task or 'vps' in sub_task:
+                # step1: update annotations for prompt-specified entities
+                self.write_prompt_predictions_into_annotations_per_clip(i, out_prompt, targets, interim_size, image_size, stride)
+
+                # step2: find newly entities 
+                if i % self.detect_newly_interval_frames == 0 or targets[0]["masks"].nelement() == 0:
+                    if 'vis' in sub_task:
+                        self.detect_newly_entities_per_clip_instance(out_learn, targets, interim_size)
+                    elif 'vps' in sub_task:
+                        self.detect_newly_entities_per_clip_pixel(out_learn, targets, interim_size)
+                    else:
+                        raise ValueError
+
+                    # convert newly entities into prompt-specified annotations
+                    self.write_newly_entities_into_annotations_per_clip(i, out_learn, targets, interim_size)
+
+                # step3: save results
+                is_out = i > self.num_prev_frames_memory and i % self.num_frames_window_output == self.num_prev_frames_memory
+                if is_out or is_last:
+                    if 'vis' in sub_task:
+                        processed_results.append(
+                            self.save_results_vis(i, targets, interim_size, image_size, out_size, is_last)
+                        )
+                    elif 'vps' in sub_task:
+                        processed_results.append(
+                            self.save_results_vps(i, targets, interim_size, image_size, out_size, is_last)
+                        )
+                    else:
+                        raise ValueError
+                    
+                    if self.visualize_results_enable and 'vis' in sub_task:
+                        self.visualize_results_vis(i, batched_inputs, targets, image_size, out_size, is_last)
+                    
+                    # remove previous masks in memory pool for memoty efficiently
+                    targets[0]["mask_logits"] = targets[0]["mask_logits"][:, self.num_frames_window_output:]
+                    targets[0]["masks"] = targets[0]["masks"][:, self.num_frames_window_output:]
+                    targets[0]["occurrence"] = targets[0]["occurrence"][:, self.num_frames_window_output:]
+
             else:
-
-                if 'vis' in sub_task or 'vps' in sub_task:
-                    # step1: update annotations for prompt-specified entities
-                    self.write_prompt_predictions_into_annotations_per_clip(i, out_prompt, targets, interim_size, image_size, stride)
-
-                    # step2: find newly entities 
-                    if i % self.detect_newly_interval_frames == 0 or targets[0]["masks"].nelement() == 0:
-                        if 'vis' in sub_task:
-                            self.detect_newly_entities_per_clip_instance(out_learn, targets, interim_size)
-                        elif 'vps' in sub_task:
-                            self.detect_newly_entities_per_clip_pixel(out_learn, targets, interim_size)
-                        else:
-                            raise ValueError
-
-                        # convert newly entities into prompt-specified annotations
-                        self.write_newly_entities_into_annotations_per_clip(i, out_learn, targets, interim_size)
-
-                    # step3: save results
-                    is_out = i > self.num_frames_window_output and i % self.num_frames_window_output == 0
-                    if is_out or is_last:
-                        if 'vis' in sub_task:
-                            processed_results.append(
-                                self.save_results_vis(i, targets, interim_size, image_size, out_size, is_last)
-                            )
-                        elif 'vps' in sub_task:
-                            processed_results.append(
-                                self.save_results_vps(i, targets, interim_size, image_size, out_size, is_last)
-                            )
-                        else:
-                            raise ValueError
-                        
-                        if self.visualize_results_enable and 'vis' in sub_task:
-                            self.visualize_results_vis(i, batched_inputs, targets, image_size, out_size, is_last)
-                        
-                        # remove previous masks in memory pool for memoty efficiently
-                        targets[0]["mask_logits"] = targets[0]["mask_logits"][:, self.num_frames_window_output:]
-                        targets[0]["masks"] = targets[0]["masks"][:, self.num_frames_window_output:]
-                        targets[0]["occurrence"] = targets[0]["occurrence"][:, self.num_frames_window_output:]
-
-                else:
-                    raise ValueError(f"Not support to eval the dataset {dataset_name} yet")
+                raise ValueError(f"Not support to eval the dataset {dataset_name} yet")
 
             # pad zero values for prompt-specified annotations
             if not is_last and "masks" in targets[0]:
@@ -508,7 +508,6 @@ class InferenceVideoEntity(nn.Module):
         pred_logits = out_learn['pred_logits'].float() # Q_lxK
         pred_masks = out_learn['pred_masks'].float()   # Q_lxTxHxW
         pred_embds = out_learn['pred_embds'].float()   # Q_lxTxC 
-        pred_reid = out_learn['pred_reid_logits']      # Q_lxQ_p
 
         num_frames = pred_masks.shape[1]
 
@@ -519,7 +518,6 @@ class InferenceVideoEntity(nn.Module):
             pred_logits = pred_logits[keep]
             pred_masks = pred_masks[keep]
             pred_embds = pred_embds[keep]
-            pred_reid  = pred_reid[keep]
             mask_quality_scores = mask_quality_scores[keep]
         
         nms_scores, nms_labels = pred_logits.max(-1)
@@ -528,7 +526,6 @@ class InferenceVideoEntity(nn.Module):
         pred_logits = pred_logits[keep]
         pred_masks = pred_masks[keep]
         pred_embds = pred_embds[keep]
-        pred_reid  = pred_reid[keep]
         nms_scores = nms_scores[keep]
         nms_labels = nms_labels[keep]
         mask_quality_scores = mask_quality_scores[keep]
@@ -561,7 +558,6 @@ class InferenceVideoEntity(nn.Module):
             pred_masks = pred_masks[keep_by_nms]
             pred_embds = pred_embds[keep_by_nms]  # Q_l, T, C
             pred_boxes = pred_boxes[keep_by_nms]
-            pred_reid  = pred_reid[keep_by_nms]   # Q_l, Q_p
             mask_quality_scores = mask_quality_scores[keep_by_nms]
         
         if is_first_frame:
@@ -578,19 +574,17 @@ class InferenceVideoEntity(nn.Module):
             gt_occurrence = targets_per_video['occurrence']
             gt_mask_quality_scores = targets_per_video["mask_quality_scores"]
 
-            use_quasi_track = True
-            if use_quasi_track:
-                tgt_embds = gt_embds[:, -3:]
+            tgt_embds = gt_embds[:, -3:]
+            if self.use_quasi_track:
                 sim = torch.einsum('ntc,mfc->nmtf', tgt_embds, pred_embds).flatten(2)  # N_gt, N_pred, K
                 sim_bi = (sim.softmax(1) + sim.softmax(0)).mean(-1) / 2. 
                 sim_bi[sim_bi < self.detect_newly_object_threshold] = 0
-
                 indices = linear_sum_assignment((1 - sim_bi).cpu())
                 matched_sim = sim_bi[indices]
-
             else:
                 indices, matched_sim = match_from_learnable_embds(
-                    gt_embds, pred_embds, return_similarity=True, return_src_indices=True
+                    tgt_embds, pred_embds, return_similarity=True, return_src_indices=True, 
+                    use_norm=True, thresh=self.detect_newly_object_threshold
                 )
                 
             above_sim = matched_sim > self.detect_newly_object_threshold
@@ -649,7 +643,6 @@ class InferenceVideoEntity(nn.Module):
         pred_logits = out_learn['pred_logits'].float() # Q_lxK
         pred_masks = out_learn['pred_masks'].float()   # Q_lxTxHxW
         pred_embds = out_learn['pred_embds'].float()   # Q_lxTxC 
-        pred_reid = out_learn['pred_reid_logits']      # Q_lxQ_p
         h_pred, w_pred = pred_masks.shape[-2:]
         box_normalizer = torch.as_tensor([w_pred, h_pred, w_pred, h_pred], device=self.device)
         pred_boxes = convert_mask_to_box(pred_masks > 0) / box_normalizer
@@ -684,7 +677,6 @@ class InferenceVideoEntity(nn.Module):
                 sorted_indices_stuff = sorted_indices_stuff[max_miou < 0.6]
             
             newly_indices = torch.cat([sorted_indices_thing, sorted_indices_stuff])
-            
             # slower speed but higher performance, because too much entities needed to generate pseudo prompts
             # newly_indices = newly_indices[nms_scores[newly_indices].sort(descending=True)[1][:self.test_topk_per_image]]
             # faster speed but slightly lower performance
@@ -700,18 +692,17 @@ class InferenceVideoEntity(nn.Module):
             gt_occurrence = targets_per_video['occurrence']
             gt_mask_quality_scores = targets_per_video["mask_quality_scores"]
 
-            use_quasi_track = True
             tgt_embds = gt_embds[:, -3:]
-            if use_quasi_track:
-                sim = torch.einsum('ntc,mc->nmt', tgt_embds, pred_embds.mean(1))  # N_gt, N_pred, K
+            if self.use_quasi_track:
+                sim = torch.einsum('ntc,mfc->nmtf', tgt_embds, pred_embds).flatten(2)  # N_gt, N_pred, K
                 sim_bi = (sim.softmax(1) + sim.softmax(0)).mean(-1) / 2. 
-
+                sim_bi[sim_bi < self.detect_newly_object_threshold] = 0  # Important!!
                 indices = linear_sum_assignment((1 - sim_bi).cpu())
                 matched_sim = sim_bi[indices]
-
             else:
                 indices, matched_sim = match_from_learnable_embds(
-                    tgt_embds, pred_embds, return_similarity=True, return_src_indices=True
+                    tgt_embds, pred_embds, return_similarity=True, return_src_indices=True, 
+                    use_norm=False, thresh=self.detect_newly_object_threshold
                 )
                 
             above_sim = matched_sim > self.detect_newly_object_threshold

@@ -1,4 +1,0 @@
-_BASE_: univs_R50_yt21_b+seem.yaml
-DATASETS:
-  TEST: ("ytvis_2019_val", )
-OUTPUT_DIR: output/inf/r50_b+seem/stage2/yt19/minvis/

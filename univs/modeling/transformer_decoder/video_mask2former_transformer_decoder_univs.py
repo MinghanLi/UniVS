@@ -10,6 +10,7 @@ from torch import nn, Tensor
 from torch.nn import functional as F
 from einops import rearrange, repeat
 
+from scipy.optimize import linear_sum_assignment
 from timm.models.layers import trunc_normal_
 
 from detectron2.config import configurable
@@ -333,16 +334,16 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
             pos[-1] = pos[-1].flatten(0, 1).permute(2,0,1)
             src[-1] = src[-1].permute(2,0,1)
         
-        # learnable queries: QxNTxC
-        query_embed = self.query_embed.weight.unsqueeze(1).repeat(1, bt, 1)  # QxNTxC
-        output = self.query_feat.weight.unsqueeze(1).repeat(1, bt, 1)  # QxNTxC  
+        # learnable queries: Q_l x NT x C
+        query_embed = self.query_embed.weight.unsqueeze(1).repeat(1, bt, 1)  
+        output = self.query_feat.weight.unsqueeze(1).repeat(1, bt, 1)  
 
-        # prompt queires: Q_pxNTxC
+        # prompt queires: Q_p x NT x C
         prompt_feats, prompt_pe, prompt_feats_dense, prompt_pe_dense, l2v_attn_weights_list = \
             self.forward_prompt_encoder(src, pos, size_list, targets, t)
         if prompt_feats is not None:
             assert self.prompt_as_queries
-            # prompt as queries: QxNTxC
+            # prompt as queries: (Q_l+Q_p) x NT x C
             output = torch.cat([output, prompt_feats])
             prompt_pe = prompt_pe if prompt_pe is not None else prompt_feats
             query_embed = torch.cat([query_embed, prompt_pe])
@@ -442,38 +443,40 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         self, i, output, query_emb, prompt_feats_dense, prompt_pos_dense,
     ):
         """
+        ProCA: Prompt Cross-Attention layer 
+        (We name it as prompt self attention in the first version and do not change it here due to lazyness)
         Args:
-            output:     (Q + K) x NT x C, the query content tokens, Q and K are the numbers of learnable and prompt queries 
-            query_emb:  (Q + K) x NT x C, the query pos emb
-            prompt_feats_dense: K x L x NT x C, where L is the length of prompt features, K is the number of 
+            output:     (Q_l + Q_p) x NT x C, the query content tokens, Q_l and Q_p are the numbers of learnable and prompt queries 
+            query_emb:  (Q_l + Q_p) x NT x C, the query pos emb
+            prompt_feats_dense: Q_p x L x NT x C, where L is the length of prompt features, Q_p is the number of 
                                 classes, expressions and objects for detection, grouding and sot tasks, respectively.
-            prompt_pos_dense: K x L x NT x C, pos emb for visual prompt, otherwise None
+            prompt_pos_dense: Q_p x L x NT x C, pos emb for visual prompt, otherwise None
 
         return:
-            output:     (Q + K) x NT x C, the query content token of prompt
+            output:     (Q_l + Q_p) x NT x C, the query content token of prompt
         """
         if output.shape[0] == self.num_queries:
             return output
 
         output_learn, output_prompt = output[:self.num_queries], output[self.num_queries:]
         query_emb_learn, query_emb_prompt = query_emb[:self.num_queries], query_emb[self.num_queries:]
-
-        # prompt_feats_dense = torch.cat([output_prompt.unsqueeze(1), prompt_feats_dense], dim=1)  # Kx(1+L)xNTxC
-        prompt_feats_dense = prompt_feats_dense.transpose(0,1).flatten(1,2)  # (1+L)xKNTxC
+        # concata the prompt query and prompt features together
+        prompt_feats_dense = torch.cat([output_prompt.unsqueeze(1), prompt_feats_dense], dim=1)  # Q_px(1+L)xNTxC
+        prompt_feats_dense = prompt_feats_dense.transpose(0,1).flatten(1,2)  # (1+L)xQ_pNTxC
         if prompt_pos_dense is not None:
-            # prompt_pos_dense = torch.cat([query_emb_prompt.unsqueeze(1), prompt_pos_dense], dim=1)
+            prompt_pos_dense = torch.cat([query_emb_prompt.unsqueeze(1), prompt_pos_dense], dim=1)
             prompt_pos_dense = prompt_pos_dense.transpose(0,1).flatten(1,2)
             query_emb_prompt = query_emb_prompt.flatten(0, 1)[None]
         else:
             prompt_pos_dense, query_emb_prompt = None, None
         
-        K, NT, _ = output_prompt.shape
-        output_prompt = output_prompt.flatten(0, 1)[None]  # 1xKNTxC
+        Q_p, NT, _ = output_prompt.shape
+        output_prompt = output_prompt.flatten(0, 1)[None]  # 1xQ_pNTxC
         output_prompt = self.transformer_prompt_self_attention_layers[i](
             output_prompt, prompt_feats_dense, 
             pos=prompt_pos_dense, query_pos=query_emb_prompt
         )
-        output_prompt = rearrange(output_prompt.squeeze(0), '(K N) C -> K N C', K=K)
+        output_prompt = rearrange(output_prompt, '1 (Q N) C -> Q N C', Q=Q_p)
         output = torch.cat([output_learn, output_prompt])
 
         return output
@@ -482,7 +485,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         bs, t, c_m, h_m, w_m = mask_features.shape
 
         decoder_output = self.decoder_norm(output)
-        decoder_output = decoder_output.transpose(0, 1)  # (NT)QC, N is the batch size
+        decoder_output = decoder_output.transpose(0, 1)  # (BT)QC, B is the batch size
 
         outputs_class = self.vis2text_projection(decoder_output)
         if task != 'grounding':
@@ -497,7 +500,9 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
                 [targets_per_video['exp_sentence_feats'][:, 0] for targets_per_video in targets]
             ).to(outputs_class).detach()
             outputs_class = rearrange(outputs_class, '(B T) Q C -> B T Q C', T=t).mean(1)
-            outputs_class = torch.einsum('bqc,bkc->bqk', outputs_class, CLIP_exp) / outputs_class.shape[-1]
+            outputs_class = torch.einsum('bqc,bkc->bqk', outputs_class, CLIP_exp) 
+            if self.training: 
+                outputs_class = outputs_class / decoder_output.shape[-1]
         
         mask_embed = self.mask_embed(decoder_output)  # N'QC
         mask_embed = rearrange(mask_embed, '(B T) Q C -> B T Q C', T=t)
@@ -508,30 +513,29 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         outputs_mask = torch.einsum("btqc,btchw->btqhw", mask_embed, mask_features)
         outputs_mask = outputs_mask.transpose(1, 2)
         b, q, t, _, _ = outputs_mask.shape
-
+        
         if self.training:
-            output = rearrange(self.decoder_norm(output), 'q (b t) c -> (b q t) c', t=t)
-            outputs_reid = torch.einsum('qc,kc->qk', output, output) / math.sqrt(output.shape[-1])
-            outputs_reid = outputs_reid * max(self.reid_temp.weight.exp(), 1)
-            
+            decoder_output = rearrange(decoder_output, '(b t) q c -> (b q t) c', t=t)
+            outputs_reid = torch.einsum('qc,kc->qk', decoder_output, decoder_output) / math.sqrt(output.shape[-1])
         else:
-            use_norm = True or (task == 'grounding')
-            output_norm = F.normalize(self.decoder_norm(output), p=2, dim=-1) if use_norm else self.decoder_norm(output)
-            if self.prompt_as_queries:
-                output_p = output_norm[self.num_queries:]
-                outputs_reid = torch.einsum('qNC,kNC->qkN', output_norm, output_p)
+            outputs_reid = [None] * bs
+            l4p_enabled = True
+            if self.prompt_as_queries and (task == 'grounding') and l4p_enabled:
+                assert len(targets) == 1, 'Only support bacth size is 1 now'
+                use_norm = True
+                output_norm = F.normalize(decoder_output, p=2, dim=-1) if use_norm else decoder_output
+                output_p = output_norm[:, self.num_queries:]
+                outputs_reid = torch.einsum('BqC,BkC->Bqk', output_norm, output_p)
                 if not use_norm:
-                    outputs_reid = outputs_reid / math.sqrt(output.shape[-1])
-                outputs_reid = rearrange(outputs_reid, 'q k (N T) -> N T q k', T=t).mean(1)
-                outputs_reid = outputs_reid * max(self.reid_temp.weight.exp(), 1)
+                    outputs_reid = outputs_reid / math.sqrt(decoder_output.shape[-1])
+                outputs_reid = rearrange(outputs_reid, '(B T) q k -> B T q k', T=t).mean(1)
+                l4p_indices = outputs_reid[:, :self.num_queries].flatten(0, -2).argmax(0)  # k
+                outputs_mask[:, self.num_queries:] = (outputs_mask[:, self.num_queries:] + outputs_mask[:, l4p_indices]) / 2.
 
-                if task == 'grounding':
-                    # for each target, retrieval the matched mask from learnable queries
-                    l4p_indices = outputs_reid[:, :self.num_queries].flatten(0, -2).argmax(0)  # k
-                    outputs_mask[:, self.num_queries:] = (outputs_mask[:, self.num_queries:] + outputs_mask[:, l4p_indices]) / 2.
-
-            else:
-                outputs_reid = [None] * bs
+                # bisoftmax = (outputs_class.softmax(-1) + outputs_class.softmax(-2))[0] / 2
+                # l4p_indices = linear_sum_assignment((1 - bisoftmax).cpu())
+                # l_indices, p_indices = l4p_indices
+                # outputs_mask[:, p_indices] = (outputs_mask[:, p_indices] + outputs_mask[:, l_indices]) / 2.
         
         # NOTE: prediction is of higher-resolution
         # [B, Q, T, H, W] -> [BT, Q, H*W] -> [BT, h, Q, H*W] -> [B*T*h, Q, HW]
@@ -557,7 +561,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         gt_masks = torch.stack([
             targets_per_video['masks'][:, -num_frames:] for targets_per_video in targets
         ]) 
-        # B, q_p, T, H, W -> B, T, q_p, H, W -> BT, q_p, HW 
+        # B, Q_p, T, H, W -> B, T, Q_p, H, W -> BT, Q_p, HW 
         gt_masks = F.interpolate(
             gt_masks.transpose(1,2).flatten(0,1).float(), 
             size=attn_mask_target_size, 
@@ -573,7 +577,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         batch_idx = batch_idx[max_logits > 0]
         pixel_idxs = pixel_idxs[max_logits > 0]
         gt_masks[batch_idx, pixel_idxs] = 1.
-        # BT, q_p, HW -> BTh, q_p, HW
+        # BT, Q_p, HW -> BTh, Q_p, HW
         gt_masks_not = (gt_masks.reshape(BT, num_gt_insts, L).repeat(1,self.num_heads,1, 1).flatten(0, 1) < 0).bool()
         
         attn_mask[:, self.num_queries:] = gt_masks_not & attn_mask[:, self.num_queries:]
@@ -583,11 +587,21 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         self, src, pos, size_list, targets, num_frames=None, prompt_type=None, use_all_prev_frames=False
     ):
         """
-         src: [H_lW_lxNTxC], l=1,2,3,4, multi-scale features after pixel encoder
-         pos: [H_lW_lxNTxC], l=1,2,3,4, positioanl embeddings of img emb
-         size_list: [(H_0, W_0), ...], multi-scale feature sizes
-         num_frames: number of frames 
-         prompt_type: type of prompt, e.g., 'visual' or 'textual'
+        Vision and Language Prompt Encoders convert orginal visual/text prompts into prompt tokens
+        Args: 
+            src: [H_lW_lxNTxC], l=1,2,3,4, multi-scale features after pixel encoder
+            pos: [H_lW_lxNTxC], l=1,2,3,4, positioanl embeddings of img emb
+            size_list: [(H_0, W_0), ...], multi-scale feature sizes
+            num_frames: number of frames 
+            prompt_type: type of prompt, e.g., 'visual' or 'textual'
+
+        Outputs:
+            output_prompt: [Q_p, NT, C], Q_p is the number of prompt-guided targets, N is the batch size
+            query_embed_prompt: [Q_p, NT, C], query embeddings for prompt queries
+            prompt_feats_dense: [Q_p, L, NT, C]
+            prompt_pe_dense, 
+            l2v_attn_weights_list
+
         """
         if num_frames is None:
             num_frames = self.num_frames
@@ -597,6 +611,10 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
 
         prompt_feats_dense, prompt_pe_dense = None, None
         l2v_attn_weights_list = None
+
+        if not self.training and self.enabled_prev_visual_prompts_for_grounding:
+            prompt_type == 'visual' if 'masks' in targets[0] else targets[0]["prompt_type"]
+
         if tasks_batch[0] == 'sot' or targets[0]["prompt_type"] == 'visual' or prompt_type == 'visual':
             prompt_tuple = self.visual_prompt_sampler.process_per_batch(
                 src, pos, size_list, targets, self.training, use_all_prev_frames=use_all_prev_frames 
@@ -607,17 +625,20 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
                 output_prompt = None
             else:
                 # remove blank prompt, whose embeddings are zero-vector
-                isnot_blank = torch.logical_not((prompt_feats_dense == 0).all(dim=-1)).unsqueeze(-1).sum(1).clamp(min=1)
+                isnot_blank_feats = torch.logical_not((prompt_feats_dense == 0).all(dim=-1)).unsqueeze(-1).sum(1).clamp(min=1)
+                isnot_blank_pe = torch.logical_not((prompt_pe_dense == 0).all(dim=-1)).unsqueeze(-1).sum(1).clamp(min=1)
                 # num_inst x NT x C
-                prompt_feats_mean = prompt_feats_dense.sum(1) / isnot_blank 
-                prompt_pe_mean = prompt_pe_dense.sum(1) / isnot_blank 
-                if (self.training and (torch.rand(1) > 0.5)): 
+                prompt_feats_mean = prompt_feats_dense.sum(1) / isnot_blank_feats 
+                prompt_pe_mean = prompt_pe_dense.sum(1) / isnot_blank_pe
+                if not self.training or (self.training and (torch.rand(1) > 0.5)): 
                     query_embed_prompt = prompt_pe_mean  # pos emb as query emb
                 else:
                     query_embed_prompt = prompt_feats_mean  # use content feat as query emb
                 output_prompt = prompt_feats_mean + self.prompt_sot.weight.view(1,1,-1)
                 
                 if not self.training and "prompt_feats" in targets[0]:
+                    assert len(targets) == 1, 'Only support batch size is 1 now'
+                    # query_embed_prompt = query_embed_prompt.mean(1)[:, None].repeat(1,self.num_frames,1)
                     prompt_pe_dense, prompt_feats_dense = \
                         self.extract_prompt_features_from_memoey_pool(targets, prompt_pe_dense, prompt_feats_dense)
 
@@ -677,16 +698,27 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
                     prompt_feats_batch, l2v_attn_weights_list = self.forward_lang_to_vision(
                         prompt_feats_batch, src, size_list, num_frames, tasks_batch[0]
                     )
-                # num_exp*L x NT x C -> num_exp x T*(1+77) x N x 1 x C -> num_exp x T*(1+77) x NT x C
-                prompt_feats_batch = rearrange(
-                    prompt_feats_batch, '(K L) (N T) C -> K T L N 1 C', K=num_exps, L=len_sentence+1, T=num_frames
-                )[:,:,:32]  # not supoort long text yet
-                prompt_feats_dense = prompt_feats_batch.flatten(1,2).repeat(1,1,1,num_frames,1).flatten(2,3) # num_exp x T*(1+77) x NT x C
-                
-                # only use the sentence token output from the CLIP text encoder
-                prompt_feats_sentence = prompt_feats_batch.mean(1)[:,0].repeat(1,1,num_frames,1).flatten(1,2)  # num_exp x NT x C
+
+                # Type 1: frame-level prompt queries
+                prompt_feats_dense = rearrange(
+                    prompt_feats_batch, '(K L) N C -> K L N C', K=num_exps, L=len_sentence+1
+                )  # num_exp x (1+77) x NT x C
+                prompt_feats_sentence = prompt_feats_dense[:, 0] #.mean(1)  # num_exp x NT x C
                 query_embed_prompt = prompt_feats_sentence 
                 output_prompt = prompt_feats_sentence + self.prompt_grounding.weight.view(1,1,-1)
+
+                # Type 2: merge prompt features to generate the initial prompt queries
+                # # num_exp*L x NT x C -> num_exp x T*(1+77) x N x 1 x C -> num_exp x T*(1+77) x NT x C
+                # prompt_feats_batch = rearrange(
+                #     prompt_feats_batch, '(K L) (N T) C -> K T L N 1 C', K=num_exps, L=len_sentence+1, T=num_frames
+                # )
+                # prompt_feats_batch = prompt_feats_batch[:,:,:32]  # TODO: not supoort long text yet
+                # prompt_feats_dense = prompt_feats_batch.flatten(1,2).repeat(1,1,1,num_frames,1).flatten(2,3) # num_exp x T*(1+77) x NT x C
+                
+                # # only use the sentence token output from the CLIP text encoder
+                # prompt_feats_sentence = prompt_feats_batch.mean(1)[:,0].repeat(1,1,num_frames,1).flatten(1,2)  # num_exp x NT x C
+                # query_embed_prompt = prompt_feats_sentence 
+                # output_prompt = prompt_feats_sentence + self.prompt_grounding.weight.view(1,1,-1)
 
                 if not self.training and 'masks' in targets[0] and self.enabled_prev_visual_prompts_for_grounding:
                     prompt_feats_dense_vis, prompt_pe_dense_vis = self.visual_prompt_sampler.process_per_batch(
@@ -714,15 +746,17 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
     
     def forward_lang_to_vision(self, prompt_feats, src, size_list, num_frames, task_type):
         """
+        Project language features output from CLIP TEXT Encoder to vision space via a cross-attention layer
         Args:
-            prompt_feats: (1+77)*K x NT x C, K is the number of expressions for detection and grouding tasks, respectively.
+            prompt_feats: (1+L)*Q_p x NT x C, Q_p is the number of expressions for detection and grouding tasks, 
+                          and L is the length of text tokens, L=77 in CLIP TEXT Encoder or L=1 for category names.
             src: [H_lW_l x NT x C], l=0,1,2
             pos: [H_lW_l x NT x C], l=0,1,2
             size_list: [(H_0, W_0), (H_1, W_1), (H_2, W_2)]
 
         return: 
-            l2v_prompt_feats: (1+77)*K x NT x C, text features after lang2imge interaction
-            l2v_attn_weights: [N x K x T x h_l x W_l], l=0,1,2; averaged attnetion weights in all heads
+            l2v_prompt_feats: (1+L)*Q_p x NT x C, text features after lang2imge interaction
+            l2v_attn_weights: [N x Q_px T x h_l x W_l], l=0,1,2; averaged attnetion weights in all heads
         """
         assert task_type in {"grounding", "detection"}, "The prompt sould be category names / expressions!"
         
@@ -732,15 +766,15 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         )
 
         # split l2v attention weights into multi-scale shapes for pixel-wise l2v-loss
-        l2v_attn_weights = l2v_attn_weights_ori.clone()  # NT x (1+77)*K x L
-        # scaling the max value to 1
+        l2v_attn_weights = l2v_attn_weights_ori.clone()  # NT x (1+77)*Q_p x L
+        # scaling the max value to 1 for subsquent loss calculation 
         l2v_attn_weights = l2v_attn_weights / torch.max(l2v_attn_weights, dim=-1, keepdim=True)[0].clamp(min=1e-6)
         if task_type == 'grounding':
-            # only use the sentence token
-            l2v_attn_weights = rearrange(l2v_attn_weights, 'N (l k) L -> N l k L', l=78)[:, 0]
+            # only consider the sentence token (the first token here)
+            l2v_attn_weights = rearrange(l2v_attn_weights, 'N (l q) L -> N l q L', l=78)[:, 0]
         l2v_attn_weights = torch.split(l2v_attn_weights, [src_i.shape[0] for src_i in src], dim=-1)
         l2v_attn_weights = [
-            rearrange(weights, '(N T) k (h w) -> N k T h w', T=num_frames, h=h, w=w) 
+            rearrange(weights, '(N T) q (h w) -> N q T h w', T=num_frames, h=h, w=w) 
             for weights, (h, w) in zip(l2v_attn_weights, size_list)
         ]
         return l2v_prompt_feats, l2v_attn_weights

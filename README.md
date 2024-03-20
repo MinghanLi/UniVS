@@ -27,6 +27,8 @@ We propose a novel unified VS architecture, namely **UniVS**, by using prompts a
 
 * **🔥 `[Hightlights]`:** To facilitate the evaluation of video segmentation tasks under **the Detectron2** framework, we wrote the evaluation metrics of the six existing video segmentation tasks into the Detectron2 **Evaluators**, including VIS, VSS, VPS, VOS, PVOS, and RefVOS tasks. Now, you can evaluate VS tasks directly in our code just like COCO, and no longer need to manually adapt any evaluation indicators by yourself. Please refer to `univs/inference` and `univs/evaluation` for specific codes. If you encounter any issues when using our code, please push them to the GitHub issues. We will reply to you as soon as possible.
 
+* **🔥 `[Mar-20-2024]`:** Trained models with EMA on stage 3 have been released now! You can download it from [Model Zoo](Model_zoo.md).
+
 * **🔥 `[Feb-29-2024]`:** Trained models on stage 2 have been released now! Try to use it for your video data!
 
 * **🔥 `[Feb-28-2024]`:** Our paper has been accepted by **CVPR2024!!**. We released the paper in [ArXiv](https://arxiv.org/abs/2402.18115). 

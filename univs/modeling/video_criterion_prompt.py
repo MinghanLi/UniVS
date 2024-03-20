@@ -23,6 +23,7 @@ def dice_loss(
         inputs: torch.Tensor,
         targets: torch.Tensor,
         num_masks: float,
+        need_sigmoid: bool=True
     ):
     """
     Compute the DICE loss, similar to generalized IOU for masks
@@ -33,7 +34,8 @@ def dice_loss(
                  classification label for each element in inputs
                 (0 for the negative class and 1 for the positive class).
     """
-    inputs = inputs.sigmoid()
+    if need_sigmoid:
+        inputs = inputs.sigmoid()
     inputs = inputs.flatten(1)
     targets = targets.flatten(1)
     numerator = 2 * (inputs * targets).sum(1)
@@ -189,13 +191,17 @@ def focal_conf_sigmoid_loss(inputs, targets, alpha=0.5, gamma=2, is_cls=False):
 
     return loss
 
-def contrastive_loss(inputs, targets, topk=50):
+def contrastive_loss(inputs, targets, topk=20):
     if inputs.nelement() == 0:
         return inputs[:0].sum().detach()
 
     inputs = inputs.flatten(1)    # N, K
     targets = targets.flatten(1)  # N, K
+    keep = targets.sum(1) > 0
+    inputs = inputs[keep]
+    targets = targets[keep]
     N = inputs.shape[0]
+    topk = min(min(topk, 20), 3*N)
 
     pos_indices = targets.argmax(1)
     pos_inputs = inputs[torch.arange(N), pos_indices]
@@ -217,28 +223,35 @@ def contrastive_loss(inputs, targets, topk=50):
     
     # loss = torch.logsumexp(inputs_negpos, dim=-1)
     loss = (1 + torch.sum(negpos_inputs.flatten(1), dim=-1)).log()
-    loss = loss.sum() / max(len(loss), 1)
+    loss = loss.sum() / max(N, 1)
 
     return loss
 
-def contrastive_aux_loss(inputs, targets, topk=10):
+def contrastive_aux_loss(inputs, targets, topk=20):
     if inputs.nelement() == 0:
         return inputs[:0].sum().detach()
     
     # assert inputs.min() >= -1 and inputs.max() <= 1, f'invalid values: min {inputs.min()} and max {inputs.max()}'
     inputs = inputs.flatten(1)    # N, K
     targets = targets.flatten(1)  # N, K
+    keep = targets.sum(1) > 0
+    inputs = inputs[keep]
+    targets = targets[keep]
     N = inputs.shape[0]
+    topk = min(min(topk, 20), 3*N)
 
     pos_indices = torch.nonzero(targets.sum(0) > 0.).reshape(-1)
+    pos_indices = pos_indices[torch.randperm(len(pos_indices))[:int(0.75*topk)]]
     bg_indices = torch.nonzero(targets.sum(0) == 0.).reshape(-1)
-    bg_indices = bg_indices[torch.randperm(len(bg_indices))[:topk]]
+    bg_indices = bg_indices[torch.randperm(len(bg_indices))[:int(0.25*topk)]]
     indices = torch.cat([pos_indices, bg_indices]).sort()[0]
 
     inputs = inputs[:, indices].clamp(min=0.)  # N K_neg
     targets = targets[:, indices]  # N K_neg
+    loss = F.smooth_l1_loss(inputs, targets, reduction='sum')
+    loss = loss / max(N, 1)
 
-    return F.smooth_l1_loss(inputs, targets, reduction='sum') / max(len(inputs), 1)
+    return loss
 
 def calculate_uncertainty(logits):
     """
@@ -333,22 +346,22 @@ class VideoSetCriterionPrompt(nn.Module):
                     loss.append(loss_focal)
                 num_objs.append(len(tgt_labels))
             
-            else:
-                ids = t["prompt_obj_ids"]
-                keep = ids >= 0
-                ids[keep] = t["ids"].max(-1)[0][ids[keep]].long()
+            # else:
+            #     ids = t["prompt_obj_ids"].clone()
+            #     keep = ids >= 0
+            #     ids[keep] = t["ids"].max(-1)[0][ids[keep]].long()
 
-                ids_multihot = ((ids.unique().reshape(-1, 1) - ids.reshape(1, -1)) == 0).float()
-                tgt_idx = [ids.unique().tolist().index(id_) for id_ in ids]
-                tgt_classes = ids_multihot[tgt_idx]
-                tgt_classes = tgt_classes[keep]
-                logits = logits[keep]
+            #     ids_multihot = ((ids.unique().reshape(-1, 1) - ids.reshape(1, -1)) == 0).float()
+            #     tgt_idx = [ids.unique().tolist().index(id_) for id_ in ids]
+            #     tgt_classes = ids_multihot[tgt_idx]
+            #     tgt_classes = tgt_classes[keep]
+            #     logits = logits[keep]
 
-                loss_focal = 0.2 * (
-                    contrastive_loss(logits, tgt_classes) + contrastive_loss(logits.t(), tgt_classes.t())
-                ) 
-                loss.append(loss_focal)
-                num_objs.append(keep.sum())
+            #     # loss_focal = 0.2 * (
+            #     #     contrastive_loss(logits, tgt_classes) + contrastive_loss(logits.t(), tgt_classes.t())
+            #     # ) 
+            #     loss.append(loss_focal)
+            #     num_objs.append(keep.sum())
            
         if len(loss) == 0:
             return {"loss_ce": out_logits[:0].sum().detach()}
@@ -374,15 +387,8 @@ class VideoSetCriterionPrompt(nn.Module):
         bs = len(targets)
         
         pred_embds = outputs["pred_embds"].flatten(0, -2)                              # BQ_pT x c
-        # tgt_ids = torch.stack([t["prompt_obj_ids"] for t in targets])
-        # tgt_ids = tgt_ids[..., None].repeat(1,1,self.num_frames).to(device).flatten()  # BQ_pT
-        tgt_ids = []
-        for t in targets:
-            valid = t["prompt_obj_ids"] >= 0
-            tgt_ids_cur = t["prompt_obj_ids"][:, None].repeat(1, self.num_frames)
-            tgt_ids_cur[valid] = t["ids"][t["prompt_obj_ids"][valid]].long()
-            tgt_ids.append(tgt_ids_cur)
-        tgt_ids = torch.stack(tgt_ids).to(device).flatten()  # BQ_pT
+        tgt_ids = torch.stack([t["prompt_obj_ids"] for t in targets])
+        tgt_ids = tgt_ids[..., None].repeat(1,1,self.num_frames).to(device).flatten()  # BQ_pT
         
         vid_ids = torch.stack([
             torch.ones(len(t['prompt_obj_ids']), device=device)*i for i, t in enumerate(targets)
@@ -398,12 +404,7 @@ class VideoSetCriterionPrompt(nn.Module):
         tgt_classes = tgt_classes.float()
         
         src_sim = torch.mm(pred_embds, pred_embds.t()) / math.sqrt(pred_embds.shape[-1])
-        if not self.use_ctt_loss:
-            loss_focal = focal_conf_sigmoid_loss(src_sim, tgt_classes, is_cls=False)
-            loss_focal = loss_focal / max(self.num_frames * bs, 1)  # stable training
-            loss_focal = loss_focal.sum() / max(loss_focal.nelement(), 1)
-        else:
-            loss_focal = contrastive_loss(src_sim, tgt_classes)
+        loss_focal = contrastive_loss(src_sim, tgt_classes)
         
         # aux loss
         sim_aux = torch.einsum(
@@ -427,7 +428,7 @@ class VideoSetCriterionPrompt(nn.Module):
         if outputs["pred_masks"].nelement() == 0: 
             src_masks = target_masks = outputs["pred_masks"][0]
         else:
-            tgt_idx = torch.stack([t['prompt_obj_ids'] for t in targets]).to(device)  # BxQ_p
+            tgt_idx = torch.stack([t['prompt_obj_ids'].clone() for t in targets]).to(device)  # BxQ_p
             keep = tgt_idx >= 0  
             tgt_idx = tgt_idx[keep]
             batch_idx, src_idx = torch.nonzero(keep).t()
@@ -490,7 +491,7 @@ class VideoSetCriterionPrompt(nn.Module):
 
         src_masks = outputs["pred_masks"].transpose(1,2)  # BNTHW -> BTNHW
         if src_masks.nelement() == 0:
-            return src_masks[:0].sum()
+            return src_masks[:0].sum().detach()
 
         # No need to upsample predictions as we are using normalized coordinates :)
         with torch.no_grad():
@@ -500,7 +501,7 @@ class VideoSetCriterionPrompt(nn.Module):
                 if len(t['sem_masks']) == 0 or is_appear.sum() == 0:
                     sem_mask = torch.ones(t['sem_masks'].shape[1:], device=device) * -1
                 else:
-                    tgt_idx = t["prompt_obj_ids"].long()
+                    tgt_idx = t["prompt_obj_ids"][is_appear].long()
                     is_bg = t['sem_masks'][tgt_idx].max(0)[0] == 0
                     sem_mask = t['sem_masks'][tgt_idx].max(0)[1].to(device)   # sem_ids: per pixel only belongs to per entity
                     sem_mask[is_bg] = -1
@@ -551,7 +552,7 @@ class VideoSetCriterionPrompt(nn.Module):
                 "loss_l2v_attn_weight": l2v_attn_weights[:0].sum().detach()
             }
         else:
-            tgt_idx = torch.stack([t['prompt_obj_ids'] for t in targets]).to(device)  # BxQ_p
+            tgt_idx = torch.stack([t['prompt_obj_ids'].clone() for t in targets]).to(device)  # BxQ_p
             keep = tgt_idx >= 0  
             tgt_idx = tgt_idx[keep]
             batch_idx, src_idx = torch.nonzero(keep).t()
@@ -562,7 +563,7 @@ class VideoSetCriterionPrompt(nn.Module):
 
         # No need to upsample predictions as we are using normalized coordinates :)
         # NT x 1 x H x W
-        src_masks = src_masks.flatten(0, 1)[:, None]
+        src_masks = src_masks.flatten(0, 1)[:, None]  # normalized attn weights
         target_masks = target_masks.flatten(0, 1)[:, None]
 
         with torch.no_grad():
@@ -587,11 +588,12 @@ class VideoSetCriterionPrompt(nn.Module):
             align_corners=False,
         ).squeeze(1)
 
-        loss = F.smooth_l1_loss(point_probs, point_labels, reduction='none')
-        loss = loss.sum() / max(loss.nelement(), 1)
+        loss_sl1 = F.smooth_l1_loss(point_probs, point_labels, reduction='none')
+        loss_sl1 = loss_sl1.sum() / max(point_labels.sum(), 1)
+        loss_dice = dice_loss_jit(point_probs, point_labels, num_masks, need_sigmoid=False)
 
         return {
-            "loss_l2v_attn_weight": loss
+            "loss_l2v_attn_weight": 0.5*(loss_sl1 + loss_dice)
         }
 
     def get_loss(self, loss, outputs, targets, num_masks, l_layer=9):
@@ -611,13 +613,14 @@ class VideoSetCriterionPrompt(nn.Module):
                       The expected keys in each dict depends on the losses applied, see each loss' doc
         """
         # Compute the average number of target boxes across all nodes, for normalization purposes
-        num_masks = sum(len(t["labels"]) for t in targets)
+        num_masks = sum(len(t["prompt_obj_ids"]) for t in targets)
         num_masks = torch.as_tensor(
             [num_masks], dtype=torch.float, device=next(iter(outputs.values())).device
         )
         if is_dist_avail_and_initialized():
             torch.distributed.all_reduce(num_masks)
-        num_masks = torch.clamp(num_masks / get_world_size(), min=1).item() * self.num_frames
+        num_masks = torch.clamp(num_masks / get_world_size(), min=1).item() 
+        num_masks = num_masks * self.num_frames
 
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
         losses = {}

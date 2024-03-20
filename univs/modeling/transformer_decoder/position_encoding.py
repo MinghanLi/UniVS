@@ -120,7 +120,7 @@ class PositionEmbeddingSine3DArbitraryT(nn.Module):
 
     """
 
-    def __init__(self, num_pos_feats=64, num_max_frames=64, temperature=10000, normalize=False, scale=None):
+    def __init__(self, num_pos_feats=64, num_max_frames=128, temperature=10000, normalize=False, scale=None):
         super().__init__()
         self.num_pos_feats = num_pos_feats
         self.num_max_frames = num_max_frames

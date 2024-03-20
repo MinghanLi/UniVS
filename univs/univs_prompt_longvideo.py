@@ -44,14 +44,14 @@ from datasets.concept_emb.combined_datasets_category_info import combined_datase
 from .prepare_targets import PrepareTargets
 
 
-def contrastive_loss(inputs, targets, pos_topk=5, topk=30):
+def contrastive_loss(inputs, targets, pos_topk=3, topk=30):
     if inputs.nelement() == 0:
         return inputs[:0].sum().detach()
 
     inputs = inputs.flatten(1)    # N, K
     targets = targets.flatten(1)  # N, K
     N, N_neg = inputs.shape
-    neg_topk = min(max(N * pos_topk, topk), 50)
+    neg_topk = min(max(N * pos_topk, topk), 30)
     
     pos_inputs = []
     for i, t in enumerate(targets):
@@ -67,7 +67,7 @@ def contrastive_loss(inputs, targets, pos_topk=5, topk=30):
     
     # loss = torch.logsumexp(inputs_negpos, dim=-1)
     loss = (1 + torch.sum(negpos_inputs.flatten(1), dim=-1)).log()
-    loss = loss.sum() / max(len(loss), 1)
+    loss = loss.sum() / max(N, 1)
 
     return loss
 
@@ -79,13 +79,16 @@ def contrastive_aux_loss(inputs, targets, pos_topk=3, topk=30):
     inputs = inputs.flatten(1)    # N, K
     targets = targets.flatten(1)  # N, K
     N, N_neg = inputs.shape
-    neg_topk = min(max(N * pos_topk, topk), 50)
+    neg_topk = min(max(N * pos_topk, topk), 30)
 
     neg_indices = torch.randperm(N_neg)[:neg_topk]
     inputs = inputs[:, neg_indices].clamp(min=0)  # N K_neg
     targets = targets[:, neg_indices]  # N K_neg
 
-    return F.smooth_l1_loss(inputs, targets, reduction='sum') / max(len(inputs), 1)
+    loss = F.smooth_l1_loss(inputs, targets, reduction='sum') 
+    loss = loss / max(N, 1)
+
+    return loss
 
 
 @META_ARCH_REGISTRY.register()
@@ -127,7 +130,6 @@ class UniVS_Prompt_LongVideo(nn.Module):
         gen_pseudo_mask: nn.Module,
         boxvis_enabled: bool,
         boxvis_ema_enabled: bool,
-        data_name: str,
         # inference
         video_unified_inference_enable: bool,
         prompt_as_queries: bool,
@@ -152,7 +154,7 @@ class UniVS_Prompt_LongVideo(nn.Module):
                 the per-channel mean and std to be used to normalize the input image
             test_topk_per_image: int, instance segmentation parameter, keep topk instances per image
             boxvis_enabled: if True, use only box-level annotation; otherwise pixel-wise annotations
-            boxvis_ema_enabled: if True, use Teacher Net to produce high-quality pseudo masks
+            boxvis_ema_enabled: Exponential Moving Average for training stable
         """
         super().__init__()
 
@@ -186,23 +188,13 @@ class UniVS_Prompt_LongVideo(nn.Module):
         self.num_frames_window = max(num_frames_window, num_frames)
         self.num_frames_video = num_frames_video
         self.num_classes = num_classes
-        self.is_coco = data_name.startswith("coco")
-
-        # boxvis
-        if boxvis_enabled and boxvis_ema_enabled:
-            # Teacher Net
-            self.backbone_t = copy.deepcopy(backbone)
-            self.sem_seg_head_t = copy.deepcopy(sem_seg_head)
-            self.gen_pseudo_mask = gen_pseudo_mask
-            self.backbone_t.requires_grad_(False)
-            self.sem_seg_head_t.requires_grad_(False)
-            self.ema_shadow_decay = 0.999
 
         self.boxvis_enabled = boxvis_enabled
         self.boxvis_ema_enabled = boxvis_ema_enabled
-        self.data_name = data_name
-        self.tracker_type = tracker_type  # if 'ovis' in data_name and use swin large backbone => "mdqe"
+        if self.boxvis_ema_enabled:
+            self._init_ema(backbone, sem_seg_head, gen_pseudo_mask)
 
+        self.tracker_type = tracker_type  # if 'ovis' in data_name and use swin large backbone => "mdqe"
         # additional args reference
         self.video_unified_inference_enable = video_unified_inference_enable
         self.prompt_as_queries = prompt_as_queries
@@ -213,6 +205,18 @@ class UniVS_Prompt_LongVideo(nn.Module):
         self.is_multi_cls = is_multi_cls
         self.apply_cls_thres = apply_cls_thres
         self.merge_on_cpu = merge_on_cpu   
+    
+    def _init_ema(self, backbone, sem_seg_head, gen_pseudo_mask):
+        # Teacher Net
+        self.backbone_t = copy.deepcopy(backbone)
+        self.sem_seg_head_t = copy.deepcopy(sem_seg_head)
+        self.backbone_t.requires_grad_(False)
+        self.sem_seg_head_t.requires_grad_(False)
+        self.ema_shadow_decay = 0.9999
+        if self.boxvis_enabled:
+            self.gen_pseudo_mask = gen_pseudo_mask
+        else:
+            self.gen_pseudo_mask = None
 
     @classmethod
     def from_config(cls, cfg):
@@ -325,7 +329,6 @@ class UniVS_Prompt_LongVideo(nn.Module):
             "gen_pseudo_mask": gen_pseudo_mask,
             'boxvis_enabled': cfg.MODEL.BoxVIS.BoxVIS_ENABLED,
             "boxvis_ema_enabled": cfg.MODEL.BoxVIS.EMA_ENABLED,
-            "data_name": cfg.DATASETS.TEST[0],
             # inference
             "video_unified_inference_enable": cfg.MODEL.UniVS.TEST.VIDEO_UNIFIED_INFERENCE_ENABLE,
             "prompt_as_queries": cfg.MODEL.UniVS.PROMPT_AS_QUERIES,
@@ -356,45 +359,28 @@ class UniVS_Prompt_LongVideo(nn.Module):
             list[dict]: each dict has the results for one image.
         """
         if not self.training:
-            dataset_name = batched_inputs[0]["dataset_name"]
-            if dataset_name.startswith("coco") or dataset_name.startswith("ade20k"):
-                # evaluation for images
-                raise ValueError(f"Not support to eval the image datasets {dataset_name} here")
-            else:
-                # evaluation for videos
-                if self.video_unified_inference_enable:
-                    if dataset_name.startswith("ytvis") or dataset_name.startswith("ovis") \
-                         or dataset_name.startswith("vipseg") or dataset_name.startswith("vpsw"):
-                        return self.inference_video_entity.eval(self, batched_inputs)
-                    else:
-                        raise ValueError(f"Not support to eval the dataset {dataset_name} yet")
-                else:
-                    if dataset_name.startswith("ytvis") or dataset_name.startswith("ovis"):
-                        if self.tracker_type == 'mdqe':  # mdqe
-                            return self.inference_video_vis.eval(self, batched_inputs)
-                        else:  # minvis
-                            return self.inference_video_vis_fast.eval(self, batched_inputs)
-                    elif dataset_name.startswith("vipseg") or dataset_name.startswith("vpsw"):
-                        return self.inference_video_vps.eval(self, batched_inputs)
-                    elif dataset_name.startswith("sot"):
-                        return self.inference_video_vos.eval(self, batched_inputs)
-                    else:
-                        raise ValueError(f"Not support to eval the dataset {dataset_name} yet")
+            return self.forward_inference(batched_inputs)
+        
+        if self.boxvis_ema_enabled:
+            self.update_ema_parameters()
 
         images = []
         for video in batched_inputs:
             for frame in video["image"]:
                 images.append(frame.to(self.device))
         images = [(x - self.pixel_mean) / self.pixel_std for x in images]
-
         images = ImageList.from_tensors(images, self.size_divisibility)
         images_tensor = images.tensor
 
         video_len = images_tensor.shape[0]
-        assert video_len == self.num_frames_video, f"dismatch the video length: {video_len} and {self.num_frames_video}, please check!"
+        assert video_len == self.num_frames_video, \
+            f"dismatch the video length: {video_len} and {self.num_frames_video}, please check!"
 
         targets_entire_video = self.prepare_targets.process(batched_inputs, images, self.device, self.text_prompt_encoder)
         assert len(targets_entire_video) == 1, "only support a video once time!"
+        prompt_memory_pool_enabled = \
+            (targets_entire_video[0]['prompt_type'] == 'visual') or (targets_entire_video[0]['task'] == 'grounding')
+        prompt_obj_ids = []
 
         is_last = False
         stride = max(self.num_frames - 1, 1)
@@ -415,10 +401,17 @@ class UniVS_Prompt_LongVideo(nn.Module):
             multi_scale_features = pixel_decoder_out_tuple[-1]
 
             targets = self.slice_targets_per_clip(i, targets_entire_video)
-            
             outputs = self.sem_seg_head.predictor(
                 multi_scale_features, mask_features, mask_features_bfe_conv, targets=targets
             )
+
+            # check the consistency of prompt object ids across multiple clips
+            prompt_obj_ids.append(targets[0]['prompt_obj_ids'].clone().tolist())
+            if i > 0 and prompt_memory_pool_enabled:
+                assert targets[0]['prompt_obj_ids'].tolist() == prompt_obj_ids[0], \
+                    'Please check the consistency of prompt object ids across multiple clips!'
+                # print(i, targets[0]['task'], targets[0]["num_max_instances"], \
+                #     targets[0]['prompt_obj_ids'].tolist(), targets[0]['masks'].shape)
 
             losses_i = self.criterion(outputs, targets)
             if i == 0:
@@ -428,7 +421,7 @@ class UniVS_Prompt_LongVideo(nn.Module):
             
             losses_interclip = self.interclip_reid_loss(is_last, targets, targets_entire_video)
             with torch.no_grad():
-                if not is_last and (targets[0]['prompt_type'] == 'visual' or targets[0]['task'] == 'grounding'):
+                if not is_last and prompt_memory_pool_enabled:
                     self.prepare_prompt_memory_pool(i, multi_scale_features, targets, targets_entire_video)
 
         losses.update(losses_interclip)
@@ -443,6 +436,35 @@ class UniVS_Prompt_LongVideo(nn.Module):
                 losses.pop(k)
         
         return losses
+    
+    def forward_inference(self, batched_inputs):
+        if self.boxvis_ema_enabled:
+            self.replace_with_ema_parameters_inf()
+
+        dataset_name = batched_inputs[0]["dataset_name"]
+        if dataset_name.startswith("coco") or dataset_name.startswith("ade20k"):
+            # evaluation for images
+            raise ValueError(f"Not support to eval the image datasets {dataset_name} here")
+        else:
+            # evaluation for videos
+            if self.video_unified_inference_enable:
+                if dataset_name.startswith("ytvis") or dataset_name.startswith("ovis") \
+                        or dataset_name.startswith("vipseg") or dataset_name.startswith("vpsw"):
+                    return self.inference_video_entity.eval(self, batched_inputs)
+                else:
+                    raise ValueError(f"Not support to eval the dataset {dataset_name} yet")
+            else:
+                if dataset_name.startswith("ytvis") or dataset_name.startswith("ovis"):
+                    if self.tracker_type == 'mdqe':  # mdqe
+                        return self.inference_video_vis.eval(self, batched_inputs)
+                    else:  # minvis
+                        return self.inference_video_vis_fast.eval(self, batched_inputs)
+                elif dataset_name.startswith("vipseg") or dataset_name.startswith("vpsw"):
+                    return self.inference_video_vps.eval(self, batched_inputs)
+                elif dataset_name.startswith("sot"):
+                    return self.inference_video_vos.eval(self, batched_inputs)
+                else:
+                    raise ValueError(f"Not support to eval the dataset {dataset_name} yet")
     
     def interclip_reid_loss(self, is_last, targets, targets_entire_video):
         targets_per_video = targets_entire_video[0] 
@@ -509,7 +531,7 @@ class UniVS_Prompt_LongVideo(nn.Module):
             targets_per_clip = {}
             for k, v in targets_per_video.items():
                 if k in {"ids", "masks", "boxes", "sem_masks"}:
-                    targets_per_clip[k] = v[:, first_frame_idx:first_frame_idx+self.num_frames]
+                    targets_per_clip[k] = v[:, first_frame_idx:first_frame_idx+self.num_frames].clone()
                 elif k in {"frame_indices"}:
                     targets_per_clip[k] = v[first_frame_idx:first_frame_idx+self.num_frames]
                 elif k not in {"src_embds", "tgt_ids"}:
@@ -523,6 +545,7 @@ class UniVS_Prompt_LongVideo(nn.Module):
         x: multi_scale_features
         prompt_embds: Q_l+Q_p, L, T, C
         """
+        targets_entire_video[0]["prompt_obj_ids"] = targets[0]["prompt_obj_ids"]
         if "prompt_feats" in targets_entire_video[0]:
             return
 
@@ -564,7 +587,40 @@ class UniVS_Prompt_LongVideo(nn.Module):
                 [targets_per_video["prompt_pe"], prompt_pe], dim=1
             )
             targets_per_video["prompt_self_attn_masks"] = None 
-            
     
+    def replace_with_ema_parameters_inf(self):
+        # ---------------- using EMA parameters for Teacher net ---------------------
+        backbone_t, sem_seg_head_t = {}, {}
+        for name, param in self.backbone_t.named_parameters():
+            backbone_t[name] = param.data.detach()
 
+        for name, param in self.sem_seg_head_t.named_parameters():
+            sem_seg_head_t[name] = param.data.detach()
 
+        # apply weighted weights to the student net
+        for name, param in self.backbone.named_parameters():
+            if name in backbone_t and param.requires_grad:
+                param.data = backbone_t[name]
+        for name, param in self.sem_seg_head.named_parameters():
+            if name in sem_seg_head_t and param.requires_grad:
+                param.data = sem_seg_head_t[name] 
+    
+    def update_ema_parameters(self):
+        # ----------------- prepare EMA for Teacher net ---------------------
+        backbone_shadow, sem_seg_head_shadow = {}, {}
+        for name, param in self.backbone.named_parameters():
+            if param.requires_grad:
+                backbone_shadow[name] = param.data.detach()
+
+        for name, param in self.sem_seg_head.named_parameters():
+            if param.requires_grad:
+                sem_seg_head_shadow[name] = param.data.detach()
+
+        w_shadow = 1.0 - self.ema_shadow_decay
+        # apply weighted weights to the teacher net
+        for name, param in self.backbone_t.named_parameters():
+            if name in backbone_shadow:
+                param.data = w_shadow * backbone_shadow[name] + (1-w_shadow) * param.data
+        for name, param in self.sem_seg_head_t.named_parameters():
+            if name in sem_seg_head_shadow:
+                param.data = w_shadow * sem_seg_head_shadow[name] + (1-w_shadow) * param.data

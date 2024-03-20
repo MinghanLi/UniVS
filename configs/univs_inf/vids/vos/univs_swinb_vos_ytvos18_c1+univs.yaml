@@ -12,9 +12,6 @@ MODEL:
     PATCH_NORM: True
     PRETRAIN_IMG_SIZE: 384
   WEIGHTS: 'pretrained/univs/univs_prompt_swinb_bs8_f4_video_2x_200queries_c1+univs+casa_prompt+sa_frozenbb.pth'
-  UniVS:
-    TEST:
-      VIDEO_UNIFIED_INFERENCE_QUERIES: 'prompt'
 INPUT:
   SAMPLING_FRAME_NUM: 4
   MIN_SIZE_TEST: 700

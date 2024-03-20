@@ -93,7 +93,7 @@ class PrepareTargets:
         if targets[0]["task"] == "grounding":
             prompt_type = 'text'
         elif targets[0]["task"] == "detection":
-            if targets[0]['dataset_name'] in {'lvis', 'burst', 'flickr'}:
+            if targets[0]['dataset_name'] in {'lvis', 'burst', 'flickr', "entityseg_panoptic"}:
                 prompt_type = 'visual'
             else:
                 prompt_type = 'visual' if torch.randn(1) > 0.5 else 'text'
@@ -113,6 +113,8 @@ class PrepareTargets:
 
             _num_frames = len(targets_per_video['file_names'])
             _num_instance = len(targets_per_video["instances"][0])
+            # if targets_per_video['dataset_name'] in {"entityseg_panoptic"}:
+            #     print('original num instances:', _num_instance)
             if _num_instance > 2*self.max_num_masks and targets_per_video['dataset_name'] in {"sa_1b", "burst", "lvis", "entityseg_panoptic"}:
                 # there are so many objects in SA1B/lvis/burst datasets, we select a fixed number of objects
                 # to keep memory balance on multiply GPUs
@@ -182,7 +184,7 @@ class PrepareTargets:
             gt_classes_per_video = gt_classes_per_video[valid_bool_clip].long()  # N,
             gt_ids_per_video = gt_ids_per_video[valid_bool_clip].long()          # N, num_frames
             gt_boxes_per_video = gt_boxes_per_video[valid_bool_clip].float()     # N, num_frames, 4
-            gt_masks_per_video = gt_masks_per_video[valid_bool_clip].float() # N, num_frames, H, W
+            gt_masks_per_video = gt_masks_per_video[valid_bool_clip].float()     # N, num_frames, H, W
             valid_bool_frame = valid_bool_frame[valid_bool_clip]
 
             frame_indices = torch.as_tensor(targets_per_video["frame_indices"], device=device)  # num_frames
@@ -191,6 +193,8 @@ class PrepareTargets:
                 gt_ids_per_video[valid_bool_frame] -= min_id  # obj id mapping
             
             assert not (gt_classes_per_video == 0).any(), 'Class labels should start from 1 instead of 0!!'
+            # if targets_per_video['dataset_name'] in {"entityseg_panoptic"}:
+            #     print(gt_masks_per_video.shape)
                 
             valid_bool_clips.append(valid_bool_clip)
             clip_gt_instances.append(
@@ -269,7 +273,7 @@ class PrepareTargets:
                         exp_obj_ids = torch.as_tensor(
                             [exp_obj_ids_map[_obj_id] for _obj_id in exp_obj_ids], dtype=torch.int64, device=device
                         )
-                        # keep consistency with ids and exp_obj_ids
+                        # keep consistency with ids and exp_obj_ids, exp_obj_id it id != 1 else -1
                         gt_instances["ids"] = exp_obj_ids.view(-1,1) * (gt_instances["ids"] != -1) - (gt_instances["ids"] == -1).float()
 
                     gt_instances["expressions"] = expressions

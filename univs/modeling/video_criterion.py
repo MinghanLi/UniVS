@@ -163,13 +163,17 @@ def focal_conf_sigmoid_loss(inputs, targets, alpha=0.5, gamma=2, is_cls=False):
 
     return loss
 
-def contrastive_loss(inputs, targets, topk=50):
+def contrastive_loss(inputs, targets, topk=20):
     if inputs.nelement() == 0:
         return inputs[:0].sum().detach()
 
     inputs = inputs.flatten(1)    # N, K
     targets = targets.flatten(1)  # N, K
+    keep = targets.sum(1) > 0
+    inputs = inputs[keep]
+    targets = targets[keep]
     N = inputs.shape[0]
+    topk = min(min(topk, 20), 3*N)
 
     pos_indices = targets.argmax(1)
     pos_inputs = inputs[torch.arange(N), pos_indices]
@@ -191,11 +195,11 @@ def contrastive_loss(inputs, targets, topk=50):
     
     # loss = torch.logsumexp(inputs_negpos, dim=-1)
     loss = (1 + torch.sum(negpos_inputs.flatten(1), dim=-1)).log()
-    loss = loss.sum() / max(len(loss), 1)
+    loss = loss.sum() / max(N, 1)
 
     return loss
 
-def contrastive_aux_loss(inputs, targets, topk=10):
+def contrastive_aux_loss(inputs, targets, topk=20):
     if inputs.nelement() == 0:
         return inputs[:0].sum().detach()
     
@@ -203,16 +207,20 @@ def contrastive_aux_loss(inputs, targets, topk=10):
     inputs = inputs.flatten(1)    # N, K
     targets = targets.flatten(1)  # N, K
     N = inputs.shape[0]
+    topk = min(min(topk, 20), 3*N)
 
     pos_indices = torch.nonzero(targets.sum(0) > 0.).reshape(-1)
+    pos_indices = pos_indices[torch.randperm(len(pos_indices))[:int(0.75*topk)]]
     bg_indices = torch.nonzero(targets.sum(0) == 0.).reshape(-1)
-    bg_indices = bg_indices[torch.randperm(len(bg_indices))[:topk]]
+    bg_indices = bg_indices[torch.randperm(len(bg_indices))[:int(0.25*topk)]]
     indices = torch.cat([pos_indices, bg_indices]).sort()[0]
 
     inputs = inputs[:, indices].clamp(min=0.)  # N K_neg
     targets = targets[:, indices]  # N K_neg
+    loss = F.smooth_l1_loss(inputs, targets, reduction='sum')
+    loss = loss / max(N, 1)
 
-    return F.smooth_l1_loss(inputs, targets, reduction='sum') / max(len(inputs), 1)
+    return loss 
 
 def calculate_uncertainty(logits):
     """
@@ -306,8 +314,7 @@ class VideoSetCriterion(nn.Module):
 
     def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses, num_frames, 
                  num_points, oversample_ratio, importance_sample_ratio, 
-                 use_ctt_loss=True, max_num_masks: int=50, 
-                 boxvis_enabled=False, boxvis_ema_enabled=False, 
+                 use_ctt_loss=True, max_num_masks: int=50, boxvis_enabled=False, 
                  ):
         """Create the criterion.
         Parameters:
@@ -317,7 +324,6 @@ class VideoSetCriterion(nn.Module):
             eos_coef: relative classification weight applied to the no-object category
             losses: list of all the losses to be applied. See get_loss for list of available losses
             boxvis_enabled: It controls the annotation types: pixel-wise or box-level annotations for VIS task
-            boxvis_ema_enabled: It controls whether to use Teacher Net to produce pseudo instance masks for VIS task
         """
         super().__init__()
         self.num_classes = num_classes
@@ -336,7 +342,6 @@ class VideoSetCriterion(nn.Module):
 
         # box-supervised video instance segmentation
         self.boxvis_enabled = boxvis_enabled
-        self.boxvis_ema_enabled = boxvis_ema_enabled
     
     def loss_labels_clip(self, outputs, targets, indices, num_masks, l_layer):
         loss = []
@@ -366,33 +371,33 @@ class VideoSetCriterion(nn.Module):
                     loss.append(loss_focal)
                 num_objs.append(len(tgt_labels))
 
-            else:
-                logits = logits[:, :len(t["ids"])]  # rm padding expressions
-                ids = t["ids"][:logits.shape[1]]  # rm overflow expressions
-                keep = tgt_i < len(ids)
-                src_i = src_i[keep]
-                tgt_i = tgt_i[keep]
+            # else:
+            #     logits = logits[:, :len(t["ids"])]  # rm padding expressions
+            #     ids = t["ids"][:logits.shape[1]]  # rm overflow expressions
+            #     keep = tgt_i < len(ids)
+            #     src_i = src_i[keep]
+            #     tgt_i = tgt_i[keep]
 
-                ids = ids.max(1)[0]  # N, T -> N
-                keep = ids[tgt_i] >= 0
-                src_i = src_i[keep]
-                tgt_i = tgt_i[keep]
+            #     ids = ids.max(1)[0]  # N, T -> N
+            #     keep = ids[tgt_i] >= 0
+            #     src_i = src_i[keep]
+            #     tgt_i = tgt_i[keep]
 
-                tgt_classes = torch.full(
-                    logits.shape, 0, dtype=torch.int64, device=logits.device
-                )
+            #     tgt_classes = torch.full(
+            #         logits.shape, 0, dtype=torch.int64, device=logits.device
+            #     )
 
-                ids_multihot = (ids.unique().reshape(-1,1) - ids.reshape(1, -1) == 0).long()
-                tgt_i = [ids.unique().tolist().index(id_) for id_ in ids[tgt_i]]
-                assert tgt_classes[src_i].shape == ids_multihot[tgt_i].shape, \
-                    f'{tgt_classes.shape} and {ids_multihot.shape}'
-                tgt_classes[src_i] = ids_multihot[tgt_i]
+            #     ids_multihot = (ids.unique().reshape(-1,1) - ids.reshape(1, -1) == 0).long()
+            #     tgt_i = [ids.unique().tolist().index(id_) for id_ in ids[tgt_i]]
+            #     assert tgt_classes[src_i].shape == ids_multihot[tgt_i].shape, \
+            #         f'{tgt_classes.shape} and {ids_multihot.shape}'
+            #     tgt_classes[src_i] = ids_multihot[tgt_i]
 
-                loss_focal = 0.2 * (
-                    contrastive_loss(logits, tgt_classes) + contrastive_loss(logits.t(), tgt_classes.t())
-                ) 
-                loss.append(loss_focal)
-                num_objs.append(len(tgt_i))
+            #     loss_focal = 0.2 * (
+            #         contrastive_loss(logits, tgt_classes) + contrastive_loss(logits.t(), tgt_classes.t())
+            #     ) 
+            #     loss.append(loss_focal)
+            #     num_objs.append(len(tgt_i))
 
         if len(loss) == 0:
             return {"loss_ce": out_logits[:0].sum().detach()}
@@ -510,7 +515,7 @@ class VideoSetCriterion(nn.Module):
             tgt_ids_p = torch.cat([t['prompt_gt_labels'] for t in targets]).to(device)  # BQ_p
             tgt_ids_p = tgt_ids_p.unsqueeze(-1).repeat(1,self.num_frames).flatten()     # BQ_pT
             keep_l = tgt_ids_l >= 1
-            keep_p = torch.cat([t['prompt_obj_ids'] for t in targets]) >= 1
+            keep_p = torch.cat([t['prompt_obj_ids'] for t in targets]) >= 0
             keep_p = keep_p.unsqueeze(-1).repeat(1,self.num_frames).flatten().to(device)  # BQ_pT
 
         else:
@@ -519,9 +524,9 @@ class VideoSetCriterion(nn.Module):
            
             tgt_ids_p = []
             for t in targets:
-                valid = t["prompt_obj_ids"] >= 0
-                tgt_ids_p_cur = t["prompt_obj_ids"][:, None].repeat(1, self.num_frames)
-                tgt_ids_p_cur[valid] = t["ids"][t["prompt_obj_ids"][valid]].long()
+                valid = t["prompt_obj_ids"] >= 0  # N_p
+                tgt_ids_p_cur = t["ids"][t["prompt_obj_ids"]].long()
+                tgt_ids_p_cur[~valid] = -1
                 tgt_ids_p.append(tgt_ids_p_cur)
             tgt_ids_p = torch.stack(tgt_ids_p).to(device).flatten() # BQ_pT
 
@@ -540,21 +545,19 @@ class VideoSetCriterion(nn.Module):
         tgt_classes = tgt_classes.float()
 
         src_sim = torch.mm(src_embds, pred_embds_prompt.t()) / math.sqrt(src_embds.shape[-1])
-        if not self.use_ctt_loss:
-            loss_focal = focal_conf_sigmoid_loss(src_sim, tgt_classes, is_cls=False)
-            loss_focal = loss_focal / max(self.num_frames * bs, 1)
-            loss_focal = loss_focal.sum() / max(num_masks * bs, 1)
-        else:
-            loss_focal = contrastive_loss(src_sim, tgt_classes)
+        loss_focal = contrastive_loss(src_sim, tgt_classes)
         
         # aux loss
-        sim_aux = torch.einsum(
-            'qc,kc->qk', F.normalize(src_embds, p=2, dim=-1), 
-            F.normalize(pred_embds_prompt, p=2, dim=-1)
-        )
-        sim_aux = sim_aux[tgt_classes.sum(-1) > 0]
-        tgt_classes = tgt_classes[tgt_classes.sum(-1) > 0]
-        loss_aux = contrastive_aux_loss(sim_aux, tgt_classes) 
+        if task == "detection" and targets[0]["prompt_type"] == "text":
+            loss_aux = src_embds[:0].sum().detach()
+        else:
+            sim_aux = torch.einsum(
+                'qc,kc->qk', F.normalize(src_embds, p=2, dim=-1), 
+                F.normalize(pred_embds_prompt, p=2, dim=-1)
+            )
+            sim_aux = sim_aux[tgt_classes.sum(-1) > 0]
+            tgt_classes = tgt_classes[tgt_classes.sum(-1) > 0]
+            loss_aux = contrastive_aux_loss(sim_aux, tgt_classes) 
 
         # store query embds to calculate inter-clip reid loss for stage3
         if len(targets) == 1 and not (task == "detection" and targets[0]["prompt_type"] == "text"):

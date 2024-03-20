@@ -247,7 +247,7 @@ class UniVidDatasetMapper:
         is_image_data = video_length == 1
         if self.is_train:
             if video_length == 1:
-                pseudo_video_length = self.sampling_frame_num * self.sampling_interval
+                pseudo_video_length = 3 * self.sampling_frame_num * self.sampling_interval
                 # get pseudo video from static image
                 dataset_dict["file_names"] = dataset_dict["file_names"] * pseudo_video_length
                 dataset_dict["annotations"] = dataset_dict["annotations"] * pseudo_video_length
@@ -256,7 +256,9 @@ class UniVidDatasetMapper:
                     dataset_dict["pan_seg_file_names"] = dataset_dict["pan_seg_file_names"] * pseudo_video_length
 
             ref_frame = random.randrange(video_length)
-            if dataset_name.startswith("mots"):
+            if dataset_name.startswith("ovis") or is_image_data:
+                sampling_frame_range = 2*self.sampling_frame_num
+            elif dataset_name.startswith("mots"):
                 sampling_frame_range = self.sampling_frame_range_mot
             elif dataset_name.startswith("sot") or dataset_name.startswith("burst"):
                 sampling_frame_range = self.sampling_frame_range_sot
@@ -269,18 +271,28 @@ class UniVidDatasetMapper:
 
             candidate_frame_idxs = list(range(start_idx, start_interval)) + list(range(end_interval, end_idx))
             if len(candidate_frame_idxs) == 0:
-                selected_idx = [ref_frame] * (self.sampling_frame_num - 1)
+                selected_idx = [ref_frame] * self.sampling_frame_num
             else:
                 selected_idx = np.random.choice(
                     np.array(candidate_frame_idxs),
-                    self.sampling_frame_num - 1,
+                    self.sampling_frame_num,
                 ).tolist()
-            selected_idx = selected_idx + [ref_frame]
+            if not is_image_data:
+                selected_idx = selected_idx[:-1] + [ref_frame]
             selected_idx = sorted(selected_idx)
             if self.sampling_frame_shuffle:
                 random.shuffle(selected_idx)
+            
+            if max(selected_idx) > 128:
+                shifted_idx = np.random.choice(
+                    np.arange(max(selected_idx)-128, max(min(selected_idx), max(selected_idx)-128)), 1
+                ).tolist()[0]
+                selected_idx_map = [idx_ - shifted_idx for idx_ in selected_idx]
+            else:
+                selected_idx_map = selected_idx
         else:
-            selected_idx = range(video_length)
+            selected_idx = list(range(video_length))
+            selected_idx_map = selected_idx
 
         # selected_idx is a List of length self.sampling_frame_num
         video_annos = dataset_dict.pop("annotations", None)  # List
@@ -303,7 +315,7 @@ class UniVidDatasetMapper:
             return None
 
         dataset_dict["video_len"] = video_length
-        dataset_dict["frame_indices"] = list(selected_idx)
+        dataset_dict["frame_indices"] = selected_idx_map
         dataset_dict["image"] = []
         dataset_dict["image_padding_mask"] = []
         dataset_dict["instances"] = []

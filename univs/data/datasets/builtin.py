@@ -9,7 +9,6 @@ from .ytvis import (
     _get_ytvis_2021_instances_meta,
 )
 from .ovis import _get_ovis_instances_meta
-from .bvisd import _get_bvisd_instances_meta
 from .burst import _get_burst_meta
 
 from .sa_1b import register_sa_1b_instances
@@ -268,25 +267,6 @@ _PREDEFINED_SPLITS_OVIS = {
 }
 
 
-_PREDEFINED_SPLITS_COCO_VIDEO = {
-    "coco2bvisd_train": ("coco/train2017", "coco/annotations/coco2bvisd_train.json"),
-}
-
-_PREDEFINED_SPLITS_BVISD = {
-    "bvisd_dev": ("", "bvisd/valid_sub.json"),  # directly use the file path in the source datasets
-}
-
-def register_all_coco_video(root):
-    for key, (image_root, json_file) in _PREDEFINED_SPLITS_COCO_VIDEO.items():
-        # Assume pre-defined datasets live in `./datasets`.
-        register_coco_instances(
-            key,
-            _get_builtin_metadata("coco"),
-            os.path.join(root, json_file) if "://" not in json_file else json_file,
-            os.path.join(root, image_root),
-        )
-
-
 def register_all_ytvis_2019(root):
     for key, (image_root, json_file) in _PREDEFINED_SPLITS_YTVIS_2019.items():
         # Assume pre-defined datasets live in `./datasets`.
@@ -317,18 +297,6 @@ def register_all_ovis(root):
         register_ytvis_instances(
             key,
             _get_ovis_instances_meta(),
-            os.path.join(root, json_file) if "://" not in json_file else json_file,
-            os.path.join(root, image_root),
-            evaluator_type='ytvis',
-        )
-
-
-def register_all_bvisd(root):
-    for key, (image_root, json_file) in _PREDEFINED_SPLITS_BVISD.items():
-        # Assume pre-defined datasets live in `./datasets`.
-        register_ytvis_instances(
-            key,
-            _get_bvisd_instances_meta(),
             os.path.join(root, json_file) if "://" not in json_file else json_file,
             os.path.join(root, image_root),
             evaluator_type='ytvis',
@@ -528,8 +496,6 @@ if __name__.endswith(".builtin"):
     register_all_ovis(_root)
     register_all_ytvis_2019(_root)
     register_all_ytvis_2021(_root)
-    register_all_coco_video(_root)
-    register_all_bvisd(_root)
     register_all_burst(_root)
 
     register_all_sa_1b(_root)

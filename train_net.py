@@ -382,7 +382,7 @@ def main(args):
         return res
 
     if cfg.MODEL.BoxVIS.EMA_ENABLED and not cfg.MODEL.WEIGHTS.split('_')[-1].startswith('teacher'):
-        # copy initial model weights to Teacher Net
+        # copy initial model weights to Teacher Net (EMA stable training)
         model_weights = copy_TeacherNet_weights(cfg.MODEL.WEIGHTS)
         cfg.merge_from_list(['MODEL.WEIGHTS', model_weights])
 

@@ -99,8 +99,6 @@ class UniVS_Prompt(nn.Module):
         gen_pseudo_mask: nn.Module,
         boxvis_enabled: bool,
         boxvis_ema_enabled: bool,
-        boxvis_bvisd_enabled: bool,
-        data_name: str,
         # inference
         video_unified_inference_enable: bool,
         prompt_as_queries: bool,
@@ -131,9 +129,7 @@ class UniVS_Prompt(nn.Module):
                 the per-channel mean and std to be used to normalize the input image
             test_topk_per_image: int, instance segmentation parameter, keep topk instances per image
             boxvis_enabled: if True, use only box-level annotation; otherwise pixel-wise annotations
-            boxvis_ema_enabled: if True, use Teacher Net to produce high-quality pseudo masks
-            boxvis_bvisd_enabled: if True, use box-supervised VIS dataset (BVISD), including
-                pseudo video clip from COCO, videos from YTVIS21 and OVIS.
+            boxvis_ema_enabled: Exponential Moving Average for training stable
         """
         super().__init__()
 
@@ -165,23 +161,11 @@ class UniVS_Prompt(nn.Module):
 
         self.num_frames = num_frames
         self.num_classes = num_classes
-        self.is_coco = data_name.startswith("coco")
-
-        # boxvis
-        if boxvis_enabled and boxvis_ema_enabled:
-            # Teacher Net
-            self.backbone_t = copy.deepcopy(backbone)
-            self.sem_seg_head_t = copy.deepcopy(sem_seg_head)
-            self.gen_pseudo_mask = gen_pseudo_mask
-            self.backbone_t.requires_grad_(False)
-            self.sem_seg_head_t.requires_grad_(False)
-            self.ema_shadow_decay = 0.999
 
         self.boxvis_enabled = boxvis_enabled
         self.boxvis_ema_enabled = boxvis_ema_enabled
-        self.boxvis_bvisd_enabled = boxvis_bvisd_enabled
-        self.data_name = data_name
-        self.tracker_type = tracker_type  # if 'ovis' in data_name and use swin large backbone => "mdqe"
+        if self.boxvis_ema_enabled:
+            self._init_ema(backbone, sem_seg_head, gen_pseudo_mask)
 
         # additional args reference
         self.video_unified_inference_enable = video_unified_inference_enable
@@ -199,9 +183,21 @@ class UniVS_Prompt(nn.Module):
         self.merge_on_cpu = merge_on_cpu
         
         # clip-by-clip tracking
+        self.tracker_type = tracker_type  # if 'ovis' in data_name and use swin large backbone => "mdqe"
         self.num_frames_window_test = num_frames_window_test
         self.clip_stride = clip_stride
         
+    def _init_ema(self, backbone, sem_seg_head, gen_pseudo_mask):
+        # Teacher Net
+        self.backbone_t = copy.deepcopy(backbone)
+        self.sem_seg_head_t = copy.deepcopy(sem_seg_head)
+        self.backbone_t.requires_grad_(False)
+        self.sem_seg_head_t.requires_grad_(False)
+        self.ema_shadow_decay = 0.9999
+        if self.boxvis_enabled:
+            self.gen_pseudo_mask = gen_pseudo_mask
+        else:
+            self.gen_pseudo_mask = None
 
     @classmethod
     def from_config(cls, cfg):
@@ -260,7 +256,6 @@ class UniVS_Prompt(nn.Module):
             cost_proj=proj_weight,
             num_points=cfg.MODEL.MASK_FORMER.TRAIN_NUM_POINTS,
             boxvis_enabled=cfg.MODEL.BoxVIS.BoxVIS_ENABLED,
-            boxvis_ema_enabled=cfg.MODEL.BoxVIS.EMA_ENABLED,
         )
 
         if deep_supervision:
@@ -316,8 +311,6 @@ class UniVS_Prompt(nn.Module):
             "gen_pseudo_mask": gen_pseudo_mask,
             'boxvis_enabled': cfg.MODEL.BoxVIS.BoxVIS_ENABLED,
             "boxvis_ema_enabled": cfg.MODEL.BoxVIS.EMA_ENABLED,
-            "boxvis_bvisd_enabled": cfg.MODEL.BoxVIS.BVISD_ENABLED,
-            "data_name": cfg.DATASETS.TEST[0],
             # inference
             "video_unified_inference_enable": cfg.MODEL.UniVS.TEST.VIDEO_UNIFIED_INFERENCE_ENABLE,
             "prompt_as_queries": cfg.MODEL.UniVS.PROMPT_AS_QUERIES,
@@ -358,24 +351,7 @@ class UniVS_Prompt(nn.Module):
             return self.forward_inference(batched_inputs)
         
         if self.boxvis_ema_enabled:
-            # ---------------- prepare EMA for Teacher net ---------------------
-            backbone_shadow, sem_seg_head_shadow = {}, {}
-            for name, param in self.backbone.named_parameters():
-                if param.requires_grad:
-                    backbone_shadow[name] = param.data.clone().detach()
-
-            for name, param in self.sem_seg_head.named_parameters():
-                if param.requires_grad:
-                    sem_seg_head_shadow[name] = param.data.clone().detach()
-
-            w_shadow = 1.0 - self.ema_shadow_decay
-            # apply weighted weights to the teacher net
-            for name, param in self.backbone_t.named_parameters():
-                if name in backbone_shadow:
-                    param.data = w_shadow * backbone_shadow[name] + (1-w_shadow) * param.data
-            for name, param in self.sem_seg_head_t.named_parameters():
-                if name in sem_seg_head_shadow:
-                    param.data = w_shadow * sem_seg_head_shadow[name] + (1-w_shadow) * param.data
+            self.update_ema_parameters()
                     
         images = []
         for video in batched_inputs:
@@ -393,7 +369,8 @@ class UniVS_Prompt(nn.Module):
 
         targets = self.prepare_targets.process(batched_inputs, images, self.device, self.text_prompt_encoder)
 
-        if self.boxvis_ema_enabled:
+        if self.boxvis_ema_enabled and self.gen_pseudo_mask is not None:
+            raise NotImplementedError
             # ------------------ Teacher Net -----------------------------
             features_t = self.backbone_t(images_norm.tensor)
             outputs_t = self.sem_seg_head_t(features_t, targets=targets)
@@ -408,11 +385,15 @@ class UniVS_Prompt(nn.Module):
             if k in self.criterion.weight_dict:
                 losses[k] *= self.criterion.weight_dict[k]
             else:
+                print(f"Loss {k} not in weight_dict, remove it.")
                 # remove this loss if not specified in `weight_dict`
                 losses.pop(k)
         return losses
     
     def forward_inference(self, batched_inputs):
+        if self.boxvis_ema_enabled:
+            self.replace_with_ema_parameters_inf()
+            
         dataset_name = batched_inputs[0]["dataset_name"]
         if dataset_name.startswith("coco") or dataset_name.startswith("ade20k"):
             # evaluation for images
@@ -441,3 +422,40 @@ class UniVS_Prompt(nn.Module):
                         return self.inference_video_vps.eval(self, batched_inputs)
                     else:
                         raise ValueError(f"Not support to eval the dataset {dataset_name} yet")
+
+    def replace_with_ema_parameters_inf(self):
+        # ---------------- using EMA parameters for Teacher net ---------------------
+        backbone_t, sem_seg_head_t = {}, {}
+        for name, param in self.backbone_t.named_parameters():
+            backbone_t[name] = param.data.detach()
+
+        for name, param in self.sem_seg_head_t.named_parameters():
+            sem_seg_head_t[name] = param.data.detach()
+
+        # apply weighted weights to the student net
+        for name, param in self.backbone.named_parameters():
+            if name in backbone_t and param.requires_grad:
+                param.data = backbone_t[name]
+        for name, param in self.sem_seg_head.named_parameters():
+            if name in sem_seg_head_t and param.requires_grad:
+                param.data = sem_seg_head_t[name] 
+    
+    def update_ema_parameters(self):
+        # ----------------- prepare EMA for Teacher net ---------------------
+        backbone_shadow, sem_seg_head_shadow = {}, {}
+        for name, param in self.backbone.named_parameters():
+            if param.requires_grad:
+                backbone_shadow[name] = param.data.detach()
+
+        for name, param in self.sem_seg_head.named_parameters():
+            if param.requires_grad:
+                sem_seg_head_shadow[name] = param.data.detach()
+
+        w_shadow = 1.0 - self.ema_shadow_decay
+        # apply weighted weights to the teacher net
+        for name, param in self.backbone_t.named_parameters():
+            if name in backbone_shadow:
+                param.data = w_shadow * backbone_shadow[name] + (1-w_shadow) * param.data
+        for name, param in self.sem_seg_head_t.named_parameters():
+            if name in sem_seg_head_shadow:
+                param.data = w_shadow * sem_seg_head_shadow[name] + (1-w_shadow) * param.data

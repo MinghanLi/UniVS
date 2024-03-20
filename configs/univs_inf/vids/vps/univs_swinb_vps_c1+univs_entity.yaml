@@ -1,4 +1,4 @@
-_BASE_: univs_swinl_vps_c1+univs_entity.yaml
+_BASE_: univs_R50_vps_c1+univs_entity.yaml
 MODEL:
   BACKBONE:
     NAME: "D2SwinTransformer"

@@ -1,9 +1,21 @@
-_BASE_: univs_swinb_yt21_c1+univs_entity.yaml
+_BASE_: univs_R50_ovis_c1+univs_entity.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  SWIN:
+    EMBED_DIM: 128
+    DEPTHS: [2, 2, 18, 2]
+    NUM_HEADS: [4, 8, 16, 32]
+    WINDOW_SIZE: 12
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    PRETRAIN_IMG_SIZE: 384
 DATASETS:
   TEST: ("ovis_dev0.01", )
 INPUT:
   SAMPLING_FRAME_NUM: 3
-  MIN_SIZE_TEST: 480
+  MIN_SIZE_TEST: 640
 TEST:
   DETECTIONS_PER_IMAGE: 50
 OUTPUT_DIR: output/inf/swinb_c1+univs/stage2/ovis/entity/

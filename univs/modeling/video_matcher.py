@@ -105,7 +105,7 @@ class VideoHungarianMatcherUni(nn.Module):
 
     def __init__(self, cost_class: float = 1, cost_mask: float = 1, cost_dice: float = 1,
                  cost_proj: float = 1, cost_pair: float = 1, num_points: int = 0,
-                 boxvis_enabled: bool = False, boxvis_ema_enabled=False):
+                 boxvis_enabled: bool = False):
         """Creates the matcher
 
         Params:
@@ -116,7 +116,6 @@ class VideoHungarianMatcherUni(nn.Module):
             cost_pair: This is the relative weight of the pairwise loss of the binary mask in the matching cost
             num_points: The number of sampling points to take part in the mask loss
             boxvis_enabled: It controls the annotation types: pixel-wise or box-level annotations for VIS task
-            boxvis_ema_enabled: It controls whether to use Teacher Net to produce pseudo instance masks for VIS task
         """
         super().__init__()
         self.cost_class = cost_class
@@ -128,10 +127,8 @@ class VideoHungarianMatcherUni(nn.Module):
         assert cost_class != 0 or cost_mask != 0 or cost_dice != 0, "all costs cant be 0"
 
         self.num_points = num_points
-
         # boxvis
         self.boxvis_enabled = boxvis_enabled
-        self.boxvis_ema_enabled = boxvis_ema_enabled
 
     @torch.no_grad()
     def memory_efficient_forward(self, outputs, targets):
@@ -212,7 +209,6 @@ class VideoHungarianMatcherUni(nn.Module):
             outputs: This is a dict that contains at least these entries:
                  "pred_logits": Tensor of dim [batch_size, num_queries, num_classes] with the classification logits
                  "pred_masks": Tensor of dim [batch_size, num_queries, H_pred, W_pred] with the predicted masks
-                 "cost_type": 'teacher' or 'student' when boxvis_ema_enabled
 
             targets: This is a list of targets (len(targets) = batch_size), where each target is a dict containing:
                  "labels": Tensor of dim [num_target_boxes] (where num_target_boxes is the number of ground-truth

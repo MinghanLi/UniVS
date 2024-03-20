@@ -4,6 +4,10 @@ output
 # pretrained dir
 pretrained
 
+# ema
+univs/utils/model_ema.py
+univs/prompt_longvideo_ema.py
+
 # tmp dir
 tmp
 

@@ -59,59 +59,135 @@ Note that the input image for Swin-Tiny/Base/Large backbones must have a shape o
   <tr>
     <th>Backbone</th>
     <th>YAML</th>
+    <th>INPUT</th>
     <th>Model</th>
   </tr>
   <tr>
     <td>ResNet-50</td>
     <td>univs_r50_stage2</td>
+    <td> Any resolution</td>
     <td><a href="https://drive.google.com/file/d/1IX3HKIkZJKmA58VJiF9Xh0fJPYXLQ1Nc/view?usp=sharing">model</a></td>
   </tr>
   <tr>
     <td>Swin-Tiny</td>
     <td>univs_swint_stage2</td>
+    <td> 1024 * 1024</td>
     <td><a href="https://drive.google.com/file/d/1A48BoH1mlLYYcRuJFajoR_2iFscgnncU/view?usp=sharing">model</a></td>
   </tr>
   <tr>
     <td>Swin-Base</td>
     <td>univs_swinb_stage2</td>
+    <td> 1024 * 1024</td>
     <td><a href="https://drive.google.com/file/d/196YHDC01ghO34UL5RGFCqurPngR5EIOa/view?usp=sharing">model</a></td>
   </tr>
   <tr>
     <td>Swin-Large</td>
     <td>univs_swinl_stage2</td>
+    <td> 1024 * 1024</td>
     <td><a href="https://drive.google.com/file/d/1aIANl9LpzT3bsd90Kna8Zr08v5mvyfdz/view?usp=sharing">model</a></td>
   </tr>
 </table>
 
 ### Stage 3: Long Video-level Joint Training 
-All numbers reported in the paper uses the following models. This stage supports input images of all aspect ratios, and the results perform better when the short side is between 512 and 720. The trained models will be released soon.
+All numbers reported in the paper uses the following models. This stage supports input images of all aspect ratios, and the results perform better when the short side is between 512 and 720. 
 
 <table>
   <tr>
     <th>Backbone</th>
     <th>YAML</th>
+    <th>Input</th>
     <th>Model</th>
 
   </tr>
   <tr>
     <td>ResNet-50</td>
     <td>univs_r50_stage3</td>
-    <td><a href="?">-</a></td>
+    <td> Any resolution</td>
+    <td><a href="https://drive.google.com/file/d/1PJQ7ryyPiK4-YagBxMCKNkm5C_nLjhv3/view?usp=sharing">model</a></td>
   </tr>
   <tr>
     <td>Swin-Tiny</td>
     <td>univs_swint_stage3</td>
-    <td><a href="?">-</a></td>
+    <td> Any resolution</td>
+    <td><a href="https://drive.google.com/file/d/1yzL_uUETd_qGhkmUOsU59X1ItFVu8JKq/view?usp=sharing">model</a></td>
   </tr>
   <tr>
     <td>Swin-Base</td>
     <td>univs_swinb_stage3</td>
-    <td><a href="">-</a></td>
+    <td> Any resolution</td>
+    <td><a href="https://drive.google.com/file/d/19Y_icBnyOh5TC-BS7mJdoQn0lN80jTOv/view?usp=sharing">model</a></td>
   </tr>
   <tr>
     <td>Swin-Large</td>
     <td>univs_swinl_stage3</td>
-    <td><a href="">-</a></td>
+    <td> Any resolution</td>
+    <td><a href="https://drive.google.com/file/d/1RujQUMrl46VktO4SmMvbmBEnr1ZKjXd-/view?usp=sharing">model</a></td>
   </tr>
 </table>
 
+
+## 4. Inference UniVS on development set 
+
+If the ground-truth for the validation set has already been released, as in the case of the DAVIS and VSPW benchmarks, we will use the first 20% of the data from the validation set for the development set to enable rapid inference. If the ground-truth for the validation set has not been released, such as YouTube-VIS benchmark, we will divide the training set into two parts: training (train_sub.json) and development (valid_sub.json) sets. In this scenario, the data in the development set will not be seen during the training phase.
+
+For your convenience in evaluation, we provide the converted development annotation files, which you can download from [here](https://drive.google.com/file/d/1UFhkdcMz_HIBYEQSFy72qpC2byZkCAvC/view?usp=sharing). After downloading, please unzip the file and store it according to the following structure:
+
+```
+datasets/
+  |---ytvis_2021/
+    |---train.json  
+    |---train_sub.json  (90% videos in training set)
+    |---valid_sub.json  (10% videos in training set)
+    |---train/
+      |---JPEGImages/
+    |---valid/
+      |---JPEGImages/
+
+  |---ovis/
+    |---train.json  
+    |---train_sub.json  (90% videos in training set)
+    |---valid_sub.json  (10% videos in training set)
+    |---train/
+      |---JPEGImages/
+    |---valid/
+      |---JPEGImages/
+
+  |---VSPW_480p/
+      |---val_cocovid.json
+      |---dev_cocovid.json  (first 50 videos in val set, only for debug)
+      |---data/
+
+  |---vipseg/
+    |---VIPSeg_720P/
+      |--- panoptic_gt_VIPSeg_val_cocovid.json
+      |--- panoptic_gt_VIPSeg_val_sub_cocovid.json
+      |--- imgs/
+      |--- panomasksRGB/
+
+  |---DAVIS/
+    2017_val.json
+    |---JPEGImages/
+      |---Full-Resolution/
+
+  |---viposeg/
+    |---valid/
+      |---valid_cocovid.json
+      |---dev_cocovid.json 
+      |---JPEGImages/
+
+  |---ref-davis/
+    |---valid_0.json
+    |---valid_1.json
+    |---valid_2.json
+    |---valid_3.json
+    |---valid/
+      |---JPEGImages/
+```
+
+The results evaluated on the development sets are presented below. You can obtain these results by running the test scripts located in the `tools/test/` directory.
+
+Note that the results from this section are solely applicable for code debugging and **should not** be used for performance comparison with other methods in the paper.
+
+<div align="center">
+  <img src="imgs/stage3_dev_results.png" width="100%" height="100%"/>
+</div><br/>

@@ -22,26 +22,35 @@ def generate_temporal_weights(num_frames, weights=None, enable_softmax=False, sc
 
     return temp_w / temp_w.sum(-1).unsqueeze(-1).clamp(min=1e-3)
     
-def match_from_learnable_embds(tgt_embds, cur_embds, return_similarity=False, return_src_indices=False):
-    """
+def match_from_learnable_embds(tgt_embds, cur_embds, return_similarity=False, return_src_indices=False, use_norm=True, thresh=0):
+    """ !! Important 
     tgt_embds: NxT_prevxC
     cur_embds: MxT_clipxC
+    use_norm: Cosine similarity if Ture, else Bisoftmax (also called as quasi_track)
     """
     num_frames_prev = tgt_embds.shape[1]
     num_frames_cur = cur_embds.shape[1]
 
-    cur_embds = cur_embds / cur_embds.norm(dim=-1)[..., None].clamp(min=1e-3)
-    tgt_embds = tgt_embds / tgt_embds.norm(dim=-1)[..., None].clamp(min=1e-3)
-    cos_sim = torch.einsum('nvc,mtc->nmvt', tgt_embds, cur_embds).mean(-1)
+    if use_norm:
+        cur_embds = cur_embds / cur_embds.norm(dim=-1)[..., None].clamp(min=1e-3)
+        tgt_embds = tgt_embds / tgt_embds.norm(dim=-1)[..., None].clamp(min=1e-3)
+        cos_sim = torch.einsum('nvc,mtc->nmvt', tgt_embds, cur_embds).mean(-1)
+    else:
+        cos_sim = torch.einsum('nvc,mtc->nmvt', tgt_embds, cur_embds).mean(-1)
+        cos_sim = cos_sim / math.sqrt(tgt_embds.shape[-1])
     
-    nonblank = (tgt_embds != 0).any(-1).float()
-    temp_weight = generate_temporal_weights(num_frames_prev, weights=nonblank, enable_softmax=False)
-    cos_sim = (cos_sim * temp_weight.unsqueeze(1)).sum(-1)  # NM
+    if use_norm:
+        # cosine similarity
+        nonblank = (tgt_embds != 0).any(-1).float()
+        temp_weight = generate_temporal_weights(num_frames_prev, weights=nonblank, enable_softmax=False)
+        cos_sim = (cos_sim * temp_weight.unsqueeze(1)).sum(-1)  # NM
+    else:
+        # bisoftmax
+        cos_sim = (cos_sim.softmax(1) + cos_sim.softmax(0)).mean(-1) / 2.
+        if thresh > 0:
+            cos_sim[cos_sim < thresh] = 0.
 
-    cost_embd = 1 - cos_sim
-    C = 1.0 * cost_embd
-    C = C.cpu()
-
+    C = (1 - cos_sim).cpu()
     indices = linear_sum_assignment(C)  # target x current
     cos_sim = cos_sim[indices]
     if not return_src_indices:
@@ -156,6 +165,9 @@ def vis_clip_instances_to_coco_json_video(batched_inputs, results_list, apply_cl
 
         segm = obj_dict["segmentations"]
         for c in classes:
+            if float(scores[c]) < 0.1 * apply_cls_thresh:
+                continue
+            
             s = float(scores[c]) * float(mask_quality_score)
             l = int(c)
             ytvis_results.append({

@@ -11,18 +11,18 @@ MODEL:
     NUM_POS_QUERIES: 20
 DATASETS:
   DATASET_RATIO: 
-  # OD & IS
+  # OD & IS 0.75
   - 0.15  # lvis
   - 0.35  # ovis 42k
   - 0.25  # ytvis21 90k
-  # VSS & VPS
+  # VSS & VPS 1.25
   - 0.5   # entityseg
   - 0.25  # panoptic coco
   - 0.5   # vipseg 85k
-  # Ref
-  - 0.35  # refcoco
+  # Ref 0.85 => 1.25
+  - 0.75  # refcoco 0.35 => 0.75
   - 0.5   # ref-ytvos
-  # SOT & VOS
+  # SOT & VOS 0.8
   - 0.25  # sa1b
   - 0.25  # ytvos18
   - 0.15  # mose
@@ -47,7 +47,7 @@ DATASETS:
   TEST: ("ytvis_2021_dev", )
 INPUT:
   SAMPLING_FRAME_NUM: 7
-  SAMPLING_FRAME_RANGE: 40
+  SAMPLING_FRAME_RANGE: 20
   MIN_SIZE_TEST: 800
 SOLVER:
   BASE_LR: 0.000025

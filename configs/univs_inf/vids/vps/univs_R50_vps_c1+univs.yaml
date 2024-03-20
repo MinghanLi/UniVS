@@ -23,6 +23,8 @@ MODEL:
     MASKDEC_ATTN_ORDER: 'casa'  # 'casa' or 'saca'
     MASKDEC_SELF_ATTN_MASK_TYPE: 'sep'  # 'all', 'sep', 'p2l-alpha', 'p2l-beta'
     DISABLE_LEARNABLE_QUERIES_SA1B: False
+    TEST:
+      VIDEO_UNIFIED_INFERENCE_ENABLE: False
   BoxVIS:
     TEST:
       NUM_FRAMES_WINDOW: 1
