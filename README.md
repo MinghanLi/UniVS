@@ -52,7 +52,7 @@ sh tools/run/univs_r50_stage2.sh
 sh tools/run/univs_r50_stage3.sh
 ```
 
-### 🌟 **Unified Inference for videos**
+### 🌟 **Unified Inference for Videos**
 
 Download trained weights from [Model Zoo](Model_zoo.md), and save it into the path `output/stage{1,2,3}/`. We support multiple ways to evaluate UniVS on VIS, VSS, VPS, VOS, PVOS and RefVOS tasks:
 ```
@@ -72,14 +72,14 @@ Step 3: Modify the dataset name as your needed datasets in inference .sh commond
 
 Step 4: For YouTube-VIS, OVIS, YouTube-VOS, Ref-YouTube-VOS datasets, you need to submit the predicted results (`results.json` in the output dir) to the codelab for performance evaluation. The official codelab websits are provided below for your convenience: [YouTube-VIS 2021](https://codalab.lisn.upsaclay.fr/competitions/7680#participate-submit_results), [OVIS](https://codalab.lisn.upsaclay.fr/competitions/5857#participate-submit_results), [YouTube-VOS](https://codalab.lisn.upsaclay.fr/competitions/6066#participate-submit_results), [Ref-YouTube-VOS](https://codalab.lisn.upsaclay.fr/competitions/3282#participate). For other datasets, the ground-truth annotations in valid set are released, you can get the performance directly after Step 3.
 
-### 🌟 **Performance on 10 benchmarks**
+### 🌟 **Performance on 10 Benchmarks**
 UniVS shows a commendable balance between perfor0mance and universality on 10 challenging VS benchmarks, covering video instance, semantic, panoptic, object, and referring segmentation tasks. 
 
 <div align="center">
   <img src="imgs/unified_results_cvpr.png" width="95%" height="100%"/>
 </div><br/>
 
-### 🌟 **Visualization demo**
+### 🌟 **Visualization Demo**
 Visualization is avaliable during inference, but you need to turn it on manually. 
 
 a) For category-guided VS tasks, you can visualize results via enabling  `self.visualize_results_enable = True` form [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_entity.py#L168). The visualization code for VIS/VSS/VPS lies in [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_entity.py#L1119).
