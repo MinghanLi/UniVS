@@ -42,7 +42,7 @@ See [Datasets preparation](./datasets/README.md).
 
 ## 🚀 Unified Training and Inference 
 
-### 🌟 Unified Training for Images and Videos 
+### 🌟 **Unified Training for Images and Videos**
 We provide a script `train_net.py`, that is made to train all the configs provided in UniVS.
 
 Download [pretrained weights of Mask2Former](https://github.com/facebookresearch/Mask2Former/blob/main/MODEL_ZOO.md) and save them into the path `pretrained/m2f_panseg/`, then run the following three stages one by one:
@@ -52,7 +52,7 @@ sh tools/run/univs_r50_stage2.sh
 sh tools/run/univs_r50_stage3.sh
 ```
 
-### 🌟 Unified Inference for videos
+### 🌟 **Unified Inference for videos**
 
 Download trained weights from [Model Zoo](Model_zoo.md), and save it into the path `output/stage{1,2,3}/`. We support multiple ways to evaluate UniVS on VIS, VSS, VPS, VOS, PVOS and RefVOS tasks:
 ```
@@ -63,12 +63,28 @@ $ sh tools/test/test_r50.sh
 $ sh tools/test/individual_task/test_pvos.sh
 ```
 
-## 🕹️ Performance on 10 benchmarks
+### 🌟 **Detailed Steps for Inference**
+Step 1: You need to download the needed datasets from their original website. Please refer to [dataset preparation](https://github.com/MinghanLi/UniVS/blob/main/datasets/README.md) for more guidance.
+
+Step 2: Built in datasets as detectron2 format in [here](https://github.com/MinghanLi/UniVS/blob/main/univs/data/datasets/builtin.py). The datasets involved in our paper has been built, so this step can be omitted. If it is a newly added dataset, it needs to be built by yourself.
+
+Step 3: Modify the dataset name as your needed datasets in inference .sh commond. Taking the OVIS dataset of VIS task as an example, you just need to add the commond `DATASETS.TEST '("ovis_val", )' \` in the file `./tools/test/individual_task/test_vis.sh`. Then, run the commond `sh tools/test/individual_task/test_vis.sh`.
+
+Step 4: For YouTube-VIS, OVIS, YouTube-VOS, Ref-YouTube-VOS datasets, you need to submit the predicted results (`results.json` in the output dir) to the codelab for performance evaluation. The official codelab websits are provided below for your convenience: [YouTube-VIS 2021](https://codalab.lisn.upsaclay.fr/competitions/7680#participate-submit_results), [OVIS](https://codalab.lisn.upsaclay.fr/competitions/5857#participate-submit_results), [YouTube-VOS](https://codalab.lisn.upsaclay.fr/competitions/6066#participate-submit_results), [Ref-YouTube-VOS](https://codalab.lisn.upsaclay.fr/competitions/3282#participate). For other datasets, the ground-truth annotations in valid set are released, you can get the performance directly after Step 3.
+
+### 🌟 **Performance on 10 benchmarks**
 UniVS shows a commendable balance between perfor0mance and universality on 10 challenging VS benchmarks, covering video instance, semantic, panoptic, object, and referring segmentation tasks. 
 
 <div align="center">
   <img src="imgs/unified_results_cvpr.png" width="95%" height="100%"/>
 </div><br/>
+
+### 🌟 **Visualization demo**
+Visualization is avaliable during inference, but you need to turn it on manually. 
+
+a) For category-guided VS tasks, you can visualize results via enabling  `self.visualize_results_enable = True` form [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_entity.py#L168). The visualization code for VIS/VSS/VPS lies in [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_entity.py#L1119).
+
+b) For prompt-guided VS tasks, you need to enable `self.visualize_results_only_enable = True` [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_vos.py#L150). The visualization code for VOS/PVOS/RefVOS [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_vos.py#L712)
 
 
 ## <a name="CitingUniVS"></a>🖊️ Citing UniVS 
