@@ -13,9 +13,9 @@ We propose a novel unified VS architecture, namely **UniVS**, by using prompts a
 </div><br/>
 
 ## More video demo in our [project page](https://sites.google.com/view/unified-video-seg-univs)
-| VIS | VSS | VPS |
-|-----|-----|-----|
-| ![vis](imgs/2d802_vis.gif) | ![vss](imgs/2d802_vss.gif) | ![vps](imgs/2d802_vps.gif) |
+|Task   | VIS | VSS | VPS |
+|-------|-----|-----|-----|
+|Output | ![vis](imgs/2d802_vis.gif) | ![vss](imgs/2d802_vss.gif) | ![vps](imgs/2d802_vps.gif) |
 
 |Task | VOS | RefVOS | PVOS |
 |-----|-----|--------|------|
