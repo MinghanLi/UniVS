@@ -12,6 +12,16 @@ We propose a novel unified VS architecture, namely **UniVS**, by using prompts a
   <img src="imgs/vs_tasks.jpg" width="100%" height="100%"/>
 </div><br/>
 
+## More video demo in our [project page](https://sites.google.com/view/unified-video-seg-univs)
+| VIS | VSS | VPS |
+|-----|-----|-----|
+| ![vis](imgs/2d802_vis.gif) | ![vss](imgs/2d802_vss.gif) | ![vps](imgs/2d802_vps.gif) |
+
+|Task | VOS | RefVOS | PVOS |
+|-----|-----|--------|------|
+|Prompt |![vos](imgs/2d802_visual_prompt.png)|"A frog is holded by a person in his hand and place near the another frog"|![pvos](imgs/2175_FV3T_visual_prompt.png)|
+|Output | ![vos](imgs/2d802_vos.gif) | ![refvos](imgs/ref_c16d9_0_1.gif) | ![pvos](imgs/2175_FV3T_pvos.gif)|
+
 	
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/video-panoptic-segmentation-on-vipseg)](https://paperswithcode.com/sota/video-panoptic-segmentation-on-vipseg?p=univs-unified-and-universal-video)
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/video-semantic-segmentation-on-vspw)](https://paperswithcode.com/sota/video-semantic-segmentation-on-vspw?p=univs-unified-and-universal-video)
