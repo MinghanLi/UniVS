@@ -743,7 +743,7 @@ class InferenceVideoVOS(nn.Module):
                 mode="bilinear",
                 align_corners=False
             ).squeeze(0).long()
-            img = img.permute(1, 2, 0).cpu().to(torch.uint8)
+            img = img.permute(1, 2, 0).cpu()
 
             for id_, m in enumerate(m_t):
                 save_dir = os.path.join(self.output_dir, 'inference/Annotations', video_name, str(id_))
