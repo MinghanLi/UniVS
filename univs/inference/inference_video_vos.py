@@ -391,21 +391,25 @@ class InferenceVideoVOS(nn.Module):
                     matched_masks_binary[range(is_first_appear.sum()), faf_idx_].unsqueeze(1)
                 ).squeeze(1)
                 mask_area = gt_masks_first.flatten(1).sum(1) / (96*96)
-                is_above_miou = miou_scores > 0.65 * mask_area.clamp(max=1)
+                is_above_miou = miou_scores > 0.15 * mask_area.clamp(max=1)
             else:
                 is_above_miou = torch.ones(is_first_appear.sum())
 
             for i_, (is_above, obj_i_, faf_i_) in enumerate(zip(is_above_miou, obj_idx_, faf_idx_)):
                 faf_i_ = faf_i_ + 1 if task == 'sot' else faf_i_
-                if not is_above or faf_i_ == 0:
-                    continue
-                
-                # use semseg results to help stuff entities
                 cur_label = int(gt_labels[obj_i_])
                 cur_mask = matched_masks[i_, faf_i_:]
-                if 'viposeg' in targets_per_video['dataset_name'] and self.use_semseg_pvos:
-                    if cur_label + 1 in self.metadata.stuff_dataset_id_to_contiguous_id:
-                        cur_mask[sem_mask[faf_i_:] == cur_label] = 10.
+
+                isstuff = False
+                if 'viposeg' in targets_per_video['dataset_name']:
+                    isstuff = cur_label + 1 in self.metadata.stuff_dataset_id_to_contiguous_id
+
+                if (not is_above and not isstuff) or faf_i_ == 0:
+                    continue
+    
+                # use semseg results to help stuff entities
+                if 'viposeg' in targets_per_video['dataset_name'] and isstuff:
+                    cur_mask[sem_mask[faf_i_:] == cur_label] = 10.
                 gt_masks[obj_i_, faf_i_:] = cur_mask.gt(0.)
                 gt_mask_logits[obj_i_, faf_i_:] = cur_mask
                 gt_boxes[obj_i_, faf_i_:] = matched_pred_boxes[i_, faf_i_:]
