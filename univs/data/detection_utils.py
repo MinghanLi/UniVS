@@ -86,6 +86,8 @@ def convert_PIL_to_numpy(image, format):
     elif format == "YUV-BT.601":
         image = image / 255.0
         image = np.dot(image, np.array(_M_RGB2YUV).T)
+    elif format != "RGB":
+        raise ValueError(f"Unsupported image format: {format}")
 
     return image
 

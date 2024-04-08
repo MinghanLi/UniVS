@@ -310,10 +310,13 @@ class PrepareTargets:
             elif targets_per_video["task"] == "detection":
                 if targets_per_video["dataset_name"] not in {'flickr'}:
                     dataset_name = targets_per_video["dataset_name"]
-                    if dataset_name not in combined_datasets_category_info:
-                        raise ValueError(f"Unsupported dataset_name: {dataset_name}")
-                    num_classes, start_idx = combined_datasets_category_info[dataset_name]
-                    clip_cls_text_emb = self.clip_cls_text_emb[start_idx:start_idx+num_classes]
+                    if targets_per_video["is_raw_video"]:
+                        clip_cls_text_emb = self.clip_cls_text_emb
+                    else:
+                        if dataset_name not in combined_datasets_category_info:
+                            raise ValueError(f"Unsupported dataset_name: {dataset_name}")
+                        num_classes, start_idx = combined_datasets_category_info[dataset_name]
+                        clip_cls_text_emb = self.clip_cls_text_emb[start_idx:start_idx+num_classes]
                 else:
                     clip_cls_text_emb = text_prompt_encoder.get_expression_prompt(
                         targets_per_video["phrases"], device, text_type='class_name'

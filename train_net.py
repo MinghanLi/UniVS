@@ -46,6 +46,7 @@ from detectron2.projects.deeplab import add_deeplab_config, build_lr_scheduler
 from detectron2.solver.build import maybe_add_gradient_clipping
 from detectron2.utils.logger import setup_logger
 
+import datasets.concept_emb
 from mask2former import add_maskformer2_config
 from mask2former_video import add_maskformer2_video_config
 from regionclip import add_regionclip_config
@@ -147,7 +148,7 @@ class Trainer(DefaultTrainer):
             evaluator_list.append(DAVISEvaluator(dataset_name, cfg, True, output_folder))
         elif evaluator_type == "pvos":
             evaluator_list.append(PVOSEvaluator(dataset_name, cfg, True, output_folder))
-        elif evaluator_type == "vos":
+        elif evaluator_type == "vos" or evaluator_type == "none":
             evaluator_list.append(None)
         else:
             raise NotImplementedError('Not support the evaluator type {}'.format(dataset_name))
@@ -352,6 +353,7 @@ def setup(args):
     Create configs and perform basic setups.
     """
     cfg = get_cfg()
+
     add_deeplab_config(cfg)  # for poly lr schedule
     add_maskformer2_config(cfg)
     add_maskformer2_video_config(cfg)
@@ -363,6 +365,7 @@ def setup(args):
     default_setup(cfg, args)
     # Setup logger for "mask_former" module
     setup_logger(output=cfg.OUTPUT_DIR, distributed_rank=comm.get_rank(), name="mask2former")
+
     return cfg
 
 

@@ -83,6 +83,8 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         num_prev_frames_memory: int=5, 
         enabled_prev_frames_memory: bool=True,
         enabled_prev_visual_prompts_for_grounding: bool=False,
+        # semantic extraction parameters
+        semantic_extraction_enable: bool=False,
     ):
         """
         NOTE: this interface is experimental.
@@ -222,6 +224,9 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         self.enabled_prev_frames_memory = enabled_prev_frames_memory
         self.enabled_prev_visual_prompts_for_grounding = enabled_prev_visual_prompts_for_grounding
 
+        # semantic_extraction during inference only
+        self.semantic_extraction_enable = semantic_extraction_enable
+
         if self.training:
             self._reset_parameters()
     
@@ -292,6 +297,9 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         ret["enabled_prev_frames_memory"] = cfg.MODEL.UniVS.TEST.ENABLED_PREV_FRAMES_MEMORY
         ret["enabled_prev_visual_prompts_for_grounding"] = cfg.MODEL.UniVS.TEST.ENABLED_PREV_VISUAL_PROMPTS_FOR_GROUNDING
 
+        # semantic extraction parameters
+        ret["semantic_extraction_enable"] = cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.ENABLE
+
         return ret
 
     def forward(self, x, mask_features, mask_features_bfe_conv=None, mask=None, targets=None):
@@ -339,20 +347,20 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         output = self.query_feat.weight.unsqueeze(1).repeat(1, bt, 1)  
 
         # prompt queires: Q_p x NT x C
-        prompt_feats, prompt_pe, prompt_feats_dense, prompt_pe_dense, l2v_attn_weights_list = \
-            self.forward_prompt_encoder(src, pos, size_list, targets, t)
-        if prompt_feats is not None:
-            assert self.prompt_as_queries
-            # prompt as queries: (Q_l+Q_p) x NT x C
-            output = torch.cat([output, prompt_feats])
-            prompt_pe = prompt_pe if prompt_pe is not None else prompt_feats
-            query_embed = torch.cat([query_embed, prompt_pe])
+        if self.prompt_as_queries:
+            prompt_feats, prompt_pe, prompt_feats_dense, prompt_pe_dense, l2v_attn_weights_list = \
+                self.forward_prompt_encoder(src, pos, size_list, targets, t)
+            if prompt_feats is not None:
+                # prompt as queries: (Q_l+Q_p) x NT x C
+                output = torch.cat([output, prompt_feats])
+                prompt_pe = prompt_pe if prompt_pe is not None else prompt_feats
+                query_embed = torch.cat([query_embed, prompt_pe])
     
-        # prompt cross-attention first (per-frame)
-        output = self.forward_transformer_prompt_self_attention_layer(
-            0, output, query_embed, prompt_feats_dense, prompt_pe_dense
-        )
-        query_embed = torch.cat([query_embed[:self.num_queries], output[self.num_queries:]])
+            # prompt cross-attention first (per-frame)
+            output = self.forward_transformer_prompt_self_attention_layer(
+                0, output, query_embed, prompt_feats_dense, prompt_pe_dense
+            )
+            query_embed = torch.cat([query_embed[:self.num_queries], output[self.num_queries:]])
 
         predictions_class = []
         predictions_mask = []
@@ -365,7 +373,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         )
         predictions_class.append(outputs_class)
         predictions_mask.append(outputs_mask)
-        predictions_embds.append(rearrange(self.decoder_norm(output), 'Q (B T) C -> B Q T C', T=t))
+        predictions_embds.append(rearrange(output, 'Q (B T) C -> B Q T C', T=t))
         predictions_reid.append(outputs_reid)
 
         num_queries_lp, NT = output.shape[:2]
@@ -382,7 +390,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
             attn_mask[torch.where(attn_mask.sum(-1) == attn_mask.shape[-1])] = False
 
             # prompt cross-attention layer
-            if i > 0 and i < self.prompt_self_attn_layers:
+            if self.prompt_as_queries and i > 0 and i < self.prompt_self_attn_layers:
                 output = self.forward_transformer_prompt_self_attention_layer(
                     i, output, query_embed, prompt_feats_dense, prompt_pe_dense
                 )
@@ -420,22 +428,29 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
             )
             predictions_class.append(outputs_class)
             predictions_mask.append(outputs_mask)
-            predictions_embds.append(rearrange(self.decoder_norm(output), 'Q (B T) C -> B Q T C', T=t))
+            predictions_embds.append(rearrange(output, 'Q (B T) C -> B Q T C', T=t))
             predictions_reid.append(outputs_reid)
 
         assert len(predictions_class) == self.num_layers + 1 
 
-        out = {
-            'pred_logits': predictions_class[-1],
-            'pred_masks': predictions_mask[-1],
-            'aux_outputs': self._set_aux_loss(
-                predictions_class if self.mask_classification else None, predictions_mask, predictions_reid, predictions_embds
-            ),
-            'pred_embds': predictions_embds[-1],
-            'pred_reid_logits': predictions_reid[-1],
-        }
-        # if self.training:
-        #     out['l2v_attn_weights'] = l2v_attn_weights_list
+        if self.training or not self.semantic_extraction_enable:
+            predictions_embds = [self.decoder_norm(embds) for embds in predictions_embds]
+            out = {
+                'pred_logits': predictions_class[-1],
+                'pred_masks': predictions_mask[-1],
+                'aux_outputs': self._set_aux_loss(
+                    predictions_class if self.mask_classification else None, predictions_mask, predictions_reid, predictions_embds
+                ),
+                'pred_embds': predictions_embds[-1],
+                'pred_reid_logits': predictions_reid[-1],
+            }
+            # if self.training:
+            #     out['l2v_attn_weights'] = l2v_attn_weights_list
+        else:
+            out = {
+                'pred_embds': predictions_embds[-1][0].permute(1,2,0),  # Q T C -> T C Q
+                'mask_features': mask_features[0],  # T, c_m, h_m, w_m = mask_features.shape
+            }
         
         return out
     

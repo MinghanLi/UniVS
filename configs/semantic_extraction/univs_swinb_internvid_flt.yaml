@@ -1,0 +1,30 @@
+_BASE_: Base.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  SWIN:
+    EMBED_DIM: 128
+    DEPTHS: [2, 2, 18, 2]
+    NUM_HEADS: [4, 8, 16, 32]
+    WINDOW_SIZE: 12
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    PRETRAIN_IMG_SIZE: 384
+  WEIGHTS: 'pretrained/univs/univs_R50.pth'
+  META_ARCHITECTURE: "UniVS_Prompt"
+  UniVS:
+    PROMPT_AS_QUERIES: False
+    TEST:
+      VIDEO_UNIFIED_INFERENCE_ENABLE: True
+      SEMANTIC_EXTRACTION:
+        ENABLE: True
+  BoxVIS:
+    TEST:
+      NUM_FRAMES_WINDOW: 5
+DATASETS:
+  TEST: ("internvid-flt-1", )
+INPUT:
+  SAMPLING_FRAME_NUM: 5
+  MIN_SIZE_TEST: 640
+OUTPUT_DIR: output/inf/swinb_semantic_extraction/internvid/

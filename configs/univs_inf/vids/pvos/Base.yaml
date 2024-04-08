@@ -1,3 +1,4 @@
+_BASE_: ../Base.yaml
 MODEL:
   BACKBONE:
     NAME: "build_resnet_backbone"
@@ -29,12 +30,13 @@ MODEL:
     COMMON_STRIDE: 4
     TRANSFORMER_ENC_LAYERS: 6
   MASK_FORMER:
+    NUM_OBJECT_QUERIES: 200
     TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoder"
     TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
   UniVS:
     VISUAL_PROMPT_PIXELS_PER_IMAGE: 256
     TEST:
-      VIDEO_UNIFIED_INFERENCE_QUERIES: 'prompt+learn'
+      VIDEO_UNIFIED_INFERENCE_QUERIES: 'prompt'
   BoxVIS:
     TEST:
       NUM_FRAMES_WINDOW: 5
@@ -43,6 +45,7 @@ MODEL:
 DATASETS:
   TEST: ("pvos_viposeg_val", )
 INPUT:
+  FORMAT: "RGB"
   MIN_SIZE_TEST: 640
   MAX_SIZE_TEST: 1333
 TEST:

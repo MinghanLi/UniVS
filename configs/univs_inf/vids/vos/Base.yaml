@@ -1,3 +1,4 @@
+_BASE_: ../Base.yaml
 MODEL:
   BACKBONE:
     FREEZE_AT: 0
@@ -42,6 +43,7 @@ MODEL:
 DATASETS:
   TEST: ("sot_ytbvos18_val", )
 INPUT:
+  FORMAT: "RGB"
   MIN_SIZE_TEST: 640
   MAX_SIZE_TEST: 1333
 VERSION: 2

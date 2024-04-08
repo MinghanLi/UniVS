@@ -1,3 +1,4 @@
+_BASE_: ../Base.yaml
 MODEL:
   BACKBONE:
     FREEZE_AT: 0
@@ -52,6 +53,7 @@ MODEL:
 DATASETS:
   TEST: ("rvos-refdavis-val-0", "rvos-refdavis-val-1", "rvos-refdavis-val-2", "rvos-refdavis-val-3")
 INPUT:
+  FORMAT: "RGB"
   MIN_SIZE_TEST: 640
   MAX_SIZE_TEST: 1333
 TEST:

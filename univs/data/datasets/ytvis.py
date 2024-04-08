@@ -314,6 +314,7 @@ def load_ytvis_json(json_file, image_root, dataset_name=None, extra_annotation_k
         record["has_mask"] = has_mask
         record["has_caption"] = has_caption
         record["has_stuff"] = has_stuff
+        record["is_raw_video"] = False  # .mp4 video, need to be converted frames first 
         if has_pan_mask:
             record["metadata"] = metadata
         # language-guided detection
@@ -359,7 +360,13 @@ def load_ytvis_json(json_file, image_root, dataset_name=None, extra_annotation_k
             elif dataset_name.startswith('flickr'):
                 record["dataset_name"] = 'flickr'
             else:
-                raise ValueError(f"Unsupported dataset_name: {dataset_name} ")
+                is_test = len(sum(record["annotations"], [])) == 0
+                if is_test:
+                    # print(f"register dataset: {dataset_name}")
+                    record["dataset_name"] = dataset_name
+                    record["is_raw_video"] = True
+                else:
+                    raise ValueError(f"Unsupported dataset_name: {dataset_name} ")
         dataset_dicts.append(record)
 
     if num_instances_without_valid_segmentation > 0:

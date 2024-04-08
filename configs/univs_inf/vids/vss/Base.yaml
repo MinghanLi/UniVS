@@ -1,3 +1,4 @@
+_BASE_: ../Base.yaml
 MODEL:
   BACKBONE:
     FREEZE_AT: 0
@@ -37,6 +38,7 @@ MODEL:
 DATASETS:
   TEST: ("vspw_vss_video_dev", )
 INPUT:
+  FORMAT: "RGB"
   MIN_SIZE_TEST: 720
   MAX_SIZE_TEST: 1333
 VERSION: 2

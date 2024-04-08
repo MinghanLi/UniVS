@@ -19,4 +19,3 @@ from .inference import *
 from .prepare_targets import PrepareTargets
 from .univs_prompt import UniVS_Prompt
 from .univs_prompt_longvideo import UniVS_Prompt_LongVideo
-

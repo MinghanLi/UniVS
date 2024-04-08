@@ -5,6 +5,7 @@ import numpy as np
 from typing import List, Union
 import torch
 import torch.nn.functional as F
+import torchvision
 
 import os
 from PIL import Image
@@ -324,26 +325,44 @@ class UniVidDatasetMapper:
         task = dataset_dict["task"]
         selected_augmentations = self.augmentations
 
+        if dataset_dict["is_raw_video"]:
+            video_path = '/'.join(file_names[0].split('/')[:-1])
+            vframes, aframes, info = torchvision.io.read_video(
+                filename=video_path, pts_unit="sec", output_format="TCHW"
+            )
+            # the compressed videos with 256p (short edge), we upsample it to 512p
+            vframes = F.interpolate(
+                vframes, 
+                size=(2*vframes.shape[-2], 2*vframes.shape[-1]), 
+                mode="bilinear", 
+                align_corners=False
+            )
+            vframes = vframes.permute(0,2,3,1).numpy()
+            total_frames = len(vframes)
+
         for frame_idx in selected_idx:
             dataset_dict["file_names"].append(file_names[frame_idx])
-            
-            # Read image
-            try:
-                image = utils.read_image(file_names[frame_idx], format=self.image_format)
-                # the image in entityseg dataset may has low-resolution
-                if dataset_name.startswith('entityseg'):
-                    if (dataset_dict["height"], dataset_dict["width"]) != image.shape:
-                        image = torch.from_numpy(image).permute(2, 0, 1).unsqueeze(0).float()
-                        image = F.interpolate(
-                            image, size=(dataset_dict["height"], dataset_dict["width"]), 
-                            mode='bilinear', align_corners=False
-                        )
-                        image = image.squeeze(0).permute(1, 2, 0).numpy()  # Convert back to NumPy array
-            except:
-                if 'entityseg' not in file_names[frame_idx]:
-                    print("Not find image:", file_names[frame_idx], "reload...")
-                # there are some images/videos have not been downloaded..
-                return None
+            if dataset_dict["is_raw_video"]:
+                image = vframes[frame_idx]
+            else:
+                # Read image
+                try:
+                    image = utils.read_image(file_names[frame_idx], format=self.image_format)
+                    # the image in entityseg dataset may has low-resolution
+                    if dataset_name.startswith('entityseg'):
+                        if (dataset_dict["height"], dataset_dict["width"]) != image.shape:
+                            image = torch.from_numpy(image).permute(2, 0, 1).unsqueeze(0).float()
+                            image = F.interpolate(
+                                image, size=(dataset_dict["height"], dataset_dict["width"]), 
+                                mode='bilinear', align_corners=False
+                            )
+                            image = image.squeeze(0).permute(1, 2, 0).numpy()  # Convert back to NumPy array
+                except:
+                    if 'entityseg' not in file_names[frame_idx]:
+                        print("Not find image:", file_names[frame_idx], "reload...")
+                    # there are some images/videos have not been downloaded..
+                    return None
+
             original_image_wh = (dataset_dict["width"], dataset_dict["height"])
             if self.is_train:
                 try:

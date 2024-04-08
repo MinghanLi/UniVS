@@ -489,6 +489,23 @@ def register_all_refcoco(root):
             os.path.join(root, image_root),
         )
 
+_PREDEFINED_SPLITS_RAW_VIDEOS_TEST = {
+    # dataset_name: (video_root, annotation_file), evaluator_type
+    "internvid-flt-1": ("internvid/raw/InternVId-FLT_1", "internvid/raw/InternVId-FLT_1.json", "none"),
+}
+
+def register_raw_videos(root):
+    for key, (video_root, json_file, evaluator_type) in _PREDEFINED_SPLITS_RAW_VIDEOS_TEST.items():
+        # Assume pre-defined datasets live in `./datasets`.
+        register_ytvis_instances(
+            key,
+            _get_sot_meta(),
+            os.path.join(root, json_file) if "://" not in json_file else json_file,
+            os.path.join(root, video_root),
+            has_mask=False,
+            evaluator_type=evaluator_type, # "vos" or "davis"
+        )
+
 
 if __name__.endswith(".builtin"):
     # Assume pre-defined datasets live in `./datasets`.
@@ -522,3 +539,6 @@ if __name__.endswith(".builtin"):
     # refcoco-mixed only
     register_refcoco_mixed_train(_root)
     register_all_refcoco(_root)
+
+    # register raw videos
+    register_raw_videos(_root)

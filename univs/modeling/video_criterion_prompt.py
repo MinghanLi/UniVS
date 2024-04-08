@@ -474,6 +474,9 @@ class VideoSetCriterionPrompt(nn.Module):
             "loss_dice": dice_loss_jit(point_logits, point_labels, num_masks),
         }
 
+        del src_masks
+        del target_masks
+
         # semantic mask loss 
         if targets[0]["task"] == 'detection' and targets[0]["prompt_type"] == "text":
             loss_ce_sem = self.loss_masks_sem(outputs, targets, num_masks, l_layer)
@@ -481,8 +484,6 @@ class VideoSetCriterionPrompt(nn.Module):
         if losses["loss_mask"].isnan().any():
             losses["loss_mask"] = losses["loss_mask"] * 0.  # odd error
 
-        del src_masks
-        del target_masks
         return losses
     
     def loss_masks_sem(self, outputs, targets, num_masks, l_layer):

@@ -34,6 +34,7 @@ from univs import (
     InferenceVideoVPS,
     InferenceVideoVOS,
     InferenceVideoEntity,
+    InferenceVideoSemanticExtraction
     )
 from univs.utils.comm import convert_mask_to_box, calculate_mask_quality_scores
 
@@ -82,6 +83,7 @@ class UniVS_Prompt(nn.Module):
         inference_video_vps: nn.Module,
         inference_video_vos: nn.Module,
         inference_video_entity: nn.Module,
+        inference_video_semantic_extraction: nn.Module,
         text_prompt_encoder,
         prepare_targets, 
         hidden_dim: int,
@@ -115,7 +117,8 @@ class UniVS_Prompt(nn.Module):
         # tracking
         num_frames_window_test: int=3,
         clip_stride: int=1,
-
+        # semantic extraction only
+        semantic_extraction_enable: bool=False
     ):
         """
         Args:
@@ -145,6 +148,7 @@ class UniVS_Prompt(nn.Module):
         self.inference_video_vps = inference_video_vps
         self.inference_video_vos = inference_video_vos
         self.inference_video_entity = inference_video_entity
+        self.inference_video_semantic_extraction = inference_video_semantic_extraction
         self.prepare_targets = prepare_targets
 
         self.hidden_dim = hidden_dim
@@ -186,6 +190,9 @@ class UniVS_Prompt(nn.Module):
         self.tracker_type = tracker_type  # if 'ovis' in data_name and use swin large backbone => "mdqe"
         self.num_frames_window_test = num_frames_window_test
         self.clip_stride = clip_stride
+
+        # semantic extraction only
+        self.semantic_extraction_enable = semantic_extraction_enable
         
     def _init_ema(self, backbone, sem_seg_head, gen_pseudo_mask):
         # Teacher Net
@@ -293,6 +300,7 @@ class UniVS_Prompt(nn.Module):
             "inference_video_vps": InferenceVideoVPS(cfg),
             "inference_video_vos": InferenceVideoVOS(cfg),
             "inference_video_entity": InferenceVideoEntity(cfg),
+            "inference_video_semantic_extraction": InferenceVideoSemanticExtraction(cfg),
             "prepare_targets": prepare_targets,
             "hidden_dim": cfg.MODEL.MASK_FORMER.HIDDEN_DIM,
             "num_queries": cfg.MODEL.MASK_FORMER.NUM_OBJECT_QUERIES,
@@ -327,6 +335,8 @@ class UniVS_Prompt(nn.Module):
             # tracking
             "num_frames_window_test": cfg.MODEL.BoxVIS.TEST.NUM_FRAMES_WINDOW,
             "clip_stride": cfg.MODEL.BoxVIS.TEST.CLIP_STRIDE,
+            # semantic extraction only
+            "semantic_extraction_enable": cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.ENABLE,
         }
 
     @property
@@ -393,6 +403,9 @@ class UniVS_Prompt(nn.Module):
     def forward_inference(self, batched_inputs):
         if self.boxvis_ema_enabled:
             self.replace_with_ema_parameters_inf()
+        
+        if self.semantic_extraction_enable:
+            return self.inference_video_semantic_extraction.eval(self, batched_inputs)
             
         dataset_name = batched_inputs[0]["dataset_name"]
         if dataset_name.startswith("coco") or dataset_name.startswith("ade20k"):
