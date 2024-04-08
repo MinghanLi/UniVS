@@ -6,6 +6,7 @@ def add_univs_config(cfg):
     cfg.DATASETS.DATALOADER_TYPE = 'iter'
 
     # DataLoader
+    cfg.INPUT.FORMAT = "RGB"
     cfg.INPUT.SAMPLING_FRAME_NUM = 2
     cfg.INPUT.SAMPLING_FRAME_WINDOE_NUM = -1 
     cfg.INPUT.SAMPLING_FRAME_VIDEO_NUM = -1
