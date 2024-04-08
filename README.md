@@ -98,8 +98,6 @@ b) For prompt-guided VS tasks, you need to enable `self.visualize_results_only_e
 
 ### 🌟 **Semantic Extraction**
 
-# 3. Add a New Dataset of Videos with *.mp4 (Semantic Extraction)
-
 ```
 # Step 1: link your dataset into `./datasets`
 $ cd datasets
