@@ -27,7 +27,7 @@ if __name__ == "__main__":
     print('Number of videos:', len(files))
     # Loop through the files and read them
     for i, video_name in enumerate(files):
-        if i >= 100:
+        if i >= 1000:
             break
 
         if i % 100 == 0:

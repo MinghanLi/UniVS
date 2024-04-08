@@ -309,19 +309,3 @@ e) Finally, unzip the file `DAVIS-2017-Unsupervised-trainval-480p.zip` again (si
 ```
 $ unzip -o DAVIS-2017-Unsupervised-trainval-480p.zip
 ```
-
-# 3. Add a New Dataset of Videos with *.mp4
-
-```
-# Convert original videos with .mp4 format to COCO annotations
-$ python datasets/data_utils/convert_videos_to_coco_test.py --video_dir /path/to/your/videos --out_json /path/to/your/output/json
-
-# Register the new dataset
-$ vim univs/data/datasets/builtin.py
-# Add the corresponding "dataset_name: (video_root, annotation_file), evaluator_type" into _PREDEFINED_SPLITS_RAW_VIDEOS_TEST
-_PREDEFINED_SPLITS_RAW_VIDEOS_TEST = {
-    # dataset_name: (video_root, annotation_file), evaluator_type
-    "internvid-flt-1": ("internvid/raw/InternVId-FLT_1", "internvid/raw/InternVId-FLT_1.json", "none"),
-}
-
-```

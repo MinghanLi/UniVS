@@ -96,6 +96,29 @@ a) For category-guided VS tasks, you can visualize results via enabling  `self.v
 
 b) For prompt-guided VS tasks, you need to enable `self.visualize_results_only_enable = True` [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_vos.py#L150). The visualization code for VOS/PVOS/RefVOS [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_vos.py#L712)
 
+### 🌟 **Semantic Extraction**
+
+# 3. Add a New Dataset of Videos with *.mp4 (Semantic Extraction)
+
+```
+# Step 1: link your dataset into `./datasets`
+$ cd datasets
+$ ln -s /path/to/your/dataset  
+
+# Step 2: Convert original videos with .mp4 format to COCO annotations
+$ python datasets/data_utils/convert_videos_to_coco_test.py --video_dir /path/to/your/videos --out_json /path/to/your/output/json
+
+# Step 3: Register the new dataset
+$ vim univs/data/datasets/builtin.py
+# Add the corresponding "dataset_name: (video_root, annotation_file), evaluator_type" into _PREDEFINED_SPLITS_RAW_VIDEOS_TEST
+_PREDEFINED_SPLITS_RAW_VIDEOS_TEST = {
+    # dataset_name: (video_root, annotation_file), evaluator_type
+    "internvid-flt-1": ("internvid/raw/InternVId-FLT_1", "internvid/raw/InternVId-FLT_1.json", "none"),
+}
+
+# Step 3: extract semantic features and object tokens
+$ sh tools/tools/test_semantic_extraction/test_semantic_extraction.sh
+```
 
 ## <a name="CitingUniVS"></a>🖊️ Citing UniVS 
 
