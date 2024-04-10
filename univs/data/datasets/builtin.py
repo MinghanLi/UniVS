@@ -491,6 +491,7 @@ def register_all_refcoco(root):
 
 _PREDEFINED_SPLITS_RAW_VIDEOS_TEST = {
     # dataset_name: (video_root, annotation_file), evaluator_type
+    "custom_videos": ("custom_videos/raw/", "custom_videos/raw.json", "none"),
     "internvid-flt-1": ("internvid/raw/InternVId-FLT_1", "internvid/raw/InternVId-FLT_1.json", "none"),
 }
 

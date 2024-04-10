@@ -96,7 +96,27 @@ a) For category-guided VS tasks, you can visualize results via enabling  `self.v
 
 b) For prompt-guided VS tasks, you need to enable `self.visualize_results_only_enable = True` [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_vos.py#L150). The visualization code for VOS/PVOS/RefVOS [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_vos.py#L712)
 
-### 🌟 **Semantic Extraction**
+### 🌟 **Visualization Demo with Custom Videos**
+Please follow the steps to run UniVS on custom videos. Until now, it only support category-guided VS tasks. We will add prompt-guided VS tasks later.
+
+```
+# Step 1: move your custom data into `./datasets/custom_videos/raw/`. Support two ways to test custom videos:
+# a. any video formats with 'mp4', 'avi', 'mov', 'mkv'
+# b. put all video frames in a subdir in the path `./datasets/custom_videos/raw/`
+# For your convenience, we give two examples in this dir, you can directly run the below code
+
+# Step 2: Convert custom videos to COCO annotations
+$ python datasets/data_utils/custom_videos/convert_custom_videos_to_coco_test.py 
+
+# Step 3: run it
+$ sh tools/tools/test_custom_videos/test_custom_videos.sh
+
+# Step 4: check the predicted results in the below path
+$ cd output/inf/custom_videos/inference
+```
+
+### 🌟 **Semantic Extraction for Custom Videos**
+There is an example to extract semantic feature map (1/32 resolution of input videos) and object tokens (200 per frame).
 
 ```
 # Step 1: link your dataset into `./datasets`
@@ -104,7 +124,7 @@ $ cd datasets
 $ ln -s /path/to/your/dataset  
 
 # Step 2: Convert original videos with .mp4 format to COCO annotations
-$ python datasets/data_utils/convert_videos_to_coco_test.py --video_dir /path/to/your/videos --out_json /path/to/your/output/json
+$ python datasets/data_utils/custom_videos/convert_internvid_to_coco_test.py 
 
 # Step 3: Register the new dataset
 $ vim univs/data/datasets/builtin.py
@@ -114,7 +134,7 @@ _PREDEFINED_SPLITS_RAW_VIDEOS_TEST = {
     "internvid-flt-1": ("internvid/raw/InternVId-FLT_1", "internvid/raw/InternVId-FLT_1.json", "none"),
 }
 
-# Step 3: extract semantic features and object tokens
+# Step 4: extract semantic features and object tokens
 $ sh tools/tools/test_semantic_extraction/test_semantic_extraction.sh
 ```
 

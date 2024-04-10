@@ -310,7 +310,7 @@ class PrepareTargets:
             elif targets_per_video["task"] == "detection":
                 if targets_per_video["dataset_name"] not in {'flickr'}:
                     dataset_name = targets_per_video["dataset_name"]
-                    if targets_per_video["is_raw_video"]:
+                    if targets_per_video["is_raw_video"] or (not is_train and dataset_name not in combined_datasets_category_info):
                         clip_cls_text_emb = self.clip_cls_text_emb
                     else:
                         if dataset_name not in combined_datasets_category_info:

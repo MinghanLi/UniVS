@@ -764,5 +764,3 @@ class InferenceVideoVOS(nn.Module):
                 save_path = '/'.join([save_dir, file_name.replace('.png', '.jpg')])
                 VisImage = visualizer.draw_instance_predictions(results)
                 VisImage.save(save_path)
-
-    

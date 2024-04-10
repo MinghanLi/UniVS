@@ -96,6 +96,8 @@ class InferenceVideoEntity(nn.Module):
         temporal_consistency_threshold: float=0.5,
         detect_newly_object_threshold: float=0.05,
         detect_newly_interval_frames: int = 1,
+        # custom videos
+        custom_videos_enable: bool=False,
     ):
         """
         Args:
@@ -152,12 +154,6 @@ class InferenceVideoEntity(nn.Module):
         self.num_frames_window_output = (math.ceil(self.num_frames_window_test / 5) + 1) * 5
         self.clip_stride = clip_stride
 
-        self.video_unified_inference_entities = video_unified_inference_entities
-        if video_unified_inference_entities == 'entity_vss':
-            self.metadata = MetadataCatalog.get('vspw_vss_video_val')
-        elif video_unified_inference_entities == 'entity_vps':
-            self.metadata = MetadataCatalog.get('vipseg_panoptic_val')
-
         self.use_quasi_track = True
         self.temporal_consistency_threshold = temporal_consistency_threshold
         self.detect_newly_object_threshold = detect_newly_object_threshold
@@ -165,11 +161,26 @@ class InferenceVideoEntity(nn.Module):
         self.num_prev_frames_memory = num_prev_frames_memory
 
         self.output_dir = output_dir
-        self.visualize_results_enable = False
+        self.custom_videos_enable = custom_videos_enable
+        self.visualize_results_enable = True if custom_videos_enable else False
         self.visualizer = visualization_query_embds(
             reduced_type='pca',
             output_dir=output_dir,
         )
+
+        if custom_videos_enable and len(video_unified_inference_entities) == 0:
+            video_unified_inference_entities = 'entity_vps_vipseg'
+        self.video_unified_inference_entities = video_unified_inference_entities
+        if video_unified_inference_entities in {'entity_vss_entityseg', 'entity_vps_entityseg'}:
+            self.metadata = MetadataCatalog.get('entityseg_panoptic_train')
+        elif video_unified_inference_entities in {'entity_vss_vipseg', 'entity_vps_vipseg'}:
+            self.metadata = MetadataCatalog.get("vipseg_panoptic_val")
+        elif video_unified_inference_entities == 'entity_vis_entityseg':
+            self.metadata = MetadataCatalog.get('entityseg_instance_train')
+        elif video_unified_inference_entities == 'entity_vis_coco':
+            self.metadata = MetadataCatalog.get('coco_2017_val')
+        elif len(video_unified_inference_entities) and video_unified_inference_entities is not None:
+            ValueError(f"Unsupported inference manner: {video_unified_inference_entities}")
 
     @classmethod
     def from_config(cls, cfg):
@@ -215,6 +226,8 @@ class InferenceVideoEntity(nn.Module):
             "temporal_consistency_threshold": cfg.MODEL.UniVS.TEST.TEMPORAL_CONSISTENCY_THRESHOLD,
             "detect_newly_object_threshold": cfg.MODEL.UniVS.TEST.DETECT_NEWLY_OBJECT_THRESHOLD,
             "detect_newly_interval_frames": cfg.MODEL.UniVS.TEST.DETECT_NEWLY_INTERVAL_FRAMES,
+            # custom videos
+            "custom_videos_enable": cfg.MODEL.UniVS.TEST.CUSTOM_VIDEOS_ENABLE,
         }
 
     @property
@@ -305,16 +318,19 @@ class InferenceVideoEntity(nn.Module):
             # map logits into [0, 1]
             out['pred_logits'] = out['pred_logits'].sigmoid()
             if sub_task.startswith('entity'):
-                if sub_task in {'entity_vss', 'entity_vps'}:
+                if sub_task in {'entity_vss_entityseg', 'entity_vps_entityseg'}:
+                    dataset_name = 'entityseg_panoptic'  # 644 classes
+                elif sub_task in {'entity_vss_vipseg', 'entity_vps_vipseg'}:
                     dataset_name = 'vipseg'
-                    num_classes, start_idx = combined_datasets_category_info[dataset_name]
-                    assert start_idx + num_classes <= out['pred_logits'].shape[-1]
-                    out['pred_logits'] = out['pred_logits'][..., start_idx:start_idx + num_classes]
-                elif sub_task == 'entity_openvoc': 
-                    # the first 100 classes come from ImageNet
-                    out['pred_logits'] = out['pred_logits'][..., 1000:]
+                elif sub_task == 'entity_vis_entityseg': 
+                    dataset_name = "entityseg_instance"  # 206 classes 
+                elif sub_task == 'entity_vis_coco':
+                    sdataset_name = 'coco'
                 else:
                     raise ValueError
+                num_classes, start_idx = combined_datasets_category_info[dataset_name]
+                assert start_idx + num_classes <= out['pred_logits'].shape[-1]
+                out['pred_logits'] = out['pred_logits'][..., start_idx:start_idx + num_classes]
             else:
                 dataset_name = targets[0]['dataset_name']
                 if dataset_name in combined_datasets_category_info:
@@ -386,34 +402,31 @@ class InferenceVideoEntity(nn.Module):
             if not is_last and "masks" in targets[0]:
                 self.pad_zero_annotations_for_next_clip(targets, min(stride, video_len-i-self.num_frames))
 
-        if self.visualize_results_enable and 'vis' in sub_task:
-            self.visualizer.visualization_query_embds(targets)
-
         if 'vis' in sub_task:
+            if self.visualize_results_enable:
+                self.visualizer.visualization_query_embds(targets)
+
             return vis_clip_instances_to_coco_json_video(
                 batched_inputs, processed_results, test_topk_per_video=self.test_topk_per_image
             )
-
         elif 'vps' in sub_task:
-            if sub_task == 'vps':
-                 # evaluation metrics
-                return self.vps_output_results(targets, processed_results, out_size)
-            else:
+            if self.visualize_results_enable:
                 # visualize any video in vps format
                 processed_results = self.vps_output_results(targets, processed_results, out_size)
                 self.visualize_results_vps(batched_inputs, processed_results, out_size, sub_task)
                 return []
-
-        elif 'vss' in sub_task:
-            if sub_task == 'vss':
-                # evaluation metrics for vspw 
-                return self.vss_output_results(targets, processed_results, out_size)
             else:
+                 # evaluation metrics
+                return self.vps_output_results(targets, processed_results, out_size)
+        elif 'vss' in sub_task:
+            if self.visualize_results_enable:
                 # visualize any video in vss format
                 processed_results = self.vss_output_results(targets, processed_results, out_size)
                 self.visualize_results_vss(batched_inputs, processed_results, out_size, sub_task)
                 return []
-
+            else:
+                # evaluation metrics for vspw 
+                return self.vss_output_results(targets, processed_results, out_size)
         else:
             raise ValueError(f"Not support to eval the dataset {dataset_name} yet")
     

@@ -433,24 +433,23 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
 
         assert len(predictions_class) == self.num_layers + 1 
 
-        if self.training or not self.semantic_extraction_enable:
-            predictions_embds = [self.decoder_norm(embds) for embds in predictions_embds]
-            out = {
-                'pred_logits': predictions_class[-1],
-                'pred_masks': predictions_mask[-1],
-                'aux_outputs': self._set_aux_loss(
-                    predictions_class if self.mask_classification else None, predictions_mask, predictions_reid, predictions_embds
-                ),
-                'pred_embds': predictions_embds[-1],
-                'pred_reid_logits': predictions_reid[-1],
-            }
-            # if self.training:
-            #     out['l2v_attn_weights'] = l2v_attn_weights_list
-        else:
-            out = {
+        predictions_embds_norm = [self.decoder_norm(embds) for embds in predictions_embds]
+        out = {
+            'pred_logits': predictions_class[-1],
+            'pred_masks': predictions_mask[-1],
+            'aux_outputs': self._set_aux_loss(
+                predictions_class if self.mask_classification else None, predictions_mask, predictions_reid, predictions_embds_norm
+            ),
+            'pred_embds': predictions_embds_norm[-1],
+            'pred_reid_logits': predictions_reid[-1],
+        }
+        # if self.training:
+        #     out['l2v_attn_weights'] = l2v_attn_weights_list
+        if self.semantic_extraction_enable:
+            out.update({
                 'pred_embds': predictions_embds[-1][0].permute(1,2,0),  # Q T C -> T C Q
                 'mask_features': mask_features[0],  # T, c_m, h_m, w_m = mask_features.shape
-            }
+            })
         
         return out
     

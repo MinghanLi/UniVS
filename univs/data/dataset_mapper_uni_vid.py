@@ -327,18 +327,21 @@ class UniVidDatasetMapper:
 
         if dataset_dict["is_raw_video"]:
             video_path = '/'.join(file_names[0].split('/')[:-1])
-            vframes, aframes, info = torchvision.io.read_video(
-                filename=video_path, pts_unit="sec", output_format="TCHW"
-            )
-            # the compressed videos with 256p (short edge), we upsample it to 512p
-            vframes = F.interpolate(
-                vframes, 
-                size=(2*vframes.shape[-2], 2*vframes.shape[-1]), 
-                mode="bilinear", 
-                align_corners=False
-            )
-            vframes = vframes.permute(0,2,3,1).numpy()
-            total_frames = len(vframes)
+            if video_path.split('.')[-1] not in ("mp4", "avi", "mov", "mkv"):
+                dataset_dict["is_raw_video"] = False
+            else:
+                vframes, aframes, info = torchvision.io.read_video(
+                    filename=video_path, pts_unit="sec", output_format="TCHW"
+                )
+                # the compressed videos with 256p (short edge), we upsample it to 512p
+                vframes = F.interpolate(
+                    vframes, 
+                    size=(2*vframes.shape[-2], 2*vframes.shape[-1]), 
+                    mode="bilinear", 
+                    align_corners=False
+                )
+                vframes = vframes.permute(0,2,3,1).numpy()
+                total_frames = len(vframes)
 
         for frame_idx in selected_idx:
             dataset_dict["file_names"].append(file_names[frame_idx])

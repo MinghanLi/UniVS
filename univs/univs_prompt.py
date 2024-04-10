@@ -118,7 +118,9 @@ class UniVS_Prompt(nn.Module):
         num_frames_window_test: int=3,
         clip_stride: int=1,
         # semantic extraction only
-        semantic_extraction_enable: bool=False
+        semantic_extraction_enable: bool=False,
+        # custom_videos
+        custom_videos_enable: bool=False,
     ):
         """
         Args:
@@ -193,6 +195,8 @@ class UniVS_Prompt(nn.Module):
 
         # semantic extraction only
         self.semantic_extraction_enable = semantic_extraction_enable
+        # custom videos
+        self.custom_videos_enable = custom_videos_enable
         
     def _init_ema(self, backbone, sem_seg_head, gen_pseudo_mask):
         # Teacher Net
@@ -337,6 +341,8 @@ class UniVS_Prompt(nn.Module):
             "clip_stride": cfg.MODEL.BoxVIS.TEST.CLIP_STRIDE,
             # semantic extraction only
             "semantic_extraction_enable": cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.ENABLE,
+            # custom videos
+            "custom_videos_enable": cfg.MODEL.UniVS.TEST.CUSTOM_VIDEOS_ENABLE,
         }
 
     @property
@@ -419,9 +425,10 @@ class UniVS_Prompt(nn.Module):
 
             else:
                 # evaluation for category-specified VS tasks
-                if self.video_unified_inference_enable:
+                if self.video_unified_inference_enable or self.custom_videos_enable:
                     if dataset_name.startswith("ytvis") or dataset_name.startswith("ovis") \
-                            or dataset_name.startswith("vipseg") or dataset_name.startswith("vspw"):
+                            or dataset_name.startswith("vipseg") or dataset_name.startswith("vspw") \
+                            or self.custom_videos_enable:
                         return self.inference_video_entity.eval(self, batched_inputs)
                     else:
                         raise ValueError(f"Not support to eval the dataset {dataset_name} yet")

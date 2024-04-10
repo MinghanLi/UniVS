@@ -147,8 +147,12 @@ def add_univs_config(cfg):
     cfg.MODEL.UniVS.TEST.ENABLED_PREV_FRAMES_MEMORY = True # False for stage2 but Ture for stage3
     cfg.MODEL.UniVS.TEST.ENABLED_PREV_VISUAL_PROMPTS_FOR_GROUNDING = False
 
+    # test for custom videos with .mp4 videos or a dir that includes all frames
+    cfg.MODEL.UniVS.TEST.CUSTOM_VIDEOS_ENABLE = False
+
     # semantic extraction parameters
     cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION = CN()
     cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.ENABLE = False
     cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.COMPRESSION_RATIO = 32  
     cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.COMPRESSION_RATIO_TEMPORAL = 1
+    cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.OUTPUT_DIR = ''

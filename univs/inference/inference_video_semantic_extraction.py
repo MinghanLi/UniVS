@@ -74,8 +74,10 @@ class InferenceVideoSemanticExtraction(nn.Module):
         num_frames: int,
         num_classes: int,
         # semantic extraction
+        semantic_extraction_enable: bool=True,
         semantic_extraction_compression_ratio: int = 8,
         semantic_extraction_compression_ratio_temporal: int=1,
+        semantic_extraction_output_dir: str='',
     ):
         """
         Args:
@@ -108,8 +110,10 @@ class InferenceVideoSemanticExtraction(nn.Module):
         self.num_frames = num_frames
         self.num_classes = num_classes
         self.num_frames_window_test = 2*num_frames
+        self.semantic_extraction_enable = semantic_extraction_enable
         self.semantic_extraction_compression_ratio = semantic_extraction_compression_ratio
         self.semantic_extraction_compression_ratio_temporal = semantic_extraction_compression_ratio_temporal
+        self.semantic_extraction_output_dir = semantic_extraction_output_dir
        
     @classmethod
     def from_config(cls, cfg):
@@ -131,8 +135,10 @@ class InferenceVideoSemanticExtraction(nn.Module):
             "num_frames": cfg.INPUT.SAMPLING_FRAME_NUM,
             "num_classes": cfg.MODEL.SEM_SEG_HEAD.NUM_CLASSES,
             # semantic extraction parameters
+            "semantic_extraction_enable": cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.ENABLE,
             "semantic_extraction_compression_ratio": cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.COMPRESSION_RATIO,
             "semantic_extraction_compression_ratio_temporal": cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.COMPRESSION_RATIO_TEMPORAL,
+            "semantic_extraction_output_dir": cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.OUTPUT_DIR,
         }
 
     @property
@@ -239,9 +245,13 @@ class InferenceVideoSemanticExtraction(nn.Module):
         # print(obj_tokens_video.shape, compression_mask_features_video.shape)
 
         # datasets/internvid/raw/InternVId-FLT_1/---3UsVESJA_00:03:31.638_00:03:41.638.mp4/
-        out_dir = '/'.join(targets[0]['file_names'][0].split('/')[:-1])
-        out_dir = out_dir.replace('raw', 'semantic_extraction')
-        out_file_obj_tokens = out_dir.replace('.mp4', f"_obj_tokens_{s_itv}_{t_itv}.pt")
+        if self.semantic_extraction_output_dir is None or len(self.semantic_extraction_output_dir) == 0:
+            out_dir = '/'.join(targets[0]['file_names'][0].split('/')[:-1])
+            out_dir = out_dir.replace('raw', 'semantic_extraction')
+        else:
+            video_name = targets[0]['file_names'][0].split('/')[:-2]
+            out_dir = os.path.join(self.semantic_extraction_output_dir, video_name)
+        out_file_obj_tokens = out_dir.replace('.mp4', '') + f"_obj_tokens_{s_itv}_{t_itv}.pt"
         out_file_compression_mask_features = out_dir.replace('.mp4', f"_compression_mask_features_{s_itv}_{t_itv}.pt")
         
         # Save tensor to a compressed file
