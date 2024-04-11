@@ -65,7 +65,7 @@ if __name__ == "__main__":
             image = cv2.imread(os.path.join(path, file_names[0]))
             height, width = image.shape[:-1]
             file_names = [
-                s.path.join(video_name, file_name) 
+                os.path.join(video_name, file_name) 
                 for file_name in file_names 
                 if file_name.split(".")[-1] in ("jpg", "png")
             ]
