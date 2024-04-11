@@ -23,8 +23,8 @@ def save_frames_into_a_video(height, width, frame_dir, output_file=None):
     out = cv2.VideoWriter(
         output_file,
         cv2.VideoWriter_fourcc(*'DIVX'),
-        4,
-        (width, height)
+        fps=15,
+        frameSize=(width, height)
     )
 
     file_names = glob.glob('/'.join([frame_dir, "*.jpg"]))
@@ -61,7 +61,6 @@ if __name__ == "__main__":
         path = os.path.join(args.video_dir, video_name)
         if os.path.isdir(path):
             file_names = os.listdir(path)
-            total_frames = len(file_names)
             image = cv2.imread(os.path.join(path, file_names[0]))
             height, width = image.shape[:-1]
             file_names = [
@@ -69,6 +68,7 @@ if __name__ == "__main__":
                 for file_name in file_names 
                 if file_name.split(".")[-1] in ("jpg", "png")
             ]
+            total_frames = len(file_names)
             vid_dict = {
                 "length": total_frames,
                 "file_names": file_names,
@@ -101,7 +101,7 @@ if __name__ == "__main__":
                 "file_names": file_names,
                 "width": 2*width if args.is_256p else width,
                 "height": 2*height if args.is_256p else height,
-                "id": ext,
+                "id": video_name.replace("."+ext, ""),
             }
         
         dataset["videos"].append(vid_dict)

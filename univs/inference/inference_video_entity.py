@@ -1202,8 +1202,8 @@ class InferenceVideoEntity(nn.Module):
             out = cv2.VideoWriter(
                 '/'.join([save_dir, video_id + '.avi']),
                 cv2.VideoWriter_fourcc(*'DIVX'),
-                4,
-                (out_size[1], out_size[0])
+                fps=10,
+                frameSize=(out_size[1], out_size[0])
             )
 
             file_names = glob.glob('/'.join([save_dir, "*.jpg"]))
@@ -1246,8 +1246,8 @@ class InferenceVideoEntity(nn.Module):
         out = cv2.VideoWriter(
             '/'.join([save_dir, video_id + '.avi']),
             cv2.VideoWriter_fourcc(*'DIVX'),
-            4,
-            (out_size[1], out_size[0])
+            fps=10,
+            frameSize=(out_size[1], out_size[0])
         )
 
         file_names = glob.glob('/'.join([save_dir, "*.jpg"]))
@@ -1307,8 +1307,8 @@ class InferenceVideoEntity(nn.Module):
         out = cv2.VideoWriter(
             '/'.join([save_dir, video_id + '.avi']),
             cv2.VideoWriter_fourcc(*'DIVX'),
-            4,
-            (out_size[1], out_size[0])
+            fps=10,
+            frameSize=(out_size[1], out_size[0])
         )
 
         file_names = glob.glob('/'.join([save_dir, "*.jpg"]))
