@@ -58,7 +58,10 @@ We propose a novel unified VS architecture, namely **UniVS**, by using prompts a
     *   [Performance on 10 Benchmarks](#performance-on-10-benchmarks)
 *   [Visualization Demo](#🚀-visualization-demo)
     *   [Visualization Code](#🌟-visualization-code)
-    *   [Visualization Demo on Custom Videos](#🌟-visualization-demo-on-custom-videos)
+    *   [Visualization Demo for Custom Videos](#🌟-visualization-demo-for-custom-videos)
+        *  [Category-guided VS Tasks (VIS, VSS, VPS)](#category-guided-vs-tasks-vis-vss-vps)
+        *  [Text Prompt-guided VS Task (RefVOS)](#refvos-task)
+
 *   [Semantic Extraction for Custom Videos](#🚀-semantic-extraction-for-custom-videos)
 
 
@@ -115,9 +118,10 @@ a) For category-guided VS tasks, you can visualize results via enabling  `self.v
 
 b) For prompt-guided VS tasks, you need to enable `self.visualize_results_only_enable = True` [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_vos.py#L150). The visualization code for VOS/PVOS/RefVOS [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_vos.py#L712)
 
-### 🌟 **Visualization Demo on Custom Videos**
+### 🌟 **Visualization Demo for Custom Videos**
 Please follow the steps to run UniVS on custom videos. Until now, it only support category-guided VS tasks (VIS, VSS, VPS) and language-guided VS tasks. We will add visual prompt-guided VS tasks later.
 
+#### Category-guided VS Tasks (VIS, VSS, VPS)
 For category-guided VS tasks (VIS, VSS, VPS), please follow the steps:
 ```
 # Step 1: move your custom data into `./datasets/custom_videos/raw/`. Support two ways to test custom videos:
@@ -135,6 +139,7 @@ $ sh tools/tools/test_custom_videos/test_custom_videos.sh
 $ cd output/inf/custom_videos/inference
 ```
 
+#### RefVOS Task
 For language-guided VS task, you need to specify text prompts for each video. Therefore, only video-by-video visualization is now supported.
 ```
 # Step 1: move your custom data into `./datasets/custom_videos/raw_text/` (only a single video). Support two ways to test custom videos:
