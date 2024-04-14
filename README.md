@@ -47,6 +47,20 @@ We propose a novel unified VS architecture, namely **UniVS**, by using prompts a
 
 * **🔥 `[Feb-28-2024]`:** Our paper has been accepted by **CVPR2024!!**. We released the paper in [ArXiv](https://arxiv.org/abs/2402.18115). 
 
+## Table of Contents
+
+*   [Installation](#🛠️-installation-🛠️)
+*   [Datasets](#👀-datasets-👀)
+*   [Unified Training and Inference](#🚀-unified-training-and-inference)
+    *   [Unified Training for Images and Videos](#🌟-unified-training-for-images-and-videos)
+    *   [Unified Inference for Videos](#🌟-unified-inference-for-videos)
+        *   [Detailed Steps for Inference](#🌟-detailed-steps-for-inference)
+    *   [Performance on 10 Benchmarks](#performance-on-10-benchmarks)
+*   [Visualization Demo](#🚀-visualization-demo)
+    *   [Visualization Code](#🌟-visualization-code)
+    *   [Visualization Demo on Custom Videos](#🌟-visualization-demo-on-custom-videos)
+*   [Semantic Extraction for Custom Videos](#🚀-semantic-extraction-for-custom-videos)
+
 
 ## 🛠️ Installation 🛠️ 
 See [installation instructions](INSTALL.md).
@@ -77,7 +91,7 @@ $ sh tools/test/test_r50.sh
 $ sh tools/test/individual_task/test_pvos.sh
 ```
 
-### 🌟 **Detailed Steps for Inference**
+#### **Detailed Steps for Inference**
 Step 1: You need to download the needed datasets from their original website. Please refer to [dataset preparation](https://github.com/MinghanLi/UniVS/blob/main/datasets/README.md) for more guidance.
 
 Step 2: Built in datasets as detectron2 format in [here](https://github.com/MinghanLi/UniVS/blob/main/univs/data/datasets/builtin.py). The datasets involved in our paper has been built, so this step can be omitted. If it is a newly added dataset, it needs to be built by yourself.
@@ -93,16 +107,18 @@ UniVS shows a commendable balance between perfor0mance and universality on 10 ch
   <img src="imgs/unified_results_cvpr.png" width="95%" height="100%"/>
 </div><br/>
 
-### 🌟 **Visualization Demo**
+## 🚀 **Visualization Demo**
+### 🌟 **Visualization Code**
 Visualization is avaliable during inference, but you need to turn it on manually. 
 
 a) For category-guided VS tasks, you can visualize results via enabling  `self.visualize_results_enable = True` form [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_entity.py#L168). The visualization code for VIS/VSS/VPS lies in [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_entity.py#L1119).
 
 b) For prompt-guided VS tasks, you need to enable `self.visualize_results_only_enable = True` [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_vos.py#L150). The visualization code for VOS/PVOS/RefVOS [here](https://github.com/MinghanLi/UniVS/blob/22ccf560d682e2666c162d94b7d15786d67066e2/univs/inference/inference_video_vos.py#L712)
 
-### 🌟 **Visualization Demo with Custom Videos**
-Please follow the steps to run UniVS on custom videos. Until now, it only support category-guided VS tasks. We will add prompt-guided VS tasks later.
+### 🌟 **Visualization Demo on Custom Videos**
+Please follow the steps to run UniVS on custom videos. Until now, it only support category-guided VS tasks (VIS, VSS, VPS) and language-guided VS tasks. We will add visual prompt-guided VS tasks later.
 
+For category-guided VS tasks (VIS, VSS, VPS), please follow the steps:
 ```
 # Step 1: move your custom data into `./datasets/custom_videos/raw/`. Support two ways to test custom videos:
 # a. any video formats with 'mp4', 'avi', 'mov', 'mkv'
@@ -119,7 +135,27 @@ $ sh tools/tools/test_custom_videos/test_custom_videos.sh
 $ cd output/inf/custom_videos/inference
 ```
 
-### 🌟 **Semantic Extraction for Custom Videos**
+For language-guided VS task, you need to specify text prompts for each video. Therefore, only video-by-video visualization is now supported.
+```
+# Step 1: move your custom data into `./datasets/custom_videos/raw_text/` (only a single video). Support two ways to test custom videos:
+# a. any video formats with 'mp4', 'avi', 'mov', 'mkv'
+# b. put all video frames in a subdir in the path `./datasets/custom_videos/raw/`
+# For your convenience, we give an example in this dir, you can directly run the below code.
+
+# Step 2: Convert custom videos to COCO annotations
+$ python datasets/data_utils/custom_videos/convert_text_custom_videos_to_coco_test.py 
+
+# Step 3: run it
+$ sh tools/tools/test_custom_videos/test_custom_videos_text.sh
+# Note: The text prompts can be changed by the parameter below, try it :)
+$ vim tools/tools/test_custom_videos/test_custom_videos_text.sh
+# MODEL.UniVS.TEST.CUSTOM_VIDEOS_TEXT "[['a man is playing ice hockey', 'the goalie stick is held by a man', 'a flag on the left', 'the hockey goal cage']]" \
+
+# Step 4: check the predicted results in the below path
+$ cd datasets/custom_videos/results_text/inference
+```
+
+## 🚀 **Semantic Extraction for Custom Videos**
 There is an example to extract semantic feature map (1/32 resolution of input videos) and object tokens (200 per frame).
 
 ```

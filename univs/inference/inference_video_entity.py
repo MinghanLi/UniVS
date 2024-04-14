@@ -297,6 +297,7 @@ class InferenceVideoEntity(nn.Module):
         is_last = False
         start_idx_window, end_idx_window = 0, 0
         stride = self.num_frames if 'vss' in sub_task else self.clip_stride
+        stride = min(stride, self.num_frames)
         for i in range(0, len(images_tensor), stride):
             if is_last and (i + self.num_frames > len(images_tensor)):
                 break

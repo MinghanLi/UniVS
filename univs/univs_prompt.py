@@ -121,6 +121,7 @@ class UniVS_Prompt(nn.Module):
         semantic_extraction_enable: bool=False,
         # custom_videos
         custom_videos_enable: bool=False,
+        custom_videos_text: list=[],
     ):
         """
         Args:
@@ -135,6 +136,9 @@ class UniVS_Prompt(nn.Module):
             test_topk_per_image: int, instance segmentation parameter, keep topk instances per image
             boxvis_enabled: if True, use only box-level annotation; otherwise pixel-wise annotations
             boxvis_ema_enabled: Exponential Moving Average for training stable
+            custom_videos_enable: if True, eval on custom videos
+            custom_videos_text: a list [], num_videos = len(CUSTOM_VIDEOS_TEXT), 
+                                [[vid1_obi1_exp, vid1_obj2_exp, ...], [vid2_obj1_exp, vid2_obj2_exp, ...]]
         """
         super().__init__()
 
@@ -197,6 +201,7 @@ class UniVS_Prompt(nn.Module):
         self.semantic_extraction_enable = semantic_extraction_enable
         # custom videos
         self.custom_videos_enable = custom_videos_enable
+        self.custom_videos_text = custom_videos_text
         
     def _init_ema(self, backbone, sem_seg_head, gen_pseudo_mask):
         # Teacher Net
@@ -232,6 +237,7 @@ class UniVS_Prompt(nn.Module):
             max_num_masks = cfg.MODEL.UniVS.NUM_POS_QUERIES,
             text_prompt_enable = cfg.MODEL.UniVS.TEXT_PROMPT_ENCODER,
             clip_class_embed_path = cfg.MODEL.UniVS.CLIP_CLASS_EMBED_PATH,
+            custom_videos_text=cfg.MODEL.UniVS.TEST.CUSTOM_VIDEOS_TEXT,
         )
 
         # Loss parameters:
@@ -343,6 +349,7 @@ class UniVS_Prompt(nn.Module):
             "semantic_extraction_enable": cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION.ENABLE,
             # custom videos
             "custom_videos_enable": cfg.MODEL.UniVS.TEST.CUSTOM_VIDEOS_ENABLE,
+            "custom_videos_text": cfg.MODEL.UniVS.TEST.CUSTOM_VIDEOS_TEXT,
         }
 
     @property
@@ -419,7 +426,8 @@ class UniVS_Prompt(nn.Module):
             return self.inference_img_generic_seg.eval(self, batched_inputs)
     
         else:
-            if dataset_name.startswith("sot") or dataset_name.startswith("rvos"):
+            
+            if batched_inputs[0]['task'] in {"grounding", "sot"} or len(self.custom_videos_text):
                 # evaluation for prompt-specified VS tasks
                 return self.inference_video_vos.eval(self, batched_inputs)
 

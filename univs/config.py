@@ -149,6 +149,8 @@ def add_univs_config(cfg):
 
     # test for custom videos with .mp4 videos or a dir that includes all frames
     cfg.MODEL.UniVS.TEST.CUSTOM_VIDEOS_ENABLE = False
+    # num_videos = len(CUSTOM_VIDEOS_TEXT), [[vid1_obi1_exp, vid1_obj2_exp, ...], [vid2_obj1_exp, vid2_obj2_exp, ...]]
+    cfg.MODEL.UniVS.TEST.CUSTOM_VIDEOS_TEXT = []
 
     # semantic extraction parameters
     cfg.MODEL.UniVS.TEST.SEMANTIC_EXTRACTION = CN()

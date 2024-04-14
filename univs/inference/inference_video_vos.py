@@ -247,7 +247,7 @@ class InferenceVideoVOS(nn.Module):
         
         is_last = False
         start_idx_window, end_idx_window = 0, 0
-        stride = self.clip_stride
+        stride = min(self.clip_stride, self.num_frames)
         for i in range(0, len(images_tensor), stride):
             if is_last and i + self.num_frames > video_len:
                 break
@@ -633,7 +633,7 @@ class InferenceVideoVOS(nn.Module):
         
         ids = torch.as_tensor(targets_per_video["ids"], device=self.device)
         if ids.min() == 0:
-            ids += 1  # for grounding tasks
+            ids += 1  # RefDAVIS for grounding tasks
         pred_masks = targets_per_video['mask_logits']
         num_frames = min(self.num_frames, video_len-first_frame_idx)
         if not is_last:

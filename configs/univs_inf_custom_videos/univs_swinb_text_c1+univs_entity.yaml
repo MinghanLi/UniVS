@@ -1,0 +1,33 @@
+_BASE_: Base.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  SWIN:
+    EMBED_DIM: 128
+    DEPTHS: [2, 2, 18, 2]
+    NUM_HEADS: [4, 8, 16, 32]
+    WINDOW_SIZE: 12
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    PRETRAIN_IMG_SIZE: 384
+  WEIGHTS: 'pretrained/univs_v2_cvpr/univs_swinb_stage3_f7_wosquare_ema.pth'
+  BoxVIS:
+    EMA_ENABLED: True
+    TEST:
+      CLIP_STRIDE: 5
+  UniVS:
+    MASKDEC_SELF_ATTN_MASK_TYPE: 'sep-blocked'
+    TEST:
+      VIDEO_UNIFIED_INFERENCE_QUERIES: 'prompt'
+      NUM_PREV_FRAMES_MEMORY: 5
+      CUSTOM_VIDEOS_ENABLE: True
+      CUSTOM_VIDEOS_TEXT: [['a man is playing ice hockey', 'an ice hockey', 'a flag on the wall']]
+DATASETS:
+  TEST: ("custom_videos", )
+INPUT:
+  SAMPLING_FRAME_NUM: 5
+  MIN_SIZE_TEST: 720
+TEST:
+  DETECTIONS_PER_IMAGE: 50
+OUTPUT_DIR: output/inf/custom_videos_text

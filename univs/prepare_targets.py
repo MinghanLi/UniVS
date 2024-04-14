@@ -27,6 +27,7 @@ class PrepareTargets:
         clip_class_embed_path: str="",
         thing_only_enabled: bool=False,
         semantic_on: bool=False,
+        custom_videos_text: list=[],
     ):
         self.num_frames = num_frames
         self.max_num_masks = max_num_masks
@@ -37,12 +38,23 @@ class PrepareTargets:
         self.clip_cls_text_emb = torch.load(clip_class_embed_path)
         self.thing_only_enabled = thing_only_enabled
         self.semantic_on = semantic_on
+
+        # inference
+        assert len(custom_videos_text) <= 1, 'Only support a single video now'
+        self.custom_videos_text = custom_videos_text
     
     def process_inference(self, targets, inter_image_size, device, text_prompt_encoder=None, image_size=None):
         """
         convert coco-format annotations to required format during inference
         inter_image_size: the size of padding images 
         """
+        if len(self.custom_videos_text) > 0:
+            assert len(self.custom_videos_text) == len(targets)
+            for targets_per_video, expressions in zip(targets, self.custom_videos_text):
+                targets_per_video["task"] = "grounding"
+                targets_per_video["expressions"] = expressions             # list[exp1, exp2, ...]
+                targets_per_video["exp_obj_ids"] = list(range(len(expressions))) # list[0, 1, ...]
+                
         task = targets[0]["task"]
         if task == "grounding":
             prompt_type = 'text'

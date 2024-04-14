@@ -9,8 +9,8 @@ import glob
 
 def parse_args():
     parser = argparse.ArgumentParser("image to video converter")
-    parser.add_argument("--video_dir", default="datasets/custom_videos/raw", type=str, help="")
-    parser.add_argument("--out_json", default="datasets/custom_videos/raw/test.json", type=str, help="")
+    parser.add_argument("--video_dir", default="datasets/custom_videos/raw_text", type=str, help="")
+    parser.add_argument("--out_json", default="datasets/custom_videos/raw_text/test.json", type=str, help="")
     parser.add_argument("--is_256p", default=False, type=bool, help="compressed videos with 256p (short edge)")
     return parser.parse_args()
 

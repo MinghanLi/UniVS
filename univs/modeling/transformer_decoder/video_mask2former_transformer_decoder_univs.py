@@ -545,7 +545,6 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
                 outputs_reid = rearrange(outputs_reid, '(B T) q k -> B T q k', T=t).mean(1)
                 l4p_indices = outputs_reid[:, :self.num_queries].flatten(0, -2).argmax(0)  # k
                 outputs_mask[:, self.num_queries:] = (outputs_mask[:, self.num_queries:] + outputs_mask[:, l4p_indices]) / 2.
-
                 # bisoftmax = (outputs_class.softmax(-1) + outputs_class.softmax(-2))[0] / 2
                 # l4p_indices = linear_sum_assignment((1 - bisoftmax).cpu())
                 # l_indices, p_indices = l4p_indices
