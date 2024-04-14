@@ -37,6 +37,8 @@ We propose a novel unified VS architecture, namely **UniVS**, by using prompts a
 
 * **🔥 `[Hightlights]`:** To facilitate the evaluation of video segmentation tasks under **the Detectron2** framework, we wrote the evaluation metrics of the six existing video segmentation tasks into the Detectron2 **Evaluators**, including VIS, VSS, VPS, VOS, PVOS, and RefVOS tasks. Now, you can evaluate VS tasks directly in our code just like COCO, and no longer need to manually adapt any evaluation indicators by yourself. Please refer to `univs/inference` and `univs/evaluation` for specific codes. If you encounter any issues when using our code, please push them to the GitHub issues. We will reply to you as soon as possible.
 
+* **🔥 `[April-14-2024]`:** Support to test custom videos for text prompt-gudied VS tasks. Enjoy! :)
+
 * **🔥 `[April-10-2024]`:** Support to test custom videos for category-gudied VS tasks. Enjoy! :)
 
 * **🔥 `[April-8-2024]`:** Support to extract semantic feature map and object tokens for custom videos. It can be used to train segmentation-guided text-to-video generation.
