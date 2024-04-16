@@ -761,7 +761,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         """
         Project language features output from CLIP TEXT Encoder to vision space via a cross-attention layer
         Args:
-            prompt_feats: (1+L)*Q_p x NT x C, Q_p is the number of expressions for detection and grouding tasks, 
+            prompt_feats: Q_p*(1+L) x NT x C, Q_p is the number of expressions for detection and grouding tasks, 
                           and L is the length of text tokens, L=77 in CLIP TEXT Encoder or L=1 for category names.
             src: [H_lW_l x NT x C], l=0,1,2
             pos: [H_lW_l x NT x C], l=0,1,2
@@ -784,7 +784,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         l2v_attn_weights = l2v_attn_weights / torch.max(l2v_attn_weights, dim=-1, keepdim=True)[0].clamp(min=1e-6)
         if task_type == 'grounding':
             # only consider the sentence token (the first token here)
-            l2v_attn_weights = rearrange(l2v_attn_weights, 'N (l q) L -> N l q L', l=78)[:, 0]
+            l2v_attn_weights = rearrange(l2v_attn_weights, 'N (q, l) L -> N q l L', l=78)[:, :, 0]
         l2v_attn_weights = torch.split(l2v_attn_weights, [src_i.shape[0] for src_i in src], dim=-1)
         l2v_attn_weights = [
             rearrange(weights, '(N T) q (h w) -> N q T h w', T=num_frames, h=h, w=w) 
