@@ -24,7 +24,7 @@ MODEL:
       CUSTOM_VIDEOS_ENABLE: True
       CUSTOM_VIDEOS_TEXT: [['a man is playing ice hockey', 'an ice hockey', 'a flag on the wall']]
 DATASETS:
-  TEST: ("custom_videos", )
+  TEST: ("custom_videos_text", )
 INPUT:
   SAMPLING_FRAME_NUM: 5
   MIN_SIZE_TEST: 720

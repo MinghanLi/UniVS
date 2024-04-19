@@ -124,7 +124,6 @@ b) For prompt-guided VS tasks, you need to enable `self.visualize_results_only_e
 Please follow the steps to run UniVS on custom videos. Until now, it only support category-guided VS tasks (VIS, VSS, VPS) and language-guided VS tasks. We will add visual prompt-guided VS tasks later.
 
 #### Category-guided VS Tasks (VIS, VSS, VPS)
-For category-guided VS tasks (VIS, VSS, VPS), please follow the steps:
 ```
 # Step 1: move your custom data into `./datasets/custom_videos/raw/`. Support two ways to test custom videos:
 # a. any video formats with 'mp4', 'avi', 'mov', 'mkv'
