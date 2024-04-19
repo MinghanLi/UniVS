@@ -31,8 +31,6 @@ MODEL:
     COMMON_STRIDE: 4
     TRANSFORMER_ENC_LAYERS: 6
   MASK_FORMER:
-    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoderUniVS"
-    TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
     HIDDEN_DIM: 256
     NUM_OBJECT_QUERIES: 200
     NHEADS: 8

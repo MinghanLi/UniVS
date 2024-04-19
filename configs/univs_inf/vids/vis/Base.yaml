@@ -31,8 +31,6 @@ MODEL:
     COMMON_STRIDE: 4
     TRANSFORMER_ENC_LAYERS: 6
   MASK_FORMER:
-    TRANSFORMER_DECODER_NAME: "VideoMultiScaleMaskedTransformerDecoder"
-    TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
     TEST:
       STABILITY_SCORE_THRESH: 0.5
   UniVS:
