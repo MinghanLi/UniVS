@@ -1,8 +1,8 @@
 # Installation
 
 ## Requirements
-- Linux or macOS with Python ≥ 3.7
-- PyTorch == 1.10.3 and [torchvision](https://github.com/pytorch/vision/) that matches the PyTorch installation.
+- Linux or macOS with Python ≥ 3.10
+- Torch == 2.1.1 and [torchvision](https://github.com/pytorch/vision/) that matches the PyTorch installation (0.16.1+cu121).
   Install them together at [pytorch.org](https://pytorch.org) to make sure of this. Note, please check
   PyTorch version matches that is required by Detectron2.
 - Detectron2: follow [Detectron2 installation instructions](https://detectron2.readthedocs.io/tutorials/install.html).
@@ -20,9 +20,9 @@
 
 ## Example conda environment setup
 ```bash
-conda create --name univs python=3.9 -y
+conda create --name univs python=3.10 -y
 conda activate univs
-conda install pytorch==1.10.1 torchvision==0.11.2 torchaudio==0.10.1 cudatoolkit=11.3 -c pytorch -c conda-forge
+conda install pytorch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 pytorch-cuda=12.1 -c pytorch -c nvidia
 
 pip install -U opencv-python
 
@@ -30,9 +30,6 @@ pip install -U opencv-python
 git clone git@github.com:facebookresearch/detectron2.git
 cd detectron2
 pip install -e .
-# alternatively 
-python -m pip install detectron2 -f \
-  https://dl.fbaipublicfiles.com/detectron2/wheels/cu113/torch1.10/index.html
 
 cd ..
 git clone git@github.com:MinghanLi/UniVS.git
