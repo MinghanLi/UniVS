@@ -76,6 +76,8 @@ class PrepareTargets:
                     "file_names":  targets_per_video["file_names"],
                 }
             )
+            if "video_id" in targets_per_video:
+                clip_gt_instances[-1]["video_id"] = targets_per_video["video_id"],
 
             targets_per_video["prompt_type"] = prompt_type
             clip_gt_instances[-1]["prompt_type"] = prompt_type

@@ -784,7 +784,7 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
         l2v_attn_weights = l2v_attn_weights / torch.max(l2v_attn_weights, dim=-1, keepdim=True)[0].clamp(min=1e-6)
         if task_type == 'grounding':
             # only consider the sentence token (the first token here)
-            l2v_attn_weights = rearrange(l2v_attn_weights, 'N (q, l) L -> N q l L', l=78)[:, :, 0]
+            l2v_attn_weights = rearrange(l2v_attn_weights, 'N (q l) L -> N q l L', l=78)[:, :, 0]
         l2v_attn_weights = torch.split(l2v_attn_weights, [src_i.shape[0] for src_i in src], dim=-1)
         l2v_attn_weights = [
             rearrange(weights, '(N T) q (h w) -> N q T h w', T=num_frames, h=h, w=w) 
@@ -890,8 +890,3 @@ class VideoMultiScaleMaskedTransformerDecoderUniVS(nn.Module):
             plt.imshow(x_ic_np)
             plt.title(str(c))
             plt.savefig(os.path.join(save_path, str(c)+'.jpg'), bbox_inches='tight')
-
-
-
-
-        

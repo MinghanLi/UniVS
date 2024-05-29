@@ -181,12 +181,14 @@ class InferenceVideoSemanticExtraction(nn.Module):
     def inference_video(self, model, batched_inputs, images, targets):
         images_tensor = images.tensor
         video_len = int(batched_inputs[0]["video_len"])
+        assert "video_id" in batched_inputs[0]
+        video_id = batched_inputs[0]["video_id"]
         
         # masks size
         interim_size = images_tensor.shape[-2:]
         image_size = images.image_sizes[0]  # image size without padding after data augmentation
         out_height = batched_inputs[0].get("height", image_size[0])  # raw image size before data augmentation
-        out_width = batched_inputs[0].get("width", image_size[1])
+        out_width = batched_inputs[0].get("width", image_size[1])  # raw image size before data augmentation
         out_size = (out_height, out_width)
 
         obj_tokens_video = []
@@ -244,15 +246,16 @@ class InferenceVideoSemanticExtraction(nn.Module):
         # compression_mask_features_video = compression_mask_features_video[::t_itv]
         # print(obj_tokens_video.shape, compression_mask_features_video.shape)
 
+        # "..../video_name/frame_name.jpg"
+        video_path = '/'.join(targets[0]['file_names'][0].split('/')[:-2])
         # datasets/internvid/raw/InternVId-FLT_1/---3UsVESJA_00:03:31.638_00:03:41.638.mp4/
         if self.semantic_extraction_output_dir is None or len(self.semantic_extraction_output_dir) == 0:
-            out_dir = '/'.join(targets[0]['file_names'][0].split('/')[:-1])
-            out_dir = out_dir.replace('raw', 'semantic_extraction')
+            out_dir = video_path.replace('raw', 'semantic_extraction')
         else:
-            video_name = targets[0]['file_names'][0].split('/')[:-2]
-            out_dir = os.path.join(self.semantic_extraction_output_dir, video_name)
-        out_file_obj_tokens = out_dir.replace('.mp4', '') + f"_obj_tokens_{s_itv}_{t_itv}.pt"
-        out_file_compression_mask_features = out_dir.replace('.mp4', f"_compression_mask_features_{s_itv}_{t_itv}.pt")
+            out_dir = self.semantic_extraction_output_dir
+        os.makedirs(out_dir, exist_ok=True)
+        out_file_obj_tokens = os.path.join(out_dir, video_id + f"._obj_tokens_{s_itv}_{t_itv}.pt")
+        out_file_compression_mask_features = os.path.join(out_dir, video_id + f"._compression_mask_features_{s_itv}_{t_itv}.pt")
         
         # Save tensor to a compressed file
         torch.save(obj_tokens_video[::t_itv], out_file_obj_tokens) #, _use_new_zipfile_serialization=True)

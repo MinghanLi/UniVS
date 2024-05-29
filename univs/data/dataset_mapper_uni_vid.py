@@ -330,23 +330,64 @@ class UniVidDatasetMapper:
             if video_path.split('.')[-1] not in ("mp4", "avi", "mov", "mkv"):
                 dataset_dict["is_raw_video"] = False
             else:
-                vframes, aframes, info = torchvision.io.read_video(
-                    filename=video_path, pts_unit="sec", output_format="TCHW"
-                )
-                # the compressed videos with 256p (short edge), we upsample it to 512p
-                vframes = F.interpolate(
-                    vframes, 
-                    size=(2*vframes.shape[-2], 2*vframes.shape[-1]), 
-                    mode="bilinear", 
-                    align_corners=False
-                )
+                try:
+                    start_sec = dataset_dict["start_sec"] if "start_sec" in dataset_dict else None
+                    end_sec = dataset_dict["end_sec"] if "end_sec" in dataset_dict else None
+                    # decord package can load videos with memory-efficient way
+                    if start_sec is not None and end_sec is not None:
+                        # # load videos with memory-efficient way
+                        # from decord import VideoReader, cpu, gpu
+                        # # Open the video file
+                        # vr = VideoReader(video_path, ctx=cpu(0))  # Use gpu(0) for GPU
+                        # # Get video framerate to calculate frame numbers
+                        # framerate = vr.get_avg_fps()
+                        # # Calculate frame indices
+                        # start_frame = int(start_sec * framerate)
+                        # end_frame = int(end_sec * framerate)
+                        # # Read frames from start to end
+                        # vframes = vr.get_batch(range(start_frame, end_frame)) 
+                        # vframes = vframes.permute(0,2,3,1)
+                        
+                        vframes, aframes, info = torchvision.io.read_video(
+                            filename=video_path, 
+                            start_pts=start_sec, end_pts=end_sec, pts_unit="sec", 
+                            output_format="TCHW"
+                        )
+                        if not self.is_train and len(vframes) < video_length:
+                            dataset_dict["video_len"] = len(vframes)
+                            selected_idx = selected_idx[:len(vframes)]
+                            selected_idx_map = selected_idx_map[:len(vframes)]
+                    else:
+                        vframes, aframes, info = torchvision.io.read_video(
+                            filename=video_path, 
+                            pts_unit="sec", 
+                            output_format="TCHW"
+                        )
+                except Exception as e:
+                    print(f"An error occurred while loading the video {video_path}:", str(e))
+                    return None
+
+                num_frames, _, height, width = vframes.shape
+                if dataset_dict["height"] != height or dataset_dict["width"] != width:
+                    d_height, d_width = dataset_dict["height"], dataset_dict["width"]
+                    print(f"Mismathed shapes: {d_height} != {height} or {d_width} != {width}")
+                    # the compressed videos with 256p (short edge), we upsample it to 512p
+                    vframes = F.interpolate(
+                        vframes, 
+                        size=(dataset_dict["height"], dataset_dict["width"]), 
+                        mode="bilinear", 
+                        align_corners=False
+                    )
                 vframes = vframes.permute(0,2,3,1).numpy()
                 total_frames = len(vframes)
 
         for frame_idx in selected_idx:
             dataset_dict["file_names"].append(file_names[frame_idx])
             if dataset_dict["is_raw_video"]:
-                image = vframes[frame_idx]
+                # for efficiency, we usually take a single frame with every 5 frames (5-stride)
+                frame_idx_ori = int(file_names[frame_idx].split('/')[-1].split('.')[0])
+                assert frame_idx_ori < len(vframes), f"the frame index should be less than {len(vframes)}"
+                image = vframes[frame_idx_ori] 
             else:
                 # Read image
                 try:

@@ -326,7 +326,7 @@ class InferenceVideoEntity(nn.Module):
                 elif sub_task == 'entity_vis_entityseg': 
                     dataset_name = "entityseg_instance"  # 206 classes 
                 elif sub_task == 'entity_vis_coco':
-                    sdataset_name = 'coco'
+                    dataset_name = 'coco'
                 else:
                     raise ValueError
                 num_classes, start_idx = combined_datasets_category_info[dataset_name]
@@ -404,9 +404,8 @@ class InferenceVideoEntity(nn.Module):
                 self.pad_zero_annotations_for_next_clip(targets, min(stride, video_len-i-self.num_frames))
 
         if 'vis' in sub_task:
-            if self.visualize_results_enable:
-                self.visualizer.visualization_query_embds(targets)
-
+            # if self.visualize_results_enable:
+                # self.visualizer.visualization_query_embds(targets)
             return vis_clip_instances_to_coco_json_video(
                 batched_inputs, processed_results, test_topk_per_video=self.test_topk_per_image
             )
@@ -516,7 +515,6 @@ class InferenceVideoEntity(nn.Module):
         targets_per_video["mask_quality_scores"] = gt_mask_quality_scores
     
     def detect_newly_entities_per_clip_instance(self, out_learn, targets, interim_size):
-        is_first_frame = "masks" not in targets[0]
 
         # remove duplicated entitis in per clip
         pred_logits = out_learn['pred_logits'].float() # Q_lxK
@@ -524,6 +522,9 @@ class InferenceVideoEntity(nn.Module):
         pred_embds = out_learn['pred_embds'].float()   # Q_lxTxC 
 
         num_frames = pred_masks.shape[1]
+
+        is_first_frame = "masks" not in targets[0]
+        is_eval_iamge = num_frames == 1 and self.custom_videos_enable
 
         mask_quality_scores = calculate_mask_quality_scores(pred_masks)
         pred_logits = pred_logits * mask_quality_scores.view(-1, 1)
@@ -1199,20 +1200,20 @@ class InferenceVideoEntity(nn.Module):
             
         # is_last = True
         if is_last:
-            # save all frames to a .avi video
-            out = cv2.VideoWriter(
-                '/'.join([save_dir, video_id + '.avi']),
-                cv2.VideoWriter_fourcc(*'DIVX'),
-                fps=10,
-                frameSize=(out_size[1], out_size[0])
-            )
-
             file_names = glob.glob('/'.join([save_dir, "*.jpg"]))
-            file_names = sorted(file_names, key=lambda f: int(f.split("/")[-1].split('_')[-1].replace('.jpg', '')))
-            for file_name in file_names:
-                out.write(cv2.imread(file_name))
-            out.release()
-            print(f"save all frames with inst. seg. into {video_id}.avi")
+            if len(file_names) > 1:
+                file_names = sorted(file_names, key=lambda f: int(f.split("/")[-1].split('_')[-1].replace('.jpg', '')))
+                # save all frames to a .avi video
+                out = cv2.VideoWriter(
+                    '/'.join([save_dir, video_id + '.avi']),
+                    cv2.VideoWriter_fourcc(*'DIVX'),
+                    fps=10,
+                    frameSize=(out_size[1], out_size[0])
+                )
+                for file_name in file_names:
+                    out.write(cv2.imread(file_name))
+                out.release()
+                print(f"save all frames with inst. seg. into {video_id}.avi")
     
     def visualize_results_vss(self, batched_inputs, sem_masks_dict, out_size, sub_task):
         file_names = batched_inputs[0]['file_names'] 
@@ -1244,19 +1245,19 @@ class InferenceVideoEntity(nn.Module):
             VisImage.save(save_path)
         
         # save all frames to a .avi video
-        out = cv2.VideoWriter(
-            '/'.join([save_dir, video_id + '.avi']),
-            cv2.VideoWriter_fourcc(*'DIVX'),
-            fps=10,
-            frameSize=(out_size[1], out_size[0])
-        )
-
         file_names = glob.glob('/'.join([save_dir, "*.jpg"]))
-        file_names = sorted(file_names, key=lambda f: int(f.split("/")[-1].split('_')[-1].replace('.jpg', '')))
-        for file_name in file_names:
-            out.write(cv2.imread(file_name))
-        out.release()
-        print(f"save all frames with sem. seg. into {video_id}.avi")
+        if len(file_names) > 1:
+            file_names = sorted(file_names, key=lambda f: int(f.split("/")[-1].split('_')[-1].replace('.jpg', '')))
+            out = cv2.VideoWriter(
+                '/'.join([save_dir, video_id + '.avi']),
+                cv2.VideoWriter_fourcc(*'DIVX'),
+                fps=10,
+                frameSize=(out_size[1], out_size[0])
+            )
+            for file_name in file_names:
+                out.write(cv2.imread(file_name))
+            out.release()
+            print(f"save all frames with sem. seg. into {video_id}.avi")
     
     def visualize_results_vps(self, batched_inputs, pan_seg_dict, out_size, sub_task):
         '''
@@ -1305,22 +1306,22 @@ class InferenceVideoEntity(nn.Module):
             VisImage.save(save_path)
         
         # save all frames to a .avi video
-        out = cv2.VideoWriter(
-            '/'.join([save_dir, video_id + '.avi']),
-            cv2.VideoWriter_fourcc(*'DIVX'),
-            fps=10,
-            frameSize=(out_size[1], out_size[0])
-        )
-
         file_names = glob.glob('/'.join([save_dir, "*.jpg"]))
-        file_names = sorted(
-            file_names, 
-            key=lambda f: int(f.split("/")[-1].split('_')[-1].replace('.jpg', ''))
-        )
-        for file_name in file_names:
-            out.write(cv2.imread(file_name))
-        out.release()
-        print(f"save all frames with pan. seg. into {video_id}.avi")
+        if len(file_names) > 1:
+            file_names = sorted(
+                file_names, 
+                key=lambda f: int(f.split("/")[-1].split('_')[-1].replace('.jpg', ''))
+            )
+            out = cv2.VideoWriter(
+                '/'.join([save_dir, video_id + '.avi']),
+                cv2.VideoWriter_fourcc(*'DIVX'),
+                fps=10,
+                frameSize=(out_size[1], out_size[0])
+            )
+            for file_name in file_names:
+                out.write(cv2.imread(file_name))
+            out.release()
+            print(f"save all frames with pan. seg. into {video_id}.avi")
 
     def plot_query_embds_per_video(self, targets):
         for targets_per_video in targets:

@@ -234,6 +234,14 @@ def load_ytvis_json(json_file, image_root, dataset_name=None, extra_annotation_k
             "width": vid_dict["width"],
             "length": vid_dict["length"]
         }
+        if "id" in vid_dict:
+            record["video_id"] = vid_dict["id"]
+        if "framerate" in vid_dict:
+            record["framerate"] = vid_dict["framerate"]
+        if "start_sec" in vid_dict:
+            record["start_sec"] = vid_dict["start_sec"]
+        if "end_sec" in vid_dict:
+            record["end_sec"] = vid_dict["end_sec"]
         
         # for flickr30k entity
         if has_caption:

@@ -37,6 +37,8 @@ We propose a novel unified VS architecture, namely **UniVS**, by using prompts a
 
 * **🔥 `[Hightlights]`:** To facilitate the evaluation of video segmentation tasks under **the Detectron2** framework, we wrote the evaluation metrics of the six existing video segmentation tasks into the Detectron2 **Evaluators**, including VIS, VSS, VPS, VOS, PVOS, and RefVOS tasks. Now, you can evaluate VS tasks directly in our code just like COCO, and no longer need to manually adapt any evaluation indicators by yourself. Please refer to `univs/inference` and `univs/evaluation` for specific codes. If you encounter any issues when using our code, please push them to the GitHub issues. We will reply to you as soon as possible.
 
+* **🔥 `[May-30-2024]`:** Support to test custom images for category-gudied Image Seg. tasks. Enjoy! :)
+
 * **🔥 `[April-14-2024]`:** Support to test custom videos for text prompt-gudied VS tasks. Enjoy! :)
 
 * **🔥 `[April-10-2024]`:** Support to test custom videos for category-gudied VS tasks. Enjoy! :)
@@ -130,13 +132,10 @@ Please follow the steps to run UniVS on custom videos. Until now, it only suppor
 # b. put all video frames in a subdir in the path `./datasets/custom_videos/raw/`
 # For your convenience, we give two examples in this dir, you can directly run the below code
 
-# Step 2: Convert custom videos to COCO annotations
-$ python datasets/data_utils/custom_videos/convert_custom_videos_to_coco_test.py 
-
-# Step 3: run it
+# Step 2:: run it
 $ sh tools/tools/test_custom_videos/test_custom_videos.sh
 
-# Step 4: check the predicted results in the below path
+# Step 3: check the predicted results in the below path
 $ cd output/inf/custom_videos/inference
 ```
 
@@ -148,17 +147,25 @@ For language-guided VS task, you need to specify text prompts for each video. Th
 # b. put all video frames in a subdir in the path `./datasets/custom_videos/raw/`
 # For your convenience, we give an example in this dir, you can directly run the below code.
 
-# Step 2: Convert custom videos to COCO annotations
-$ python datasets/data_utils/custom_videos/convert_text_custom_videos_to_coco_test.py 
-
-# Step 3: run it
+# Step 2: run it
 $ sh tools/tools/test_custom_videos/test_custom_videos_text.sh
 # Note: The text prompts can be changed by the parameter below, try it :)
 $ vim tools/tools/test_custom_videos/test_custom_videos_text.sh
 # MODEL.UniVS.TEST.CUSTOM_VIDEOS_TEXT "[['a man is playing ice hockey', 'the goalie stick is held by a man', 'a flag on the left', 'the hockey goal cage']]" \
 
-# Step 4: check the predicted results in the below path
+# Step 3: check the predicted results in the below path
 $ cd datasets/custom_videos/results_text/inference
+```
+
+#### Category-guided Image Seg. Tasks (IS, SS, PS)
+```
+# Step 1: move your custom iamges into `./datasets/custom_images/images/`. 
+
+# Step 2:: run it
+$ sh tools/tools/test_custom_images/test_custom_images_coco.sh
+
+# Step 3: check the predicted results in the below path
+$ cd datasets/custom_images/results/
 ```
 
 ## 🚀 **Semantic Extraction for Custom Videos**

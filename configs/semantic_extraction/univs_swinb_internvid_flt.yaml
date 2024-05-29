@@ -19,6 +19,7 @@ MODEL:
       VIDEO_UNIFIED_INFERENCE_ENABLE: True
       SEMANTIC_EXTRACTION:
         ENABLE: True
+        OUTPUT_DIR: datasets/internvid/semantic_extraction
   BoxVIS:
     TEST:
       NUM_FRAMES_WINDOW: 5

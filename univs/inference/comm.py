@@ -106,8 +106,12 @@ def vis_clip_instances_to_coco_json_video(batched_inputs, results_list, apply_cl
         }
     """
     assert len(batched_inputs) == 1, "More than one inputs are loaded for inference!"
-
-    video_id = int(batched_inputs[0]["video_id"])
+    
+    try: 
+        video_id = int(batched_inputs[0]["video_id"])
+    except Exception as err:
+        print("Can not convert video in to int number!")
+        video_id = batched_inputs[0]["video_id"]
     video_len = int(batched_inputs[0]["video_len"])
     height = int(batched_inputs[0]["height"])
     width = int(batched_inputs[0]["width"])

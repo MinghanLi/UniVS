@@ -2,6 +2,7 @@ import torch
 import torchvision
 from torch import Tensor
 
+
 def convert_box_to_mask(outputs_box: torch.Tensor, h: int, w: int):
     """
     Args:

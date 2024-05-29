@@ -1,0 +1,30 @@
+_BASE_: Base.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  SWIN:
+    EMBED_DIM: 128
+    DEPTHS: [2, 2, 18, 2]
+    NUM_HEADS: [4, 8, 16, 32]
+    WINDOW_SIZE: 12
+    APE: False
+    DROP_PATH_RATE: 0.3
+    PATCH_NORM: True
+    PRETRAIN_IMG_SIZE: 384
+  WEIGHTS: 'output/stage3/univs_swinb_stage3_f7_wosquare_ema.pth'
+  BoxVIS:
+    EMA_ENABLED: True
+  UniVS:
+    TEST:
+      NUM_PREV_FRAMES_MEMORY: 1
+      CUSTOM_VIDEOS_ENABLE: True
+      BOX_NMS_THRESH: 0.5
+      VIDEO_UNIFIED_INFERENCE_ENTITIES: 'entity_vis_coco'
+DATASETS:
+  TEST: ("custom_images", )
+INPUT:
+  SAMPLING_FRAME_NUM: 1
+  MIN_SIZE_TEST: 720
+TEST:
+  DETECTIONS_PER_IMAGE: 50
+OUTPUT_DIR: output/inf/custom_images

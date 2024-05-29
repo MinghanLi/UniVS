@@ -78,8 +78,6 @@ MODEL:
       BOX_NMS_THRESH: 0.85
       DETECT_NEWLY_OBJECT_THRESHOLD: 0.1
       TEMPORAL_CONSISTENCY_THRESHOLD: 0.25
-      SEMANTIC_EXTRACTION:
-        OUTPUT_DIR: 'datasets/internvid/semantic_extraction'
 DATASETS:
   DATASET_RATIO: 
   - 1.0
@@ -106,13 +104,14 @@ SOLVER:
 INPUT:
   MIN_SIZE_TRAIN_SAMPLING: "choice_by_clip"
   RANDOM_FLIP: "flip_by_clip"
+  SAMPLING_FRAME_NUM: 5
   CROP:
     ENABLED: True
     TYPE: "absolute_range"
     SIZE: (600, 1024)
   FORMAT: "RGB"
   LSJ_AUG:
-    ENABLED: True
+    ENABLED: False
     IMAGE_SIZE: 1024
     MIN_SCALE: 0.25
     MAX_SCALE: 4.0
