@@ -18,5 +18,5 @@ for filename in os.listdir(original_img_dir):
         new_file_path = os.path.join(new_dir, filename)
 
         # Move the file
-        shutil.move(current_file, new_file_path)
-        print(f"Moved '{filename}' to '{new_dir}'")
+        shutil.copy(current_file, new_file_path)
+        print(f"Copy '{filename}' to '{new_dir}'")
