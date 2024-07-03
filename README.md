@@ -136,7 +136,7 @@ Please follow the steps to run UniVS on custom videos. Until now, it only suppor
 $ sh tools/test_custom_videos/test_custom_videos.sh
 
 # Step 3: check the predicted results in the below path
-$ cd output/inf/custom_videos/inference
+$ cd datasets/custom_videos/inference
 ```
 
 #### RefVOS Task
