@@ -9,18 +9,18 @@
 We propose a novel unified VS architecture, namely **UniVS**, by using prompts as queries. For each target of interest, UniVS averages the prompt features stored in the memory pool as its initial query, which is fed to a target-wise prompt cross-attention (ProCA) layer to integrate comprehensive prompt features. On the other hand, by taking the predicted masks of entities as their visual prompts, UniVS can convert different VS tasks into the task of prompt-guided target segmentation, eliminating the heuristic inter-frame matching. More video demo on our project page: https://sites.google.com/view/unified-video-seg-univs
 
 <div align="center">
-  <img src="assets/vs_tasks.jpg" width="100%" height="100%"/>
+  <img src="imgs/vs_tasks.jpg" width="100%" height="100%"/>
 </div><br/>
 
 ## More video demo in our [project page](https://sites.google.com/view/unified-video-seg-univs)
 |Task   | VIS | VSS | VPS |
 |-------|-----|-----|-----|
-|Output | ![vis](assets/2d802_vis.gif) | ![vss](assets/2d802_vss.gif) | ![vps](assets/2d802_vps.gif) |
+|Output | ![vis](imgs/2d802_vis.gif) | ![vss](imgs/2d802_vss.gif) | ![vps](imgs/2d802_vps.gif) |
 
 |Task | VOS | RefVOS | PVOS |
 |-----|-----|--------|------|
-|Prompt |![vos](assets/2d802_visual_prompt.png)|"A frog is holded by a person in his hand and place near the another frog"|![pvos](assets/2175_FV3T_visual_prompt.png)|
-|Output | ![vos](assets/2d802_vos.gif) | ![refvos](assets/ref_c16d9_0_1.gif) | ![pvos](assets/2175_FV3T_pvos.gif)|
+|Prompt |![vos](imgs/2d802_visual_prompt.png)|"A frog is holded by a person in his hand and place near the another frog"|![pvos](imgs/2175_FV3T_visual_prompt.png)|
+|Output | ![vos](imgs/2d802_vos.gif) | ![refvos](imgs/ref_c16d9_0_1.gif) | ![pvos](imgs/2175_FV3T_pvos.gif)|
 
 	
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/univs-unified-and-universal-video/video-panoptic-segmentation-on-vipseg)](https://paperswithcode.com/sota/video-panoptic-segmentation-on-vipseg?p=univs-unified-and-universal-video)
@@ -111,7 +111,7 @@ Step 4: For YouTube-VIS, OVIS, YouTube-VOS, Ref-YouTube-VOS datasets, you need t
 UniVS shows a commendable balance between perfor0mance and universality on 10 challenging VS benchmarks, covering video instance, semantic, panoptic, object, and referring segmentation tasks. 
 
 <div align="center">
-  <img src="assets/unified_results_cvpr.png" width="95%" height="100%"/>
+  <img src="imgs/unified_results_cvpr.png" width="95%" height="100%"/>
 </div><br/>
 
 ## 🚀 **Visualization Demo**
